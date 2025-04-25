@@ -16,6 +16,8 @@ export type Waypoint = {
 interface WaypointContextType {
     waypoints: Waypoint[];
     selectedId: number | null;
+    currentPosition: { lat: number; lng: number } | null;
+    setCurrentPosition: React.Dispatch<React.SetStateAction<{ lat: number; lng: number } | null>>;
     toggleAddMode: () => void;
     setAddMode: (addMode: boolean) => void;
     addMode: boolean;
@@ -38,6 +40,7 @@ const WaypointContext = createContext<WaypointContextType | undefined>(undefined
 // Provider component
 export function WaypointProvider({ children }: React.PropsWithChildren) {
     const [waypoints, setWaypoints] = useLocalStorage<Waypoint[]>("waypoints", []);
+    const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [addMode, setAddMode] = useLocalStorage("add-waypoint-mode", false);
 
@@ -101,6 +104,8 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
         <WaypointContext.Provider
             value={{
                 waypoints,
+                currentPosition,
+                setCurrentPosition,
                 selectedId,
                 addWaypoint,
                 selectWaypoint,
