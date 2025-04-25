@@ -121,6 +121,7 @@ export function WaypointOverlay() {
         draw();
 
         const onMapClick = (e: L.LeafletMouseEvent) => {
+            if ((e.originalEvent.target as HTMLElement)?.closest("#menu")) return; // Ignore clicks on the menu
             if (addMode && selectedId === null) {
                 addWaypoint(e.latlng.lat, e.latlng.lng);
             } else if (addPathMode) {

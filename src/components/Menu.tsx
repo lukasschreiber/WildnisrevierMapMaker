@@ -13,7 +13,7 @@ export function Menu(props: {
     const map = useMap();
 
     return (
-        <div className="absolute top-0 left-0 p-2 text-white bg-black/50 z-[100000] text-xs flex flex-col gap-3">
+        <div className="absolute top-0 left-0 p-2 text-white bg-black/50 z-[100000] text-xs flex flex-col gap-3" id="menu" onClick={(e) => e.stopPropagation()}>
             {selectedId ? <WaypointInfo id={selectedId} /> : <p className="text-xs">No Waypoint Selected</p>}
             {selectedSegmentId ? (
                 <SegmentInfo id={selectedSegmentId} />
