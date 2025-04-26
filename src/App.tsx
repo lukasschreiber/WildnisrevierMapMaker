@@ -21,7 +21,7 @@ export default function App() {
     return (
         <>
             <MapContainer center={[view.lat, view.lng]} zoom={view.zoom} style={{ height: "100vh", width: "100%" }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={20} maxNativeZoom={18} />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={22} maxNativeZoom={18} />
                 <MapPersister setView={setView} />
                 <ScaleControl position="bottomleft" imperial={false} />
                 <WaypointOverlay />
