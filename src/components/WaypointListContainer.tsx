@@ -57,7 +57,7 @@ export function WaypointListContainer() {
             })}
             {waypoints.filter((waypoint) => waypoint.name?.includes("?")).length > 0 && (
                 <div className="waypoint-group">
-                    <div className="waypoint-group-header font-bold">Waypoints with "?"</div>
+                    <div className="waypoint-group-header font-bold">Waypoints with "?" - {waypoints.filter((waypoint) => waypoint.name?.includes("?")).length}</div>
                     {waypoints
                         .filter((waypoint) => waypoint.name?.includes("?"))
                         .map((waypoint) => (
