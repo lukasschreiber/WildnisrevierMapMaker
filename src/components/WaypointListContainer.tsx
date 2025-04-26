@@ -41,7 +41,9 @@ export function WaypointListContainer() {
                 const waypointType = getWaypointTypeById(Number(typeId));
                 return (
                     <div key={typeId} className="waypoint-group">
-                        <div className="waypoint-group-header font-bold">{waypointType?.name || `Unknown Type (${typeId})`} - {waypoints.length}</div>
+                        <div className="waypoint-group-header font-bold">
+                            {waypointType?.name || `Unknown Type (${typeId})`} - {waypoints.length}
+                        </div>
                         {waypoints.map((waypoint) => (
                             <WaypointListItem
                                 key={waypoint.id}
@@ -53,6 +55,21 @@ export function WaypointListContainer() {
                     </div>
                 );
             })}
+            {waypoints.filter((waypoint) => waypoint.name?.includes("?")).length > 0 && (
+                <div className="waypoint-group">
+                    <div className="waypoint-group-header font-bold">Waypoints with "?"</div>
+                    {waypoints
+                        .filter((waypoint) => waypoint.name?.includes("?"))
+                        .map((waypoint) => (
+                            <WaypointListItem
+                                key={waypoint.id}
+                                waypoint={waypoint}
+                                selectedId={selectedId}
+                                onClick={handleWaypointClick}
+                            />
+                        ))}
+                </div>
+            )}
         </div>
     );
 }
