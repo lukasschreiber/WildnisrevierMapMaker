@@ -59,14 +59,14 @@ export function ExportContainer() {
         svgContent.setAttribute("id", "exported-svg");
         svgContent.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
 
-        svgContent.querySelectorAll("[data-hidden-on-export]").forEach((el) => {
-            el.setAttribute("visibility", "hidden");
-        });
-    
         // Clone the group element and append it to the new SVG
         const clonedGroup = svgContentGroup.cloneNode(true);
         svgContent.appendChild(clonedGroup);
     
+        svgContent.querySelectorAll('*[data-hidden-on-export="true"]').forEach((el) => {
+            el.setAttribute("visibility", "hidden");
+        });
+
         // Use XMLSerializer to serialize the SVG content
         const serializer = new XMLSerializer();
         const svgString = serializer.serializeToString(svgContent);
@@ -125,7 +125,7 @@ export function ExportContainer() {
                         importJson(file);
                     }
                 }}
-                className="bg-black/20 p-1 rounded-md"
+                className="bg-black/50 p-1 rounded-md"
             />
             <button
                 onClick={() => {

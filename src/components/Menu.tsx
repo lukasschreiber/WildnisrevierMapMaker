@@ -32,7 +32,7 @@ export function Menu(props: { showSidePanel: boolean, setShowSidePanel: (show: b
             <div>
                 <div className="text-xs mb-1">Mode:</div>
                 <select
-                    className="w-full bg-black/20 p-1 rounded-md"
+                    className="w-full bg-black/50 p-1 rounded-md"
                     value={addMode ? "add" : addPathMode ? "paths" : "normal"}
                     onChange={(e) => {
                         const value = e.target.value as "add" | "paths" | "normal";
@@ -84,7 +84,7 @@ export function Menu(props: { showSidePanel: boolean, setShowSidePanel: (show: b
             <hr className="my-2 border-black opacity-40" />
             <div className="flex flex-col gap-1">
                 <button
-                    className="bg-black/20 p-1 rounded-md cursor-pointer hover:bg-black/30 transition-colors"
+                    className="bg-black/50 p-1 rounded-md cursor-pointer hover:bg-black/30 transition-colors"
                     onClick={() => {
                         setCurrentPosition(null);
                         map.locate({ enableHighAccuracy: true }).on("locationfound", function (e) {
@@ -97,7 +97,7 @@ export function Menu(props: { showSidePanel: boolean, setShowSidePanel: (show: b
                 </button>
                 {currentPosition && (
                     <button
-                        className="bg-black/20 p-1 rounded-md mt-2 cursor-pointer hover:bg-black/30 transition-colors"
+                        className="bg-black/50 p-1 rounded-md mt-2 cursor-pointer hover:bg-black/30 transition-colors"
                         onClick={() => {
                             map.flyTo(currentPosition, map.getZoom());
                         }}
@@ -107,7 +107,7 @@ export function Menu(props: { showSidePanel: boolean, setShowSidePanel: (show: b
                 )}
                 {currentPosition && (
                     <button
-                        className="bg-black/20 p-1 rounded-md mt-2 cursor-pointer hover:bg-black/30 transition-colors"
+                        className="bg-black/50 p-1 rounded-md mt-2 cursor-pointer hover:bg-black/30 transition-colors"
                         onClick={() => {
                             setCurrentPosition(null);
                         }}

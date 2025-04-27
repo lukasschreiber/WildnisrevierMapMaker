@@ -11,6 +11,7 @@ import { usePathContext } from "../context/PathContext";
 import { renderSegments } from "../renderer/renderSegments";
 import { renderWaypointArrow } from "../renderer/renderWaypointArrow";
 import { renderLabel } from "../renderer/renderLabel";
+import { useWaypointGroupContext } from "../context/WaypointGroupContext";
 
 export function WaypointOverlay() {
     const {
@@ -25,6 +26,8 @@ export function WaypointOverlay() {
         updateWaypointPosition,
         deleteWaypoint,
     } = useWaypointContext();
+
+    const { getWaypointGroupById, waypointGroups } = useWaypointGroupContext();
 
     const {
         addMode: addPathMode,
@@ -59,7 +62,7 @@ export function WaypointOverlay() {
 
             renderSegments(g, map, segments, getWaypointById, settings.showSinglePaths, settings.pathWidth, settings.pathColor, settings.hideOriginalPaths, settings.hideFancyPaths, selectSegment);
 
-            waypoints.forEach(({ lat, lng, id, baseId, name, typeId }) => {
+            waypoints.forEach(({ lat, lng, id, baseId, name, typeId, groupId }) => {
                 const point = map.latLngToLayerPoint(new L.LatLng(lat, lng));
                 const isSelected = id === selectedId;
 
@@ -92,6 +95,7 @@ export function WaypointOverlay() {
                     isSelected, 
                     settings.waypointRadius, 
                     getWaypointTypeById(typeId)!,
+                    getWaypointGroupById(groupId ?? -1),
                     settings.waypointBorderWidth,
                     settings.waypointBorderColor,
                     settings.showWaypointBorder
@@ -116,7 +120,7 @@ export function WaypointOverlay() {
                     }
                 );
 
-                if (settings.showLabels && !getWaypointTypeById(typeId)?.hidden) {
+                if (settings.showLabels && !getWaypointTypeById(typeId)?.hidden && !getWaypointGroupById(groupId ?? -1)?.hidden) {
                     renderLabel(g, point.x + 4 + settings.waypointRadius, point.y + 4, id.toString() + (name ? ` (${name})` : ""));
                 }
             });
@@ -250,6 +254,7 @@ export function WaypointOverlay() {
         settings.hideOriginalPaths,
         waypointTypes,
         segments,
+        waypointGroups,
         segmentConnectionStarted,
         segmentConnectionStartedWaypointId,
     ]);

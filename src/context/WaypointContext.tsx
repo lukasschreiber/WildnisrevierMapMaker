@@ -10,6 +10,7 @@ export type Waypoint = {
     name?: string;
     baseId?: number;
     typeId: number;
+    groupId?: number;
 };
 
 // Type for the Context
@@ -30,6 +31,7 @@ interface WaypointContextType {
     updateWaypointPosition: (id: number, lat: number, lng: number) => void;
     updateWaypointName: (id: number, name: string) => void;
     updateWaypointType: (id: number, typeId: number) => void;
+    updateWaypointGroup: (id: number, groupId?: number) => void;
     isDeletable: (id: number) => boolean;
     setWaypoints: React.Dispatch<React.SetStateAction<Waypoint[]>>;
 }
@@ -86,6 +88,10 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
         setWaypoints((prev) => prev.map((wp) => (wp.id === id ? { ...wp, typeId } : wp)));
     };
 
+    const updateWaypointGroup = (id: number, groupId?: number) => {
+        setWaypoints((prev) => prev.map((wp) => (wp.id === id ? { ...wp, groupId } : wp)));
+    };
+
     const isDeletable = (id: number) => {
         const waypoint = getWaypointById(id);
         if (!waypoint) return false;
@@ -104,6 +110,7 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
         <WaypointContext.Provider
             value={{
                 waypoints,
+                updateWaypointGroup,
                 currentPosition,
                 setCurrentPosition,
                 selectedId,

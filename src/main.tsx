@@ -6,16 +6,19 @@ import { WaypointProvider } from "./context/WaypointContext.tsx";
 import { SettingsProvider } from "./settings/SettingsContext.tsx";
 import { WaypointTypeProvider } from "./context/WaypointTypeContext.tsx";
 import { PathProvider } from "./context/PathContext.tsx";
+import { WaypointGroupProvider } from "./context/WaypointGroupContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <SettingsProvider>
             <WaypointProvider>
-                <PathProvider>
-                    <WaypointTypeProvider>
-                        <App />
-                    </WaypointTypeProvider>
-                </PathProvider>
+                <WaypointGroupProvider>
+                    <PathProvider>
+                        <WaypointTypeProvider>
+                            <App />
+                        </WaypointTypeProvider>
+                    </PathProvider>
+                </WaypointGroupProvider>
             </WaypointProvider>
         </SettingsProvider>
     </StrictMode>

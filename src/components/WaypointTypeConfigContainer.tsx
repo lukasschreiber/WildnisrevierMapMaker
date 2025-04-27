@@ -12,7 +12,7 @@ export function WaypointTypeConfigContainer() {
                         type="text"
                         value={type.name}
                         onChange={(e) => updateWaypointType(type.id, { name: e.target.value })}
-                        className="bg-black/20 p-1 rounded-md"
+                        className="bg-black/50 p-1 rounded-md"
                     />
                     <select
                         value={type.icon}
@@ -21,7 +21,7 @@ export function WaypointTypeConfigContainer() {
                                 icon: e.target.value as "circle" | "square" | "triangle" | "star",
                             })
                         }
-                        className="bg-black/20 p-1 rounded-md"
+                        className="bg-black/50 p-1 rounded-md"
                     >
                         <option value="circle">Circle</option>
                         <option value="square">Square</option>
@@ -36,14 +36,14 @@ export function WaypointTypeConfigContainer() {
                         type="color"
                         value={type.color}
                         onChange={(e) => updateWaypointType(type.id, { color: e.target.value })}
-                        className="bg-black/20 p-1 rounded-md"
+                        className="bg-black/50 p-1 rounded-md"
                     />
                     {type.hasTwoColors && (
                         <input 
                             type="color"
                             value={type.color2}
                             onChange={(e) => updateWaypointType(type.id, { color2: e.target.value })}
-                            className="bg-black/20 p-1 rounded-md"
+                            className="bg-black/50 p-1 rounded-md"
                         />
                     )}
                     <input
@@ -51,7 +51,7 @@ export function WaypointTypeConfigContainer() {
                         id={type.id.toString()}
                         checked={type.hidden}
                         onChange={(e) => updateWaypointType(type.id, { hidden: e.target.checked })}
-                        className="bg-black/20 p-1 rounded-md"
+                        className="bg-black/50 p-1 rounded-md"
                     />
                     <label className="text-xs" htmlFor={type.id.toString()}>Hidden</label>
                     <input
@@ -59,7 +59,7 @@ export function WaypointTypeConfigContainer() {
                         id={`${type.id}-two-colors`}
                         checked={type.hasTwoColors}
                         onChange={(e) => updateWaypointType(type.id, { hasTwoColors: e.target.checked })}
-                        className="bg-black/20 p-1 rounded-md"
+                        className="bg-black/50 p-1 rounded-md"
                     />
                     <label className="text-xs" htmlFor={`${type.id}-two-colors`}>Two Colors</label>
                     <button

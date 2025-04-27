@@ -9,7 +9,7 @@ export function renderLabel(
     fontWeight: string = "normal",
     opacity: number = 1,
 ) {
-    g.append("text")
+    const t = g.append("text")
         .attr("x", x)
         .attr("y", y)
         .text(text)
@@ -20,6 +20,6 @@ export function renderLabel(
         .style("pointer-events", "none");
 
     if (hiddenOnExport) {
-        g.attr("data-hidden-on-export", "true");
+        t.attr("data-hidden-on-export", "true");
     }
 }

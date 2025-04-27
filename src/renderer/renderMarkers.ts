@@ -1,3 +1,4 @@
+import { WaypointGroup } from "../context/WaypointGroupContext";
 import { WaypointType } from "../context/WaypointTypeContext";
 import * as d3 from "d3";
 
@@ -9,15 +10,17 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     isSelected: boolean,
     radius: number,
     type: WaypointType,
+    group: WaypointGroup | undefined,
     borderWidth: number,
     borderColor: string,
     showBorder: boolean
 ): E {
+    const isHidden = group?.hidden || type.hidden;
     const r = radius;
     const fillTop = type.color;
     const fillBottom = type.hasTwoColors ? type.color2 || type.color : type.color;
     const stroke = showBorder ? borderColor : "none";
-    const opacity = type.hidden ? 0.1 : isSelected ? 0.5 : 1;
+    const opacity = isHidden ? 0.1 : isSelected ? 0.5 : 1;
     const outlineWidth = 2;
 
     const gradientId = `halfGradient-${type.id}`;
@@ -35,7 +38,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     function applyCommonAttrs<T extends SVGElement>(
         shape: d3.Selection<T, unknown, null, undefined>
     ): E {
-        if (type.hidden) {
+        if (isHidden) {
             shape.attr("data-hidden-on-export", "true");
         }
 

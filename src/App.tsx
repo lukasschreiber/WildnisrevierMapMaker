@@ -11,12 +11,13 @@ import { LocationMarker } from "./components/LocationMarker";
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { FileLaunchHandler } from "./FileLaunchHandler";
+import { WaypointGroupContainer } from "./components/WaypointGroupContainer";
 
 export default function App() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
-    const [activeTab, setActiveTab] = useLocalStorage<"settings" | "types" | "io" | "waypoints">(
+    const [activeTab, setActiveTab] = useLocalStorage<"settings" | "types" | "io" | "waypoints" | "groups">(
         "active-tab",
         "waypoints"
     );
@@ -76,6 +77,12 @@ export default function App() {
                                 >
                                     Waypoints
                                 </button>
+                                <button
+                                    className={`p-2 rounded-md ${activeTab === "groups" ? "bg-blue-500" : ""}`}
+                                    onClick={() => setActiveTab("groups")}
+                                >
+                                    Waypoint Groups
+                                </button>
                             </div>
                         </div>
                         <div className="overflow-auto">
@@ -83,6 +90,7 @@ export default function App() {
                             {activeTab === "types" && <WaypointTypeConfigContainer />}
                             {activeTab === "io" && <ExportContainer />}
                             {activeTab === "waypoints" && <WaypointListContainer />}
+                            {activeTab === "groups" && <WaypointGroupContainer />}
                         </div>
                     </div>
                 )}
