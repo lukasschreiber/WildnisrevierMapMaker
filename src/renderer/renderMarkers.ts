@@ -121,31 +121,32 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
             const iconSvg = Object.entries(icons).find(([path]) => path.includes(`${iconName}.svg`))?.[1];
 
             if (iconSvg) {
-                const container = g.append("g")
-                    .html(iconSvg)
-                    // .attr("transform", `translate(${point.x}, ${point.y})`)
-                    .style("fill", type.color2 ? `url(#${gradientId})` : fillTop)
-                    .style("opacity", opacity)
-                    .style("stroke", stroke)
-                    .style("stroke-width", isSelected ? outlineWidth : borderWidth)
-                    .style("cursor", "pointer")
 
-                const svgElement = container.select("svg");
-                const viewBox = svgElement.attr("viewBox");
-                const [minX, minY, width, height] = viewBox ? viewBox.split(" ").map(Number) : [0, 0, 0, 0];
-                const scaleX = r * 2 / width;
-                const scaleY = r * 2 / height;
-                const scale = Math.min(scaleX, scaleY);
+                // Parse the SVG string into a DOM element
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(iconSvg, "image/svg+xml");
+                const svgChildren = Array.from(svgDoc.documentElement.children);
+                const viewBox = svgDoc.documentElement.getAttribute("viewBox");
+                const [width, height] = viewBox ? viewBox.split(" ").slice(2).map(Number) : [24, 24];
 
-                svgElement
-                    .attr("width", width * scale)
-                    .attr("height", height * scale)
-                    .attr("viewBox", `${minX} ${minY} ${width} ${height}`);
+                if (svgChildren.length > 1) {
+                    console.warn("SVG contains multiple root elements:", iconSvg);
+                }
 
-                container.attr("transform", `translate(${point.x - (width * scale) / 2}, ${point.y - (height * scale) / 2})`)
+                const child = svgChildren[0];
+                const container = g.append(child.tagName);
+                const attributes = Array.from(child.attributes);
+                attributes.forEach(attr => {
+                    if (attr.name !== "xmlns" && attr.name !== "viewBox") {
+                        container.attr(attr.name, attr.value);
+                    }
+                });
 
+                container.style("pointer-events", "all")
+                container.attr("data-icon", iconName)
 
-                return g
+                return applyCommonAttrs(container as unknown as d3.Selection<SVGGElement, unknown, null, undefined>)
+                .attr("transform", `translate(${point.x - width / 2}, ${point.y - height / 2})`)
             } else {
                 console.warn("Unknown icon type and no matching SVG found:", type.icon);
                 return g;
