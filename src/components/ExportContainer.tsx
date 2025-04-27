@@ -2,11 +2,13 @@ import { useCallback } from "react";
 import { usePathContext } from "../context/PathContext";
 import { useWaypointContext } from "../context/WaypointContext";
 import { useWaypointTypeContext } from "../context/WaypointTypeContext";
+import { useSettings } from "../settings/useSettings";
 
 export function ExportContainer() {
     const { waypoints, setWaypoints } = useWaypointContext();
     const { waypointTypes, setWaypointTypes } = useWaypointTypeContext();
     const { segments, setSegments } = usePathContext();
+    const { settings } = useSettings();
 
     const downloadFile = (content: string, fileName: string, mimeType: string) => {
         const blob = new Blob([content], { type: mimeType });
@@ -62,11 +64,30 @@ export function ExportContainer() {
         // Clone the group element and append it to the new SVG
         const clonedGroup = svgContentGroup.cloneNode(true);
         svgContent.appendChild(clonedGroup);
-    
-        svgContent.querySelectorAll('*[data-hidden-on-export="true"]').forEach((el) => {
-            el.setAttribute("visibility", "hidden");
-        });
 
+        const kindsToHide = []
+        if (settings.hideArrowsInExport) {
+            kindsToHide.push("arrow");
+        }
+
+        if (settings.hideDistancesInExport) {
+            kindsToHide.push("distance-label");
+        }
+
+        if (settings.hideOriginalPathsInExport) {
+            kindsToHide.push("original-path");
+        }
+
+        if (settings.hideHiddenWaypointsInExport) {
+            kindsToHide.push("hidden-marker");
+        }
+
+        for (const kind of kindsToHide) {
+            svgContent.querySelectorAll(`*[data-kind="${kind}"]`).forEach((el) => {
+                el.setAttribute("visibility", "hidden");
+            });
+        }
+        
         // Use XMLSerializer to serialize the SVG content
         const serializer = new XMLSerializer();
         const svgString = serializer.serializeToString(svgContent);
@@ -76,7 +97,8 @@ export function ExportContainer() {
     
         // Remove the temporary SVG
         document.getElementById("exported-svg")?.remove();
-    }, []);
+    }, [settings.hideArrowsInExport, settings.hideDistancesInExport, settings.hideHiddenWaypointsInExport, settings.hideOriginalPathsInExport]);
+
     const importJson = useCallback((file: File) => {
         if (!confirm("Are you sure you want to import this file? This will overwrite your current data.")) {
             return;

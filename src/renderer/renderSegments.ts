@@ -2,9 +2,9 @@ import L from "leaflet";
 import * as d3 from "d3";
 import { PathSegment } from "../context/PathContext";
 
-export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undefined>, map: L.Map, segments: any[], getWaypointById: Function, useUniqueColors: boolean, pathWidth: number, pathColor: string, hideOriginalPaths: boolean, hideFancyPaths: boolean, selectSegment: (id: number) => void) {
+export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undefined>, map: L.Map, segments: any[], getWaypointById: Function, useUniqueColors: boolean, pathWidth: number, pathColor: string, hideOriginalPaths: boolean, hideFancyPaths: boolean, tension: number, selectSegment: (id: number) => void) {
     const paths = getPaths(segments);
-    const curve = d3.curveCardinal.tension(0); // Adjust tension for smoother curves (0 to 1)
+    const curve = d3.curveCardinal.tension(tension);
 
     if (!hideFancyPaths) {
         paths.forEach((path, index) => {
@@ -51,6 +51,7 @@ export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undef
             .attr("opacity", 0.5)
             .style("cursor", "pointer")
             .style("stroke-width", 2)
+            .attr("data-kind", "original-path")
             .on("click",
                 (event: MouseEvent) => {
                     event.stopPropagation();

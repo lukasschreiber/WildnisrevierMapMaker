@@ -12,6 +12,8 @@ import { renderSegments } from "../renderer/renderSegments";
 import { renderWaypointArrow } from "../renderer/renderWaypointArrow";
 import { renderLabel } from "../renderer/renderLabel";
 import { useWaypointGroupContext } from "../context/WaypointGroupContext";
+import { useShapeContext } from "../context/ShapeContext";
+import { renderShape } from "../renderer/renderShape";
 
 export function WaypointOverlay() {
     const {
@@ -41,6 +43,8 @@ export function WaypointOverlay() {
         selectSegment,
     } = usePathContext();
 
+    const { addMode: addShapeMode, addNode: addShapeNode, addModeReferenceShapeId, shapes } = useShapeContext();
+
     const { getWaypointTypeById, waypointTypes } = useWaypointTypeContext();
     const map = useMap();
     const { settings } = useSettings();
@@ -60,7 +64,38 @@ export function WaypointOverlay() {
         const draw = () => {
             g.selectAll("*").remove();
 
-            renderSegments(g, map, segments, getWaypointById, settings.showSinglePaths, settings.pathWidth, settings.pathColor, settings.hideOriginalPaths, settings.hideFancyPaths, selectSegment);
+            shapes.forEach((shape) => {
+                if (!shape.nodes || shape.nodes.length === 0) return; // Skip shapes without nodes
+                const points = shape.nodes.map((node) => {
+                    const waypoint = getWaypointById(node.waypointId)!;
+                    return map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
+                });
+
+                renderShape(
+                    g,
+                    shape,
+                    points,
+                    settings.showOriginalShapeEdges,
+                    settings.showOriginalShapeVertices,
+                    settings.showShapeControlPointEdges,
+                    settings.shapeLabelColor,
+                    settings.showSolidBlockBehindLabels
+                );
+            });
+
+            renderSegments(
+                g,
+                map,
+                segments,
+                getWaypointById,
+                settings.showSinglePaths,
+                settings.pathWidth,
+                settings.pathColor,
+                settings.hideOriginalPaths,
+                settings.hideFancyPaths,
+                settings.pathTension,
+                selectSegment
+            );
 
             waypoints.forEach(({ lat, lng, id, baseId, name, typeId, groupId }) => {
                 const point = map.latLngToLayerPoint(new L.LatLng(lat, lng));
@@ -86,42 +121,65 @@ export function WaypointOverlay() {
                     }
 
                     if (settings.showWaypointDistances) {
-                        renderLabel(g, (point.x + basePoint.x) / 2, (point.y + basePoint.y) / 2 - 5, `${dist.toFixed(2)} m`, true)
+                        renderLabel(
+                            g,
+                            (point.x + basePoint.x) / 2,
+                            (point.y + basePoint.y) / 2 - 5,
+                            `${dist.toFixed(2)} m`,
+                            "distance-label",
+                            settings.labelColor,
+                        );
                     }
                 }
 
-                renderMarker(g, 
-                    point, 
-                    isSelected, 
-                    settings.waypointRadius, 
-                    getWaypointTypeById(typeId)!,
+                const type = getWaypointTypeById(typeId)!;
+
+                renderMarker(
+                    g,
+                    point,
+                    isSelected,
+                    type.radiusOverride ?? settings.waypointRadius,
+                    type,
                     getWaypointGroupById(groupId ?? -1),
                     settings.waypointBorderWidth,
                     settings.waypointBorderColor,
                     settings.showWaypointBorder
-                ).on(
-                    "click",
-                    (event: MouseEvent) => {
-                        event.stopPropagation();
-                        if (!addPathMode) {
-                            selectWaypoint(id);
-                            const waypoint = getWaypointById(id);
-                            if (waypoint) {
-                                const { lat, lng } = waypoint;
-                                map.setView([lat, lng], map.getZoom());
-                            }
+                ).on("click", (event: MouseEvent) => {
+                    event.stopPropagation();
+                    if (addPathMode) {
+                        if (segmentConnectionStarted) {
+                            endSegmentConnection(id);
                         } else {
-                            if (segmentConnectionStarted) {
-                                endSegmentConnection(id);
-                            } else {
-                                startSegmentConnection(id);
-                            }
+                            startSegmentConnection(id);
+                        }
+                    } else if (addShapeMode) {
+                        if (addModeReferenceShapeId) {
+                            console.log("Adding node to shape", addModeReferenceShapeId);
+                            addShapeNode(addModeReferenceShapeId, id);
+                        }
+                    } else {
+                        selectWaypoint(id);
+                        const waypoint = getWaypointById(id);
+                        if (waypoint) {
+                            const { lat, lng } = waypoint;
+                            map.setView([lat, lng], map.getZoom());
                         }
                     }
-                );
+                });
 
-                if (settings.showLabels && !getWaypointTypeById(typeId)?.hidden && !getWaypointGroupById(groupId ?? -1)?.hidden) {
-                    renderLabel(g, point.x + 4 + settings.waypointRadius, point.y + 4, id.toString() + (name ? ` (${name})` : ""));
+                if (
+                    settings.showLabels &&
+                    !getWaypointTypeById(typeId)?.hidden &&
+                    !getWaypointGroupById(groupId ?? -1)?.hidden
+                ) {
+                    renderLabel(
+                        g,
+                        point.x + 4 + settings.waypointRadius,
+                        point.y + 4,
+                        id.toString() + (name ? ` (${name})` : ""),
+                        undefined,
+                        settings.labelColor,
+                    );
                 }
             });
         };
@@ -217,7 +275,7 @@ export function WaypointOverlay() {
                 .attr("x1", fromPoint.x)
                 .attr("y1", fromPoint.y)
                 .attr("x2", toPoint.x)
-                .attr("y2", toPoint.y)
+                .attr("y2", toPoint.y);
         };
 
         map.on("click", onMapClick);
@@ -235,9 +293,13 @@ export function WaypointOverlay() {
         waypoints,
         addMode,
         addPathMode,
+        addModeReferenceShapeId,
+        addShapeMode,
+        shapes,
         selectedId,
         settings.showLabels,
         settings.showWaypointLines,
+        settings.pathTension,
         settings.showWaypointDistances,
         settings.waypointRadius,
         settings.arrowSize,
@@ -245,6 +307,8 @@ export function WaypointOverlay() {
         settings.arrowOpacity,
         settings.pathWidth,
         settings.pathColor,
+        settings.labelColor,
+        settings.shapeLabelColor,
         settings.showSinglePaths,
         settings.arrowWidth,
         settings.arrowColor,
@@ -252,8 +316,13 @@ export function WaypointOverlay() {
         settings.waypointBorderColor,
         settings.showWaypointBorder,
         settings.hideOriginalPaths,
+        settings.showOriginalShapeEdges,
+        settings.showOriginalShapeVertices,
+        settings.showShapeControlPointEdges,
+        settings.showSolidBlockBehindLabels,
         waypointTypes,
         segments,
+        addWaypoint,
         waypointGroups,
         segmentConnectionStarted,
         segmentConnectionStartedWaypointId,

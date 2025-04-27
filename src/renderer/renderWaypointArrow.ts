@@ -14,7 +14,7 @@ export function renderWaypointArrow(g: d3.Selection<SVGGElement, unknown, null, 
         .style("stroke", color)
         .attr("stroke-linecap", "round")
         .style("stroke-width", width)
-        .attr("data-hidden-on-export", "true")
+        .attr("data-kind", "arrow")
         .style("opacity", opacity);
 
     // arrowhead
@@ -36,7 +36,7 @@ export function renderWaypointArrow(g: d3.Selection<SVGGElement, unknown, null, 
         .attr("stroke-linecap", "round")
         .style("stroke", color)
         .style("stroke-width", width)
-        .attr("data-hidden-on-export", "true")
+        .attr("data-kind", "arrow")
         .style("opacity", opacity);
 
     g.append("line")
@@ -47,6 +47,6 @@ export function renderWaypointArrow(g: d3.Selection<SVGGElement, unknown, null, 
         .attr("stroke-linecap", "round")
         .style("stroke", color)
         .style("stroke-width", width)
-        .attr("data-hidden-on-export", "true")
+        .attr("data-kind", "arrow")
         .style("opacity", opacity);
 }

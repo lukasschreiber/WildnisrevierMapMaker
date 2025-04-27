@@ -7,17 +7,20 @@ import { SettingsProvider } from "./settings/SettingsContext.tsx";
 import { WaypointTypeProvider } from "./context/WaypointTypeContext.tsx";
 import { PathProvider } from "./context/PathContext.tsx";
 import { WaypointGroupProvider } from "./context/WaypointGroupContext.tsx";
+import { ShapeProvider } from "./context/ShapeContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <SettingsProvider>
             <WaypointProvider>
                 <WaypointGroupProvider>
-                    <PathProvider>
-                        <WaypointTypeProvider>
-                            <App />
-                        </WaypointTypeProvider>
-                    </PathProvider>
+                    <ShapeProvider>
+                        <PathProvider>
+                            <WaypointTypeProvider>
+                                <App />
+                            </WaypointTypeProvider>
+                        </PathProvider>
+                    </ShapeProvider>
                 </WaypointGroupProvider>
             </WaypointProvider>
         </SettingsProvider>

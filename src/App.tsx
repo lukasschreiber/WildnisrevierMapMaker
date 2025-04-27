@@ -12,15 +12,16 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { FileLaunchHandler } from "./FileLaunchHandler";
 import { WaypointGroupContainer } from "./components/WaypointGroupContainer";
+import { PathContainer } from "./components/PathContainer";
+import { ShapeContainer } from "./components/ShapeContainer";
 
 export default function App() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
-    const [activeTab, setActiveTab] = useLocalStorage<"settings" | "types" | "io" | "waypoints" | "groups">(
-        "active-tab",
-        "waypoints"
-    );
+    const [activeTab, setActiveTab] = useLocalStorage<
+        "settings" | "types" | "io" | "waypoints" | "groups" | "paths" | "shapes"
+    >("active-tab", "waypoints");
     const [view, setView] = useLocalStorage("map-view", {
         lat: 52.52,
         lng: 13.405,
@@ -54,22 +55,10 @@ export default function App() {
                             {/* tabs */}
                             <div className="flex flex-row gap-2 w-full justify-end">
                                 <button
-                                    className={`p-2 rounded-md ${activeTab === "settings" ? "bg-blue-500" : ""}`}
-                                    onClick={() => setActiveTab("settings")}
-                                >
-                                    Settings
-                                </button>
-                                <button
                                     className={`p-2 rounded-md ${activeTab === "types" ? "bg-blue-500" : ""}`}
                                     onClick={() => setActiveTab("types")}
                                 >
                                     Waypoint Types
-                                </button>
-                                <button
-                                    className={`p-2 rounded-md ${activeTab === "io" ? "bg-blue-500" : ""}`}
-                                    onClick={() => setActiveTab("io")}
-                                >
-                                    I/O
                                 </button>
                                 <button
                                     className={`p-2 rounded-md ${activeTab === "waypoints" ? "bg-blue-500" : ""}`}
@@ -83,14 +72,40 @@ export default function App() {
                                 >
                                     Waypoint Groups
                                 </button>
+                                {/* <button
+                                    className={`p-2 rounded-md ${activeTab === "paths" ? "bg-blue-500" : ""}`}
+                                    onClick={() => setActiveTab("paths")}
+                                >
+                                    Paths
+                                </button> */}
+                                <button
+                                    className={`p-2 rounded-md ${activeTab === "shapes" ? "bg-blue-500" : ""}`}
+                                    onClick={() => setActiveTab("shapes")}
+                                >
+                                    Shapes
+                                </button>
+                                <button
+                                    className={`p-2 rounded-md ${activeTab === "settings" ? "bg-blue-500" : ""}`}
+                                    onClick={() => setActiveTab("settings")}
+                                >
+                                    Settings
+                                </button>
+                                <button
+                                    className={`p-2 rounded-md ${activeTab === "io" ? "bg-blue-500" : ""}`}
+                                    onClick={() => setActiveTab("io")}
+                                >
+                                    I/O
+                                </button>
                             </div>
                         </div>
                         <div className="overflow-auto">
+                            {activeTab === "paths" && <PathContainer />}
                             {activeTab === "settings" && <SettingsContainer />}
                             {activeTab === "types" && <WaypointTypeConfigContainer />}
                             {activeTab === "io" && <ExportContainer />}
                             {activeTab === "waypoints" && <WaypointListContainer />}
                             {activeTab === "groups" && <WaypointGroupContainer />}
+                            {activeTab === "shapes" && <ShapeContainer />}
                         </div>
                     </div>
                 )}

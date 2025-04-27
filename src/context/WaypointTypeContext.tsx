@@ -8,6 +8,7 @@ export type WaypointType = {
     icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry";
     color: string;
     hasTwoColors: boolean;
+    radiusOverride?: number;
     color2?: string;
     hidden: boolean;
 };

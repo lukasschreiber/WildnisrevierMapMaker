@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { calculateRelativeWaypoint } from "../renderer/relativeWaypoints";
 
@@ -22,7 +22,7 @@ interface WaypointContextType {
     toggleAddMode: () => void;
     setAddMode: (addMode: boolean) => void;
     addMode: boolean;
-    addWaypoint: (lat: number, lng: number) => void;
+    addWaypoint: (lat: number, lng: number, baseId?: number, name?: string, typeId?: number, groupId?: number) => void;
     addRelativeWaypoint: (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => void;
     selectWaypoint: (id: number) => void;
     deselectWaypoint: () => void;
@@ -34,6 +34,13 @@ interface WaypointContextType {
     updateWaypointGroup: (id: number, groupId?: number) => void;
     isDeletable: (id: number) => boolean;
     setWaypoints: React.Dispatch<React.SetStateAction<Waypoint[]>>;
+
+    setNewWaypointName: (name: string) => void;
+    setNewWaypointType: (typeId: number) => void;
+    setNewWaypointGroup: (groupId?: number) => void;
+    newWaypointName: string;
+    newWaypointType: number;
+    newWaypointGroup: number | undefined;
 }
 
 // Create the context with default values
@@ -45,15 +52,21 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
     const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [addMode, setAddMode] = useLocalStorage("add-waypoint-mode", false);
+    const [newWaypointName, setNewWaypointName] = useState<string>("");
+    const [newWaypointType, setNewWaypointType] = useState<number>(1);
+    const [newWaypointGroup, setNewWaypointGroup] = useState<number | undefined>(undefined);
 
     const getNextId = () => {
         return waypoints.length > 0 ? Math.max(...waypoints.map((w) => w.id)) + 1 : 1;
     };
 
-    const addWaypoint = (lat: number, lng: number, baseId?: number, name?: string, typeId?: number) => {
-        const newWaypoint: Waypoint = { id: getNextId(), lat, lng, baseId, typeId: typeId === undefined ? 1 : typeId, name };
+    const addWaypoint = useCallback((lat: number, lng: number, baseId?: number, name?: string, typeId?: number, groupId?: number) => {
+        const type = typeId === undefined ? newWaypointType : typeId;
+        const group = groupId === undefined ? newWaypointGroup : groupId;
+        const waypointName = name === undefined ? newWaypointName : name;
+        const newWaypoint: Waypoint = { id: getNextId(), lat, lng, baseId, typeId: type, groupId: group, name: waypointName };
         setWaypoints((prev) => [...prev, newWaypoint]);
-    };
+    }, [newWaypointName, newWaypointType, newWaypointGroup, waypoints]);
 
     const selectWaypoint = (id: number) => {
         setSelectedId(id);
@@ -128,6 +141,12 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
                 updateWaypointName,
                 addRelativeWaypoint,
                 updateWaypointType,
+                setNewWaypointName,
+                setNewWaypointType,
+                setNewWaypointGroup,
+                newWaypointName,
+                newWaypointType,
+                newWaypointGroup,
             }}
         >
             {children}

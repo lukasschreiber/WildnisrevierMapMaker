@@ -1,7 +1,8 @@
 import { useWaypointTypeContext } from "../context/WaypointTypeContext";
 
 export function WaypointTypeConfigContainer() {
-    const { waypointTypes, updateWaypointType, addWaypointType, removeWaypointType, isDeletable } = useWaypointTypeContext();
+    const { waypointTypes, updateWaypointType, addWaypointType, removeWaypointType, isDeletable } =
+        useWaypointTypeContext();
 
     return (
         <div className="flex flex-col gap-2">
@@ -33,19 +34,29 @@ export function WaypointTypeConfigContainer() {
                         <option value="cherry">Cherry</option>
                     </select>
                     <input
+                        type="number"
+                        value={type.radiusOverride || ""}
+                        onChange={(e) =>
+                            updateWaypointType(type.id, {
+                                radiusOverride: e.target.value ? parseInt(e.target.value) : undefined,
+                            })
+                        }
+                        className="bg-black/50 p-1 rounded-md max-w-12"
+                        placeholder="size"
+                    />
+                    <input
                         type="color"
                         value={type.color}
                         onChange={(e) => updateWaypointType(type.id, { color: e.target.value })}
                         className="bg-black/50 p-1 rounded-md"
                     />
-                    {type.hasTwoColors && (
-                        <input 
-                            type="color"
-                            value={type.color2}
-                            onChange={(e) => updateWaypointType(type.id, { color2: e.target.value })}
-                            className="bg-black/50 p-1 rounded-md"
-                        />
-                    )}
+                    <input
+                        type="color"
+                        value={type.color2 || "#000000"}
+                        onChange={(e) => updateWaypointType(type.id, { color2: e.target.value })}
+                        className="bg-black/50 p-1 rounded-md disabled:opacity-40"
+                        disabled={!type.hasTwoColors}
+                    />
                     <input
                         type="checkbox"
                         id={type.id.toString()}
@@ -53,7 +64,9 @@ export function WaypointTypeConfigContainer() {
                         onChange={(e) => updateWaypointType(type.id, { hidden: e.target.checked })}
                         className="bg-black/50 p-1 rounded-md"
                     />
-                    <label className="text-xs" htmlFor={type.id.toString()}>Hidden</label>
+                    <label className="text-xs" htmlFor={type.id.toString()}>
+                        Hidden
+                    </label>
                     <input
                         type="checkbox"
                         id={`${type.id}-two-colors`}
@@ -61,7 +74,9 @@ export function WaypointTypeConfigContainer() {
                         onChange={(e) => updateWaypointType(type.id, { hasTwoColors: e.target.checked })}
                         className="bg-black/50 p-1 rounded-md"
                     />
-                    <label className="text-xs" htmlFor={`${type.id}-two-colors`}>Two Colors</label>
+                    <label className="text-xs" htmlFor={`${type.id}-two-colors`}>
+                        Two Colors
+                    </label>
                     <button
                         onClick={() => removeWaypointType(type.id)}
                         disabled={waypointTypes.length <= 1 || type.id === 1 || !isDeletable(type.id)}
@@ -72,7 +87,16 @@ export function WaypointTypeConfigContainer() {
                 </div>
             ))}
             <button
-                onClick={() => addWaypointType({ id: Date.now(), name: "New Type", icon: "circle", color: "#000000", hidden: false, hasTwoColors: false })}
+                onClick={() =>
+                    addWaypointType({
+                        id: Date.now(),
+                        name: "New Type",
+                        icon: "circle",
+                        color: "#000000",
+                        hidden: false,
+                        hasTwoColors: false,
+                    })
+                }
                 className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded"
             >
                 Add Waypoint Type

@@ -39,7 +39,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
         shape: d3.Selection<T, unknown, null, undefined>
     ): E {
         if (isHidden) {
-            shape.attr("data-hidden-on-export", "true");
+            shape.attr("data-kind", "hidden-marker");
         }
 
         return shape

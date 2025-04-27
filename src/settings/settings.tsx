@@ -13,12 +13,25 @@ export interface LayoutSettings {
     arrowSize: RangeSetting;
     arrowColor: ColorSetting;
     arrowWidth: RangeSetting;
+    labelColor: ColorSetting;
 
     showSinglePaths: CheckboxSetting;
     pathWidth: RangeSetting;
     pathColor: ColorSetting;
     hideOriginalPaths: CheckboxSetting;
     hideFancyPaths: CheckboxSetting;
+    pathTension: RangeSetting;
+
+    showOriginalShapeEdges: CheckboxSetting;
+    showOriginalShapeVertices: CheckboxSetting;
+    showShapeControlPointEdges: CheckboxSetting;
+    shapeLabelColor: ColorSetting;
+    showSolidBlockBehindLabels: CheckboxSetting;
+
+    hideArrowsInExport: CheckboxSetting;
+    hideHiddenWaypointsInExport: CheckboxSetting;
+    hideDistancesInExport: CheckboxSetting;
+    hideOriginalPathsInExport: CheckboxSetting;
 }
 
 export function getSettingsDefinition() {
@@ -67,6 +80,12 @@ export function getSettingsDefinition() {
                     default: true,
                     label: "Show Waypoint Border",
                     helpText: "Show border around waypoints.",
+                },
+                labelColor: {
+                    type: "color",
+                    default: "#000000",
+                    label: "Label Color",
+                    helpText: "Color of the labels.",
                 },
             },
         },
@@ -149,6 +168,79 @@ export function getSettingsDefinition() {
                     default: false,
                     label: "Hide Fancy Paths",
                     helpText: "Hide the fancy paths.",
+                },
+                pathTension: {
+                    type: "range",
+                    default: 0.5,
+                    min: 0,
+                    max: 1,
+                    stepSize: 0.05,
+                    label: "Path Tension",
+                    helpText: "Tension of the paths.",
+                },
+            },
+        },
+        {
+            name: "Shape Settings",
+            settings: {
+                showOriginalShapeEdges: {
+                    type: "checkbox",
+                    default: true,
+                    label: "Show Original Shape Edges",
+                    helpText: "Show edges of the original shapes.",
+                },
+                showOriginalShapeVertices: {
+                    type: "checkbox",
+                    default: true,
+                    label: "Show Original Shape Vertices",
+                    helpText: "Show vertices of the original shapes.",
+                },
+                showShapeControlPointEdges: {
+                    type: "checkbox",
+                    default: true,
+                    label: "Show Shape Control Point Edges",
+                    helpText: "Show control points.",
+                },
+                shapeLabelColor: {  
+                    type: "color",
+                    default: "#FFFFFF",
+                    label: "Shape Label Color",
+                    helpText: "Color of the shape labels.",
+                },
+                showSolidBlockBehindLabels: {
+                    type: "checkbox",
+                    default: true,
+                    label: "Show Solid Block Behind Labels",
+                    helpText: "Show a solid block behind the labels.",
+                },
+            }
+        },
+        {
+            name: "Export Settings",
+            settings: {
+                hideArrowsInExport: {
+                    type: "checkbox",
+                    default: false,
+                    label: "Hide Arrows in Export",
+                    helpText: "Hide arrows in the exported image.",
+                },
+                hideHiddenWaypointsInExport: {
+                    type: "checkbox",
+                    default: false,
+                    label: "Hide Hidden Waypoints in Export",
+                    helpText: "Hide hidden waypoints in the exported image.",
+                },
+                hideDistancesInExport: {
+                    type: "checkbox",
+                    default: false,
+                    label: "Hide Distances in Export",
+                    helpText: "Hide distances in the exported image.",
+                },
+                hideOriginalPathsInExport: {
+                    type: "checkbox",
+                    default: false,
+                    label: "Hide Original Paths in Export",
+                    helpText: "Hide original paths in the exported image.",
                 },
             },
         },

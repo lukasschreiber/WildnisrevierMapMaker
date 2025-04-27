@@ -3,7 +3,7 @@ export function renderLabel(
     x: number,
     y: number,
     text: string,
-    hiddenOnExport: boolean = false,
+    hiddenOnExportKind: string | undefined = undefined,
     color: string = "black",
     fontSize: number = 10,
     fontWeight: string = "normal",
@@ -19,7 +19,7 @@ export function renderLabel(
         .style("opacity", opacity)
         .style("pointer-events", "none");
 
-    if (hiddenOnExport) {
-        t.attr("data-hidden-on-export", "true");
+    if (hiddenOnExportKind) {
+        t.attr("data-kind", hiddenOnExportKind);
     }
 }
