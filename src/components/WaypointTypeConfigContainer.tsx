@@ -31,8 +31,6 @@ export function WaypointTypeConfigContainer() {
                         <option value="diamond">Diamond</option>
                         <option value="apple">Apple</option>
                         <option value="cherry">Cherry</option>
-                        <option value="pear">Pear</option>
-                        <option value="plum">Plum</option>
                     </select>
                     <input
                         type="color"

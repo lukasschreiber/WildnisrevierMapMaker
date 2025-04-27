@@ -5,7 +5,7 @@ import { useWaypointContext } from "./WaypointContext";
 export type WaypointType = {
     id: number;
     name: string;
-    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry" | "pear" | "plum";
+    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry";
     color: string;
     hasTwoColors: boolean;
     color2?: string;
