@@ -14,9 +14,11 @@ export function FileLaunchHandler() {
         if ("launchQueue" in window) {
             console.log("has launchQueue");
             (window.launchQueue as any).setConsumer(async (launchParams: any) => {
-                console.log("FileLaunchHandler consumer called");
-                console.log("launchParams", launchParams);
                 if (!launchParams.files.length) return;
+
+                if (launchParams.consume) {
+                    launchParams.consume();
+                }
                 
                 for (const fileHandle of launchParams.files) {
                     if (fileHandle.kind === "file") {
