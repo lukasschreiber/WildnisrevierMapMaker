@@ -16,7 +16,16 @@ export function FileLaunchHandler() {
             (window.launchQueue as any).setConsumer(async (launchParams: any) => {
                 if (!launchParams.files.length) return;
                 console.log("launchParams", launchParams);
-                
+
+                // get the current file name from localstorag
+                const currentFileName = localStorage.getItem("current-file-name") || "";
+                const newFileName = launchParams.files[0].name;
+
+                if (currentFileName === newFileName) {
+                    console.log("File already loaded");
+                    return;
+                }
+
                 for (const fileHandle of launchParams.files) {
                     if (fileHandle.kind === "file") {
                         const file = await fileHandle.getFile();
