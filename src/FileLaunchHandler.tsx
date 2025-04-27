@@ -9,9 +9,12 @@ export function FileLaunchHandler() {
     const { setSegments } = usePathContext();
 
     useEffect(() => {
+        console.log("FileLaunchHandler mounted");
         if ("launchQueue" in window) {
             (window as any).launchQueue.setConsumer(async (launchParams: any) => {
                 if (!launchParams.files.length) return;
+                console.log("FileLaunchHandler consumer called");
+                console.log("launchParams", launchParams);
                 
                 for (const fileHandle of launchParams.files) {
                     if (fileHandle.kind === "file") {

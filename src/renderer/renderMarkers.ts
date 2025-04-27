@@ -2,7 +2,6 @@ import { WaypointType } from "../context/WaypointTypeContext";
 import * as d3 from "d3";
 
 const icons = import.meta.glob('../assets/*.svg', { eager: true, query: '?raw', import: "default" }) as Record<string, string>;
-console.log(icons)
 
 export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, undefined>>(
     g: E,
