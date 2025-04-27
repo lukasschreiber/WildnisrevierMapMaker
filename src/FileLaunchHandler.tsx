@@ -28,13 +28,14 @@ export function FileLaunchHandler() {
 
                 for (const fileHandle of launchParams.files) {
                     if (fileHandle.kind === "file") {
-                        localStorage.setItem("current-file-name", fileHandle.name);
                         const file = await fileHandle.getFile();
                         const text = await file.text();
 
                         if (!confirm(`Do you want to import '${file.name}'? This will overwrite your current data.`)) {
                             return;
                         }
+
+                        localStorage.setItem("current-file-name", fileHandle.name);
 
                         try {
                             const data = JSON.parse(text);

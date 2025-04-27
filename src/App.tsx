@@ -16,9 +16,9 @@ export default function App() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
-    const [activeTab, setActiveTab] = useLocalStorage<null | "settings" | "types" | "io" | "waypoints">(
+    const [activeTab, setActiveTab] = useLocalStorage<"settings" | "types" | "io" | "waypoints">(
         "active-tab",
-        null
+        "waypoints"
     );
     const [view, setView] = useLocalStorage("map-view", {
         lat: 52.52,
