@@ -9,7 +9,8 @@ export function FileLaunchHandler() {
     const { setSegments } = usePathContext();
 
     useEffect(() => {
-        console.log("FileLaunchHandler mounted");
+        console.log("FileLaunchHandler mounted", "launchQueue" in window);
+
         if ("launchQueue" in window) {
             console.log("has launchQueue");
             (window.launchQueue as any).setConsumer(async (launchParams: any) => {
