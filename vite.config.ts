@@ -23,7 +23,7 @@ export default defineConfig({
         },
       ],
       launch_handler: {
-        client_mode: "navigate-existing"
+        client_mode: "auto"
       },
       scope: "/",
       start_url: "/",
@@ -32,7 +32,7 @@ export default defineConfig({
           action: '/',
           accept: {
             'application/json': ['.json']
-          }
+          },
         }
       ],
       icons: [
