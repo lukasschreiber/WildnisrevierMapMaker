@@ -28,7 +28,7 @@ export function ExportContainer() {
         };
 
         const json = JSON.stringify(data, null, 2);
-        const name = `export-${new Date().toISOString()}.json`;
+        const name = `export-${new Date().toISOString()}.wmap`;
         downloadFile(json, name, "application/json");
     }, [waypoints, segments, waypointTypes]);
 
@@ -114,7 +114,7 @@ export function ExportContainer() {
             <div className="text-xs">Import JSON:</div>
             <input
                 type="file"
-                accept=".json"
+                accept=".wmap"
                 onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {

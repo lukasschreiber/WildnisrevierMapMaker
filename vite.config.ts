@@ -23,7 +23,7 @@ export default defineConfig({
         },
       ],
       launch_handler: {
-        client_mode: "auto"
+        client_mode: "navigate-existing"
       },
       scope: "/",
       start_url: "/",
