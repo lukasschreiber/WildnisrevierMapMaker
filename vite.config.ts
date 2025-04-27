@@ -18,7 +18,7 @@ export default defineConfig({
         {
           src: 'wide_screenshot.png',
           form_factor: 'wide',
-          sizes: '1280x720',
+          sizes: '1917x997',
           type: 'image/png'
         },
       ],
