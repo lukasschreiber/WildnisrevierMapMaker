@@ -10,6 +10,7 @@ import { Menu } from "./components/Menu";
 import { LocationMarker } from "./components/LocationMarker";
 import { useEffect, useRef } from "react";
 import L from "leaflet";
+import { FileLaunchHandler } from "./FileLaunchHandler";
 
 export default function App() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -35,6 +36,7 @@ export default function App() {
 
     return (
         <>
+            <FileLaunchHandler />
             <MapContainer center={[view.lat, view.lng]} zoom={view.zoom} style={{ height: "100vh", width: "100%" }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={22} maxNativeZoom={18} />
                 <MapPersister setView={setView} />

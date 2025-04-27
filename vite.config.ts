@@ -13,6 +13,19 @@ export default defineConfig({
       short_name: 'Map Maker',
       description: 'Create and manage waypoints on a map',
       theme_color: '#ffffff',
+      launch_handler: {
+        client_mode: "navigate-existing"
+      },
+      scope: "/",
+      start_url: "/",
+      file_handlers: [
+        {
+          action: '/',
+          accept: {
+            'application/json': ['.json']
+          }
+        }
+      ],
       icons: [
         {
           "src": "windows11/SmallTile.scale-100.png",
