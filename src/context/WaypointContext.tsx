@@ -22,7 +22,7 @@ interface WaypointContextType {
     setAddMode: (addMode: boolean) => void;
     addMode: boolean;
     addWaypoint: (lat: number, lng: number) => void;
-    addRelativeWaypoint: (baseId: number, distance: number, bearing: number) => void;
+    addRelativeWaypoint: (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => void;
     selectWaypoint: (id: number) => void;
     deselectWaypoint: () => void;
     deleteWaypoint: (id: number) => void;
@@ -48,8 +48,8 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
         return waypoints.length > 0 ? Math.max(...waypoints.map((w) => w.id)) + 1 : 1;
     };
 
-    const addWaypoint = (lat: number, lng: number, baseId?: number) => {
-        const newWaypoint: Waypoint = { id: getNextId(), lat, lng, baseId, typeId: 1 };
+    const addWaypoint = (lat: number, lng: number, baseId?: number, name?: string, typeId?: number) => {
+        const newWaypoint: Waypoint = { id: getNextId(), lat, lng, baseId, typeId: typeId === undefined ? 1 : typeId, name };
         setWaypoints((prev) => [...prev, newWaypoint]);
     };
 
@@ -92,11 +92,11 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
         return !waypoints.some((wp) => wp.baseId === id);
     };
 
-    const addRelativeWaypoint = (baseId: number, distance: number, bearing: number) => {
+    const addRelativeWaypoint = (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => {
         const baseWaypoint = getWaypointById(baseId);
         if (baseWaypoint) {
             const newWaypoint = calculateRelativeWaypoint(baseWaypoint.lat, baseWaypoint.lng, distance, bearing);
-            addWaypoint(newWaypoint.lat, newWaypoint.lng, baseId);
+            addWaypoint(newWaypoint.lat, newWaypoint.lng, baseId, name, typeId);
         }
     };
 

@@ -139,6 +139,5 @@ function getPaths(segments: PathSegment[]): number[][] {
         }
     }
 
-    console.log("Paths:", paths);
     return paths;
 }

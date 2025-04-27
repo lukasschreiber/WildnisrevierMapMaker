@@ -4,12 +4,21 @@ import { useWaypointTypeContext } from "../context/WaypointTypeContext";
 import { usePathContext } from "../context/PathContext";
 
 export function WaypointInfo(props: { id: number }) {
-    const { getWaypointById, deleteWaypoint, deselectWaypoint, addRelativeWaypoint, isDeletable, updateWaypointName, updateWaypointType } =
-        useWaypointContext();
-        const { deleteSegment, segments } = usePathContext();
+    const {
+        getWaypointById,
+        deleteWaypoint,
+        deselectWaypoint,
+        addRelativeWaypoint,
+        isDeletable,
+        updateWaypointName,
+        updateWaypointType,
+    } = useWaypointContext();
+    const { deleteSegment, segments } = usePathContext();
     const { waypointTypes } = useWaypointTypeContext();
     const [distance, setDistance] = useState(1);
     const [bearing, setBearing] = useState(0);
+    const [newTypeId, setNewTypeId] = useState(0);
+    const [newName, setNewName] = useState<string | null>(null);
     const waypoint = useMemo(() => getWaypointById(props.id), [props.id, getWaypointById]);
 
     if (!waypoint) {
@@ -59,6 +68,24 @@ export function WaypointInfo(props: { id: number }) {
                 Delete Waypoint
             </button>
 
+            <hr className="my-2 border-black opacity-40" />
+            <input
+                className="w-full bg-black/20 p-1 rounded-md"
+                placeholder="Name"
+                value={newName || ""}
+                onChange={(e) => setNewName(e.target.value)}
+            />
+            <select
+                className="w-full bg-black/20 p-1 rounded-md"
+                value={newTypeId}
+                onChange={(e) => setNewTypeId(parseInt(e.target.value))}
+            >
+                {waypointTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                        {type.name}
+                    </option>
+                ))}
+            </select>
             <div className="flex gap-2 flex-row">
                 <div className="w-1/2">Distance (m)</div>
                 <div className="w-1/2">Bearing (°)</div>
@@ -81,7 +108,7 @@ export function WaypointInfo(props: { id: number }) {
             </div>
             <button
                 onClick={() => {
-                    addRelativeWaypoint(waypoint.id, distance, bearing);
+                    addRelativeWaypoint(waypoint.id, distance, bearing, newName ?? undefined, newTypeId);
                 }}
                 className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded"
             >

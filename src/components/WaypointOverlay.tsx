@@ -101,6 +101,11 @@ export function WaypointOverlay() {
                         event.stopPropagation();
                         if (!addPathMode) {
                             selectWaypoint(id);
+                            const waypoint = getWaypointById(id);
+                            if (waypoint) {
+                                const { lat, lng } = waypoint;
+                                map.setView([lat, lng], map.getZoom());
+                            }
                         } else {
                             if (segmentConnectionStarted) {
                                 endSegmentConnection(id);

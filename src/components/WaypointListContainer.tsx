@@ -4,16 +4,22 @@ import { useWaypointTypeContext } from "../context/WaypointTypeContext";
 import { renderMarker } from "../renderer/renderMarkers";
 import { useSettings } from "../settings/useSettings";
 import * as d3 from "d3";
+import { useMap } from "react-leaflet";
 
 export function WaypointListContainer() {
     const { waypoints, selectedId, selectWaypoint, deselectWaypoint } = useWaypointContext();
     const { getWaypointTypeById } = useWaypointTypeContext();
+    const map = useMap();
 
     const handleWaypointClick = (id: number) => {
         if (selectedId === id) {
             deselectWaypoint();
         } else {
             selectWaypoint(id);
+            const waypoint = waypoints.find((wp) => wp.id === id);
+            if (waypoint) {
+                map.flyTo([waypoint.lat, waypoint.lng], map.getZoom());
+            }
         }
     };
 

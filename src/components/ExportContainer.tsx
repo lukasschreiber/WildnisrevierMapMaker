@@ -84,7 +84,6 @@ export function ExportContainer() {
             if (typeof content === "string") {
                 try {
                     const data = JSON.parse(content);
-                    console.log(data);
                     if (data.waypointTypes) {
                         setWaypointTypes(data.waypointTypes);
                     }
