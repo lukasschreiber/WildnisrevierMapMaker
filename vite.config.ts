@@ -31,7 +31,7 @@ export default defineConfig({
         {
           action: '/',
           accept: {
-            'application/json': ['.json']
+            'application/json': ['.wmap']
           },
         }
       ],
