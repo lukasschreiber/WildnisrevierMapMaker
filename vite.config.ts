@@ -12,7 +12,16 @@ export default defineConfig({
       name: 'Map Maker Wildnisrevier',
       short_name: 'Map Maker',
       description: 'Create and manage waypoints on a map',
+      display: 'standalone',
       theme_color: '#ffffff',
+      screenshots: [
+        {
+          src: 'wide_screenshot.png',
+          form_factor: 'wide',
+          sizes: '1280x720',
+          type: 'image/png'
+        },
+      ],
       launch_handler: {
         client_mode: "navigate-existing"
       },
