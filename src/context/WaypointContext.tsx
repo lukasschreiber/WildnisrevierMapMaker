@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { calculateRelativeWaypoint } from "../renderer/relativeWaypoints";
+import { usePathContext } from "./PathContext";
+import { useShapeContext } from "./ShapeContext";
 
 // Type for the Waypoint
 export type Waypoint = {
@@ -55,6 +57,8 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
     const [newWaypointName, setNewWaypointName] = useState<string>("");
     const [newWaypointType, setNewWaypointType] = useState<number>(1);
     const [newWaypointGroup, setNewWaypointGroup] = useState<number | undefined>(undefined);
+    const { segments } = usePathContext();
+    const { shapes } = useShapeContext();
 
     const getNextId = () => {
         return waypoints.length > 0 ? Math.max(...waypoints.map((w) => w.id)) + 1 : 1;
@@ -108,7 +112,7 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
     const isDeletable = (id: number) => {
         const waypoint = getWaypointById(id);
         if (!waypoint) return false;
-        return !waypoints.some((wp) => wp.baseId === id);
+        return !waypoints.some((wp) => wp.baseId === id) && !segments.some((s) => s.from.waypointId === id || s.to.waypointId === id) && !shapes.some((s) => s.nodes.some((n) => n.waypointId === id));
     };
 
     const addRelativeWaypoint = (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => {

@@ -12,17 +12,17 @@ import { ShapeProvider } from "./context/ShapeContext.tsx";
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <SettingsProvider>
-            <WaypointProvider>
-                <WaypointGroupProvider>
-                    <ShapeProvider>
-                        <PathProvider>
+            <PathProvider>
+                <ShapeProvider>
+                    <WaypointProvider>
+                        <WaypointGroupProvider>
                             <WaypointTypeProvider>
                                 <App />
                             </WaypointTypeProvider>
-                        </PathProvider>
-                    </ShapeProvider>
-                </WaypointGroupProvider>
-            </WaypointProvider>
+                        </WaypointGroupProvider>
+                    </WaypointProvider>
+                </ShapeProvider>
+            </PathProvider>
         </SettingsProvider>
     </StrictMode>
 );
