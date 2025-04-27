@@ -83,7 +83,7 @@ export function WaypointOverlay() {
                     }
 
                     if (settings.showWaypointDistances) {
-                        renderLabel(g, (point.x + basePoint.x) / 2, (point.y + basePoint.y) / 2 - 5, `${dist.toFixed(2)} m`)
+                        renderLabel(g, (point.x + basePoint.x) / 2, (point.y + basePoint.y) / 2 - 5, `${dist.toFixed(2)} m`, true)
                     }
                 }
 

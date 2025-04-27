@@ -58,6 +58,10 @@ export function ExportContainer() {
         svgContent.setAttribute("version", "1.1");
         svgContent.setAttribute("id", "exported-svg");
         svgContent.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+        svgContent.querySelectorAll("[data-hidden-on-export]").forEach((el) => {
+            el.setAttribute("visibility", "hidden");
+        });
     
         // Clone the group element and append it to the new SVG
         const clonedGroup = svgContentGroup.cloneNode(true);

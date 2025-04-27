@@ -35,6 +35,9 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     function applyCommonAttrs<T extends SVGElement>(
         shape: d3.Selection<T, unknown, null, undefined>
     ): E {
+        if (type.hidden) {
+            shape.attr("data-hidden-on-export", "true");
+        }
 
         return shape
             .attr("transform", `translate(${point.x}, ${point.y})`)
@@ -43,6 +46,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
             .style("stroke", stroke)
             .style("stroke-width", isSelected ? outlineWidth : borderWidth)
             .style("cursor", "pointer") as unknown as E;
+            
     }
 
     switch (type.icon) {
@@ -103,7 +107,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                     L ${-armWidth / 2} ${-armWidth / 2}
                     Z
                 `;
-            return applyCommonAttrs(g.append("path").attr("d", crossPath));
+            return applyCommonAttrs(g.append("path").attr("d", crossPath).style("pointer-events", "all"));
 
         case "diamond":
             const diamondPath = [
