@@ -72,6 +72,11 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
     const p = d3.path();
 
     const m = controlPoints.length;
+    
+    if (controlPoints.length < 1) {
+        return;
+    }
+
     const start = controlPoints[1];
     p.moveTo(start.x, start.y);
 
