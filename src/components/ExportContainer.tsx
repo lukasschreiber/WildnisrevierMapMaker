@@ -3,11 +3,13 @@ import { usePathContext } from "../context/PathContext";
 import { useWaypointContext } from "../context/WaypointContext";
 import { useWaypointTypeContext } from "../context/WaypointTypeContext";
 import { useSettings } from "../settings/useSettings";
+import { useShapeContext } from "../context/ShapeContext";
 
 export function ExportContainer() {
     const { waypoints, setWaypoints } = useWaypointContext();
     const { waypointTypes, setWaypointTypes } = useWaypointTypeContext();
     const { segments, setSegments } = usePathContext();
+    const { shapes, setShapes } = useShapeContext();
     const { settings } = useSettings();
 
     const downloadFile = (content: string, fileName: string, mimeType: string) => {
@@ -27,6 +29,7 @@ export function ExportContainer() {
             waypoints,
             waypointTypes,
             segments,
+            shapes,
         };
 
         const json = JSON.stringify(data, null, 2);
@@ -40,17 +43,17 @@ export function ExportContainer() {
             alert("No SVG content found");
             return;
         }
-    
+
         // Get bounding box and calculate the position
         const bbox = svgContentGroup.getBBox();
         const svgWidth = bbox.width;
         const svgHeight = bbox.height;
         const svgX = bbox.x;
         const svgY = bbox.y;
-    
+
         // Create a new SVG element
         const svgContent = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    
+
         svgContent.setAttribute("width", `${svgWidth}`);
         svgContent.setAttribute("height", `${svgHeight}`);
         svgContent.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -65,7 +68,7 @@ export function ExportContainer() {
         const clonedGroup = svgContentGroup.cloneNode(true);
         svgContent.appendChild(clonedGroup);
 
-        const kindsToHide = []
+        const kindsToHide = [];
         if (settings.hideArrowsInExport) {
             kindsToHide.push("arrow");
         }
@@ -87,17 +90,22 @@ export function ExportContainer() {
                 el.setAttribute("visibility", "hidden");
             });
         }
-        
+
         // Use XMLSerializer to serialize the SVG content
         const serializer = new XMLSerializer();
         const svgString = serializer.serializeToString(svgContent);
-    
+
         // Download the file
         downloadFile(svgString, `export-${new Date().toISOString()}.svg`, "image/svg+xml");
-    
+
         // Remove the temporary SVG
         document.getElementById("exported-svg")?.remove();
-    }, [settings.hideArrowsInExport, settings.hideDistancesInExport, settings.hideHiddenWaypointsInExport, settings.hideOriginalPathsInExport]);
+    }, [
+        settings.hideArrowsInExport,
+        settings.hideDistancesInExport,
+        settings.hideHiddenWaypointsInExport,
+        settings.hideOriginalPathsInExport,
+    ]);
 
     const importJson = useCallback((file: File) => {
         if (!confirm("Are you sure you want to import this file? This will overwrite your current data.")) {
@@ -118,6 +126,9 @@ export function ExportContainer() {
                     }
                     if (data.segments) {
                         setSegments(data.segments);
+                    }
+                    if (data.shapes) {
+                        setShapes(data.shapes);
                     }
                 } catch (error) {
                     alert("Error parsing JSON file");
