@@ -44,7 +44,7 @@ export default function App() {
                 <WaypointOverlay />
                 <LocationMarker />
                 <Menu showSidePanel={showSidePanel} setShowSidePanel={setShowSidePanel} />
-                {activeTab && showSidePanel && (
+                {showSidePanel && (
                     <div
                         className="absolute top-0 right-0 p-2 text-white bg-black/50 z-[100000] text-xs flex flex-col gap-3 h-full"
                         ref={containerRef}
