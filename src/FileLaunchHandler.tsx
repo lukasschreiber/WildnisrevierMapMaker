@@ -11,9 +11,10 @@ export function FileLaunchHandler() {
     useEffect(() => {
         console.log("FileLaunchHandler mounted");
         if ("launchQueue" in window) {
-            (window as any).launchQueue.setConsumer(async (launchParams: any) => {
-                if (!launchParams.files.length) return;
+            console.log("has launchQueue");
+            (window.launchQueue as any).setConsumer(async (launchParams: any) => {
                 console.log("FileLaunchHandler consumer called");
+                if (!launchParams.files.length) return;
                 console.log("launchParams", launchParams);
                 
                 for (const fileHandle of launchParams.files) {
