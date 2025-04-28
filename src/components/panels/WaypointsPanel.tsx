@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useWaypointContext, Waypoint } from "../context/WaypointContext";
-import { useWaypointTypeContext } from "../context/WaypointTypeContext";
-import { renderMarker } from "../renderer/renderMarkers";
-import { useSettings } from "../settings/useSettings";
 import * as d3 from "d3";
 import { useMap } from "react-leaflet";
-import { useWaypointGroupContext } from "../context/WaypointGroupContext";
-import useLocalStorage from "../hooks/useLocalStorage";
+import { useWaypointContext, Waypoint } from "../../context/WaypointContext";
+import { useWaypointTypeContext } from "../../context/WaypointTypeContext";
+import { useWaypointGroupContext } from "../../context/WaypointGroupContext";
+import useLocalStorage from "../../hooks/useLocalStorage";
+import { useSettings } from "../../settings/useSettings";
+import { renderMarker } from "../../renderer/renderMarkers";
+import { Select } from "../inputs/Select";
 
 type GroupByOption = "type" | "group";
 type SortByOption = "id" | "name" | "type" | "group";
 type SortDirection = "asc" | "desc";
 
-export function WaypointListContainer() {
+export function WaypointsPanel() {
     const { waypoints, selectedId, selectWaypoint, deselectWaypoint } = useWaypointContext();
     const { getWaypointTypeById } = useWaypointTypeContext();
     const { getWaypointGroupById } = useWaypointGroupContext();
@@ -94,38 +95,38 @@ export function WaypointListContainer() {
             <div className="flex flex-row gap-4 mb-4">
                 <div>
                     <label className="block text-xs mb-1">Group By</label>
-                    <select
+                    <Select
                         value={groupBy}
-                        onChange={(e) => setGroupBy(e.target.value as GroupByOption)}
-                        className="w-full bg-black/50 p-1 rounded-md"
-                    >
-                        <option value="type">Type</option>
-                        <option value="group">Group</option>
-                    </select>
+                        onChange={(value) => setGroupBy(value as GroupByOption)}
+                        options={[
+                            { label: "Type", value: "type" },
+                            { label: "Group", value: "group" },
+                        ]}
+                    />
                 </div>
                 <div>
                     <label className="block text-xs mb-1">Sort By</label>
-                    <select
+                    <Select
                         value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortByOption)}
-                        className="w-full bg-black/50 p-1 rounded-md"
-                    >
-                        <option value="id">ID</option>
-                        <option value="name">Name</option>
-                        <option value="type">Type</option>
-                        <option value="group">Group</option>
-                    </select>
+                        onChange={(value) => setSortBy(value as SortByOption)}
+                        options={[
+                            { label: "ID", value: "id" },
+                            { label: "Name", value: "name" },
+                            { label: "Type", value: "type" },
+                            { label: "Group", value: "group" },
+                        ]}
+                    />
                 </div>
                 <div>
                     <label className="block text-xs mb-1">Direction</label>
-                    <select
+                    <Select
                         value={sortDirection}
-                        onChange={(e) => setSortDirection(e.target.value as SortDirection)}
-                        className="w-full bg-black/50 p-1 rounded-md"
-                    >
-                        <option value="asc">Ascending</option>
-                        <option value="desc">Descending</option>
-                    </select>
+                        options={[
+                            { label: "Ascending", value: "asc" },
+                            { label: "Descending", value: "desc" },
+                        ]}
+                        onChange={(value) => setSortDirection(value as SortDirection)}
+                    />
                 </div>
             </div>
             {waypointsInNeedOfClassification.length > 0 && (

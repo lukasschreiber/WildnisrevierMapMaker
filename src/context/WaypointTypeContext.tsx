@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useCallback, useContext } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { useWaypointContext } from "./WaypointContext";
 
@@ -32,27 +32,27 @@ export function WaypointTypeProvider({ children }: React.PropsWithChildren) {
         { id: 2, name: "Custom", icon: "square", color: "#00FF00", hidden: false, hasTwoColors: false },
     ]);
 
-    const addWaypointType = (type: WaypointType) => {
+    const addWaypointType = useCallback((type: WaypointType) => {
         setWaypointTypes((prev) => [...prev, type]);
-    };
+    }, []);
 
-    const removeWaypointType = (id: number) => {
+    const removeWaypointType = useCallback((id: number) => {
         if (confirm("Are you sure you want to delete this waypoint type?")) {
             setWaypointTypes((prev) => prev.filter((type) => type.id !== id));
         }
-    };
+    }, []);
 
-    const updateWaypointType = (id: number, type: Partial<WaypointType>) => {
+    const updateWaypointType = useCallback((id: number, type: Partial<WaypointType>) => {
         setWaypointTypes((prev) => prev.map((t) => (t.id === id ? { ...t, ...type } : t)));
-    };
+    }, []);
 
-    const isDeletable = (id: number) => {
+    const isDeletable = useCallback((id: number) => {
         return !waypoints.some((waypoint) => waypoint.typeId === id);
-    };
+    }, [waypoints]);
 
-    const getWaypointTypeById = (id: number) => {
+    const getWaypointTypeById = useCallback((id: number) => {
         return waypointTypes.find((type) => type.id === id);
-    };
+    }, [waypointTypes]);
 
     return (
         <WaypointTypeContext.Provider

@@ -72,42 +72,42 @@ export function WaypointProvider({ children }: React.PropsWithChildren) {
         setWaypoints((prev) => [...prev, newWaypoint]);
     }, [newWaypointName, newWaypointType, newWaypointGroup, waypoints]);
 
-    const selectWaypoint = (id: number) => {
+    const selectWaypoint = useCallback((id: number) => {
         setSelectedId(id);
-    };
+    }, []);
 
-    const deselectWaypoint = () => {
+    const deselectWaypoint = useCallback(() => {
         setSelectedId(null);
-    };
+    }, []);
 
-    const deleteWaypoint = (id: number) => {
+    const deleteWaypoint = useCallback((id: number) => {
         setWaypoints((prev) => prev.filter((wp) => wp.id !== id));
         setSelectedId(null); // Clear selection after deletion
-    };
+    }, [setWaypoints]);
 
-    const toggleAddMode = () => {
+    const toggleAddMode = useCallback(() => {
         setAddMode((prev) => !prev);
-    };
+    }, [setAddMode]);
 
-    const getWaypointById = (id: number): Waypoint | undefined => {
+    const getWaypointById = useCallback((id: number): Waypoint | undefined => {
         return waypoints.find((wp) => wp.id === id);
-    };
+    }, [waypoints]);
 
-    const updateWaypointPosition = (id: number, lat: number, lng: number) => {
+    const updateWaypointPosition = useCallback((id: number, lat: number, lng: number) => {
         setWaypoints((prev) => prev.map((wp) => (wp.id === id ? { ...wp, lat, lng } : wp)));
-    };
+    }, [setWaypoints]);
 
-    const updateWaypointName = (id: number, name: string) => {
+    const updateWaypointName = useCallback((id: number, name: string) => {
         setWaypoints((prev) => prev.map((wp) => (wp.id === id ? { ...wp, name } : wp)));
-    };
+    }, [setWaypoints]);
 
-    const updateWaypointType = (id: number, typeId: number) => {
+    const updateWaypointType = useCallback((id: number, typeId: number) => {
         setWaypoints((prev) => prev.map((wp) => (wp.id === id ? { ...wp, typeId } : wp)));
-    };
+    }, [setWaypoints]);
 
-    const updateWaypointGroup = (id: number, groupId?: number) => {
+    const updateWaypointGroup = useCallback((id: number, groupId?: number) => {
         setWaypoints((prev) => prev.map((wp) => (wp.id === id ? { ...wp, groupId } : wp)));
-    };
+    }, [setWaypoints]);
 
     const isDeletable = (id: number) => {
         const waypoint = getWaypointById(id);

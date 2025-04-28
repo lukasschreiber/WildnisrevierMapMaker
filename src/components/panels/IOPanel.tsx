@@ -1,11 +1,11 @@
 import { useCallback } from "react";
-import { usePathContext } from "../context/PathContext";
-import { useWaypointContext } from "../context/WaypointContext";
-import { useWaypointTypeContext } from "../context/WaypointTypeContext";
-import { useSettings } from "../settings/useSettings";
-import { useShapeContext } from "../context/ShapeContext";
+import { useWaypointContext } from "../../context/WaypointContext";
+import { useWaypointTypeContext } from "../../context/WaypointTypeContext";
+import { usePathContext } from "../../context/PathContext";
+import { useShapeContext } from "../../context/ShapeContext";
+import { useSettings } from "../../settings/useSettings";
 
-export function ExportContainer() {
+export function IOPanel() {
     const { waypoints, setWaypoints } = useWaypointContext();
     const { waypointTypes, setWaypointTypes } = useWaypointTypeContext();
     const { segments, setSegments } = usePathContext();
@@ -158,7 +158,7 @@ export function ExportContainer() {
                         importJson(file);
                     }
                 }}
-                className="bg-black/50 p-1 rounded-md"
+                className="bg-black/50 p-1 rounded-md h-20 border-white border-1 border-dashed cursor-pointer hover:bg-black/30 transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-black/50 disabled:bg-black/50 disabled:border-gray-500 disabled:text-gray-500"
             />
             <button
                 onClick={() => {

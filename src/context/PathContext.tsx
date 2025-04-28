@@ -1,9 +1,9 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 
 export type PathNode = {
     waypointId: number;
-}
+};
 
 export type PathSegment = {
     id: number;
@@ -41,46 +41,58 @@ export function PathProvider({ children }: React.PropsWithChildren) {
         return segments.length > 0 ? Math.max(...segments.map((p) => p.id)) + 1 : 1;
     };
 
-    const addSegment = (from: PathNode, to: PathNode) => {
-        const newSegment: PathSegment = { id: getNextId(), from, to };
-        setSegments((prev) => [...prev, newSegment]);
-    };
+    const addSegment = useCallback(
+        (from: PathNode, to: PathNode) => {
+            const newSegment: PathSegment = { id: getNextId(), from, to };
+            setSegments((prev) => [...prev, newSegment]);
+        },
+        [segments]
+    );
 
-    const selectSegment = (id: number) => {
+    const selectSegment = useCallback((id: number) => {
         setSelectedId(id);
-    };
+    }, []);
 
-    const deselectSegment = () => {
+    const deselectSegment = useCallback(() => {
         setSelectedId(null);
-    };
+    }, []);
 
-    const deleteSegment = (id: number) => {
-        setSegments((prev) => prev.filter((segment) => segment.id !== id));
-        if (selectedId === id) {
-            deselectSegment();
-        }
-    };
-
-    const getSegmentById = (id: number) => {
-        return segments.find((segment) => segment.id === id);
-    };
-
-    const startSegmentConnection = (waypointId: number) => {
-        setConnectionStartedWaypointId(waypointId);
-    };
-
-    const endSegmentConnection = (waypointId: number) => {
-        if (connectionStartedWaypointId !== null) {
-            if (connectionStartedWaypointId !== waypointId) {
-                addSegment({ waypointId: connectionStartedWaypointId }, { waypointId });
+    const deleteSegment = useCallback(
+        (id: number) => {
+            setSegments((prev) => prev.filter((segment) => segment.id !== id));
+            if (selectedId === id) {
+                deselectSegment();
             }
-            setConnectionStartedWaypointId(null);
-        }
-    };
+        },
+        [selectedId, deselectSegment, setSegments]
+    );
 
-    const cancelSegmentConnection = () => {
+    const getSegmentById = useCallback(
+        (id: number) => {
+            return segments.find((segment) => segment.id === id);
+        },
+        [segments]
+    );
+
+    const startSegmentConnection = useCallback((waypointId: number) => {
+        setConnectionStartedWaypointId(waypointId);
+    }, []);
+
+    const endSegmentConnection = useCallback(
+        (waypointId: number) => {
+            if (connectionStartedWaypointId !== null) {
+                if (connectionStartedWaypointId !== waypointId) {
+                    addSegment({ waypointId: connectionStartedWaypointId }, { waypointId });
+                }
+                setConnectionStartedWaypointId(null);
+            }
+        },
+        [connectionStartedWaypointId, addSegment]
+    );
+
+    const cancelSegmentConnection = useCallback(() => {
         setConnectionStartedWaypointId(null);
-    };
+    }, []);
 
     return (
         <PathContext.Provider

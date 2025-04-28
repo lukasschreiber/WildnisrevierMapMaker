@@ -1,6 +1,6 @@
-import { usePathContext } from "../context/PathContext";
+import { usePathContext } from "../../context/PathContext";
 
-export function PathContainer() {
+export function PathsPanel() {
     const { segments } = usePathContext();
     return (
         <div>

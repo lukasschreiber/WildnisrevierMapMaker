@@ -1,6 +1,8 @@
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../../settings/useSettings";
+import { Checkbox } from "../inputs/Checkbox";
+import { ColorInput } from "../inputs/ColorInput";
 
-export function SettingsContainer() {
+export function SettingsPanel() {
     const { settings, set, layout } = useSettings();
     return (
         <div className="flex flex-col gap-2">
@@ -19,18 +21,14 @@ export function SettingsContainer() {
 
                         if (setting.type === "checkbox") {
                             return (
-                                <div key={key} className="flex items-center gap-2">
-                                    <input
-                                        id={key}
-                                        type="checkbox"
-                                        checked={settings[key] as boolean}
-                                        onChange={(e) => set(key, e.target.checked)}
-                                    />
-                                    <label className="flex flex-col" htmlFor={key}>
-                                        <span>{setting.label}</span>
-                                        {setting.helpText && <span className="text-black/80">{setting.helpText}</span>}
-                                    </label>
-                                </div>
+                                <Checkbox
+                                    key={key}
+                                    id={key}
+                                    label={setting.label}
+                                    value={settings[key] as boolean}
+                                    onChange={(value) => set(key, value)}
+                                    className="flex flex-col"
+                                />
                             );
                         } else if (setting.type === "range") {
                             return (
@@ -57,10 +55,9 @@ export function SettingsContainer() {
                             return (
                                 <div key={key} className="flex flex-col">
                                     <label>{setting.label}</label>
-                                    <input
-                                        type="color"
+                                    <ColorInput
                                         value={settings[key] as string}
-                                        onChange={(e) => set(key, e.target.value)}
+                                        onChange={(value) => set(key, value)}
                                     />
                                     <span className="text-black/80">{setting.helpText}</span>
                                 </div>

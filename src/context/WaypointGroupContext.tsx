@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useCallback, useContext } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { useWaypointContext } from "./WaypointContext";
 
@@ -6,7 +6,7 @@ export type WaypointGroup = {
     id: number;
     name: string;
     hidden: boolean;
-}
+};
 
 export type WaypointGroupContextType = {
     waypointGroups: WaypointGroup[];
@@ -28,23 +28,26 @@ export function WaypointGroupProvider({ children }: React.PropsWithChildren) {
         setWaypointGroups((prev) => [...prev, group]);
     };
 
-    const removeWaypointGroup = (id: number) => {
-        if (confirm("Are you sure you want to delete this waypoint group?")) {
-            setWaypointGroups((prev) => prev.filter((group) => group.id !== id));
-        }
-    };
+    const removeWaypointGroup = useCallback(
+        (id: number) => {
+            if (confirm("Are you sure you want to delete this waypoint group?")) {
+                setWaypointGroups((prev) => prev.filter((group) => group.id !== id));
+            }
+        },
+        [waypointGroups]
+    );
 
-    const updateWaypointGroup = (id: number, group: Partial<WaypointGroup>) => {
+    const updateWaypointGroup = useCallback((id: number, group: Partial<WaypointGroup>) => {
         setWaypointGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...group } : g)));
-    };
+    }, [waypointGroups]);
 
-    const isDeletable = (id: number) => {
+    const isDeletable = useCallback((id: number) => {
         return waypoints.every((waypoint) => waypoint.groupId !== id);
-    };
+    }, [waypoints]);
 
-    const getWaypointGroupById = (id: number) => {
+    const getWaypointGroupById = useCallback((id: number) => {
         return waypointGroups.find((group) => group.id === id);
-    };
+    }, [waypointGroups]);
 
     return (
         <WaypointGroupContext.Provider

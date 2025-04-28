@@ -15,25 +15,11 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     borderColor: string,
     showBorder: boolean
 ): E {
-    const isHidden = group?.hidden || type.hidden;
     const r = radius;
-    const fillTop = type.color;
-    const fillBottom = type.hasTwoColors ? type.color2 || type.color : type.color;
+    const isHidden = group?.hidden || type.hidden;
+
     const stroke = showBorder ? borderColor : "none";
-    const opacity = isHidden ? 0.1 : isSelected ? 0.5 : 1;
     const outlineWidth = 2;
-
-    const gradientId = `halfGradient-${type.id}`;
-
-    if (type.color2) {
-        const gradient = g.append("defs")
-            .append("linearGradient")
-            .attr("id", gradientId)
-            .attr("x1", "0%").attr("x2", "0%").attr("y1", "100%").attr("y2", "0%");
-        gradient.append("stop").attr("offset", "50%").style("stop-color", fillBottom);
-        gradient.append("stop").attr("offset", "50%").style("stop-color", fillTop);
-
-    }
 
     function applyCommonAttrs<T extends SVGElement>(
         shape: d3.Selection<T, unknown, null, undefined>
@@ -42,10 +28,11 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
             shape.attr("data-kind", "hidden-marker");
         }
 
+        applyMarkerFill(g, shape, type.color, type.color2, type.hasTwoColors);
+        applyMarkerOpacity(shape, isSelected, group?.hidden || false, type.hidden);
+
         return shape
             .attr("transform", `translate(${point.x}, ${point.y})`)
-            .style("fill", type.color2 ? `url(#${gradientId})` : fillTop)
-            .style("opacity", opacity)
             .style("stroke", stroke)
             .style("stroke-width", isSelected ? outlineWidth : borderWidth)
             .style("cursor", "pointer") as unknown as E;
@@ -158,4 +145,29 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 return g;
             }
     }
+}
+
+export function applyMarkerFill<T extends SVGElement | d3.BaseType>(g: d3.Selection<SVGGElement, unknown, null, undefined>, waypoint: d3.Selection<T, unknown, null, undefined>, color: string, color2?: string, hasTwoColors?: boolean) {
+    const fillTop = color;
+    const fillBottom = hasTwoColors ? color2 || color : color;
+    const gradientId = `bg-${color.replace("#", "")}-${color2?.replace("#", "") || color.replace("#", "")}`;
+
+    g.select(`#${gradientId}`).remove(); // Remove existing gradient
+
+    if (color2) {
+        const gradient = g.append("defs")
+            .append("linearGradient")
+            .attr("id", gradientId)
+            .attr("x1", "0%").attr("x2", "0%").attr("y1", "100%").attr("y2", "0%");
+        gradient.append("stop").attr("offset", "50%").style("stop-color", fillBottom);
+        gradient.append("stop").attr("offset", "50%").style("stop-color", fillTop);
+    }
+
+    waypoint.attr("fill", color2 ? `url(#${gradientId})` : fillTop)
+}
+
+export function applyMarkerOpacity<T extends SVGElement | d3.BaseType>(waypoint: d3.Selection<T, unknown, null, undefined>, isSelected: boolean, groupHidden: boolean, typeHidden: boolean) {
+    const isHidden = groupHidden || typeHidden;
+    const opacity = isHidden ? 0.1 : isSelected ? 0.5 : 1;
+    waypoint.style("opacity", opacity);
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 
 export type ShapeNode = {
@@ -45,30 +45,36 @@ export function ShapeProvider({ children }: React.PropsWithChildren) {
     );
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
-    const getNextId = () => {
+    const getNextId = useCallback(() => {
         return shapes.length > 0 ? Math.max(...shapes.map((s) => s.id)) + 1 : 1;
-    };
+    }, [shapes]);
 
-    const selectShape = (id: number) => {
+    const selectShape = useCallback((id: number) => {
         setSelectedId(id);
-    };
+    }, []);
 
-    const deselectShape = () => {
+    const deselectShape = useCallback(() => {
         setSelectedId(null);
-    };
+    }, []);
 
-    const removeShape = (id: number) => {
-        setShapes((prev) => prev.filter((shape) => shape.id !== id));
-        if (selectedId === id) {
-            deselectShape();
-        }
-    };
+    const removeShape = useCallback(
+        (id: number) => {
+            setShapes((prev) => prev.filter((shape) => shape.id !== id));
+            if (selectedId === id) {
+                deselectShape();
+            }
+        },
+        [selectedId, deselectShape, setShapes]
+    );
 
-    const updateShape = (id: number, shape: Partial<Shape>) => {
-        setShapes((prev) => prev.map((s) => (s.id === id ? { ...s, ...shape } : s)));
-    };
+    const updateShape = useCallback(
+        (id: number, shape: Partial<Shape>) => {
+            setShapes((prev) => prev.map((s) => (s.id === id ? { ...s, ...shape } : s)));
+        },
+        [setShapes]
+    );
 
-    const dedupeNodes = (nodes: ShapeNode[]) => {
+    const dedupeNodes = useCallback((nodes: ShapeNode[]) => {
         const uniqueNodes = new Map<number, ShapeNode>();
         nodes.forEach((node) => {
             if (!uniqueNodes.has(node.waypointId)) {
@@ -76,34 +82,50 @@ export function ShapeProvider({ children }: React.PropsWithChildren) {
             }
         });
         return Array.from(uniqueNodes.values());
-    }
+    }, []);
 
-    const addNode = (shapeId: number, waypointId: number) => {
-        setShapes((prev) => [
-            ...prev.map((shape) =>
-                shape.id === shapeId ? { ...shape, nodes: dedupeNodes([...shape.nodes, { waypointId }]) } : shape
-            ),
-        ]);
-    };
+    const addNode = useCallback(
+        (shapeId: number, waypointId: number) => {
+            setShapes((prev) => [
+                ...prev.map((shape) =>
+                    shape.id === shapeId ? { ...shape, nodes: dedupeNodes([...shape.nodes, { waypointId }]) } : shape
+                ),
+            ]);
+        },
+        [dedupeNodes, setShapes]
+    );
 
-    const removeNode = (shapeId: number, waypointId: number) => {
-        setShapes((prev) => [
-            ...prev.map((shape) =>
-                shape.id === shapeId
-                    ? { ...shape, nodes: shape.nodes.filter((node) => node.waypointId !== waypointId) }
-                    : shape
-            ),
-        ]);
-    };
+    const removeNode = useCallback(
+        (shapeId: number, waypointId: number) => {
+            if (addModeReferenceShapeId === shapeId) {
+                setAddModeReferenceShapeId(null);
+                setAddMode(false);
+            }
+            setShapes((prev) => [
+                ...prev.map((shape) =>
+                    shape.id === shapeId
+                        ? { ...shape, nodes: shape.nodes.filter((node) => node.waypointId !== waypointId) }
+                        : shape
+                ),
+            ]);
+        },
+        [addModeReferenceShapeId, setAddMode, setAddModeReferenceShapeId, setShapes]
+    );
 
-    const getShapeById = (id: number): Shape | undefined => {
-        return shapes.find((shape) => shape.id === id);
-    };
+    const getShapeById = useCallback(
+        (id: number): Shape | undefined => {
+            return shapes.find((shape) => shape.id === id);
+        },
+        [shapes]
+    );
 
-    const addShape = (name: string, color: string, texture?: string, shapeType: "smooth" | "straight" = "smooth") => {
-        const newShape: Shape = { id: getNextId(), nodes: [], name, color, texture, shapeType };
-        setShapes((prev) => [...prev, newShape]);
-    };
+    const addShape = useCallback(
+        (name: string, color: string, texture?: string, shapeType: "smooth" | "straight" = "smooth") => {
+            const newShape: Shape = { id: getNextId(), nodes: [], name, color, texture, shapeType };
+            setShapes((prev) => [...prev, newShape]);
+        },
+        [getNextId, setShapes]
+    );
 
     return (
         <ShapeContext.Provider
