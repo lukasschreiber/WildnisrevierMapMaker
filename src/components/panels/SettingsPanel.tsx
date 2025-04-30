@@ -1,9 +1,11 @@
-import { useSettings } from "../../settings/useSettings";
+import { useSettingsStore } from "../../stores/useSettings";
 import { Checkbox } from "../inputs/Checkbox";
 import { ColorInput } from "../inputs/ColorInput";
 
 export function SettingsPanel() {
-    const { settings, set, layout } = useSettings();
+    const settings = useSettingsStore((state) => state.settings);
+    const layout = useSettingsStore((state) => state.layout);
+    const set = useSettingsStore((state) => state.set);
     return (
         <div className="flex flex-col gap-2">
             {layout.map((group) => (

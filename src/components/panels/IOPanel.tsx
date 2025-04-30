@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import { useSettings } from "../../settings/useSettings";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { usePathStore } from "../../stores/usePaths";
 import { useShapeStore } from "../../stores/useShapes";
+import { useSettingsStore } from "../../stores/useSettings";
 
 export function IOPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
@@ -15,7 +15,10 @@ export function IOPanel() {
     const shapes = useShapeStore((state) => state.shapes);
     const setShapes = useShapeStore((state) => state.setShapes);
     // TODO: persist groups
-    const { settings } = useSettings();
+    const hideArrowsInExport = useSettingsStore((state) => state.settings.hideArrowsInExport);
+    const hideDistancesInExport = useSettingsStore((state) => state.settings.hideDistancesInExport);
+    const hideOriginalPathsInExport = useSettingsStore((state) => state.settings.hideOriginalPathsInExport);
+    const hideHiddenWaypointsInExport = useSettingsStore((state) => state.settings.hideHiddenWaypointsInExport);
 
     const downloadFile = (content: string, fileName: string, mimeType: string) => {
         const blob = new Blob([content], { type: mimeType });
@@ -74,19 +77,19 @@ export function IOPanel() {
         svgContent.appendChild(clonedGroup);
 
         const kindsToHide = [];
-        if (settings.hideArrowsInExport) {
+        if (hideArrowsInExport) {
             kindsToHide.push("arrow");
         }
 
-        if (settings.hideDistancesInExport) {
+        if (hideDistancesInExport) {
             kindsToHide.push("distance-label");
         }
 
-        if (settings.hideOriginalPathsInExport) {
+        if (hideOriginalPathsInExport) {
             kindsToHide.push("original-path");
         }
 
-        if (settings.hideHiddenWaypointsInExport) {
+        if (hideHiddenWaypointsInExport) {
             kindsToHide.push("hidden-marker");
         }
 
@@ -106,10 +109,10 @@ export function IOPanel() {
         // Remove the temporary SVG
         document.getElementById("exported-svg")?.remove();
     }, [
-        settings.hideArrowsInExport,
-        settings.hideDistancesInExport,
-        settings.hideHiddenWaypointsInExport,
-        settings.hideOriginalPathsInExport,
+        hideArrowsInExport,
+        hideDistancesInExport,
+        hideHiddenWaypointsInExport,
+        hideOriginalPathsInExport,
     ]);
 
     const importJson = useCallback((file: File) => {

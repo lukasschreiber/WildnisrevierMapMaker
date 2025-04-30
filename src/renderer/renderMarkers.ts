@@ -1,6 +1,6 @@
-import { WaypointGroup } from "../context/WaypointGroupContext";
-import { WaypointType } from "../context/WaypointTypeContext";
 import * as d3 from "d3";
+import { WaypointGroup } from "../stores/useGroups";
+import { WaypointType } from "../stores/useWaypointTypes";
 
 const icons = import.meta.glob('../assets/*.svg', { eager: true, query: '?raw', import: "default" }) as Record<string, string>;
 

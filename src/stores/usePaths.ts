@@ -17,6 +17,7 @@ interface PathState {
   addMode: boolean;
   selectedId: number | null;
   connectionStartedWaypointId: number | null;
+  segmentConnectionStarted: boolean;
 
   // Actions
   setAddMode: (addMode: boolean) => void;
@@ -38,6 +39,7 @@ export const usePathStore = create<PathState>()(
       addMode: false,
       selectedId: null,
       connectionStartedWaypointId: null,
+      segmentConnectionStarted: false,
 
       setAddMode: (addMode) => set({ addMode }),
 
@@ -63,7 +65,7 @@ export const usePathStore = create<PathState>()(
         })),
 
       startSegmentConnection: (waypointId) => {
-        set({ connectionStartedWaypointId: waypointId });
+        set({ connectionStartedWaypointId: waypointId, segmentConnectionStarted: true });
       },
 
       endSegmentConnection: (waypointId) => {
@@ -71,10 +73,10 @@ export const usePathStore = create<PathState>()(
         if (fromId !== null && fromId !== waypointId) {
           get().addSegment({ waypointId: fromId }, { waypointId });
         }
-        set({ connectionStartedWaypointId: null });
+        set({ connectionStartedWaypointId: null, segmentConnectionStarted: false });
       },
 
-      cancelSegmentConnection: () => set({ connectionStartedWaypointId: null }),
+      cancelSegmentConnection: () => set({ connectionStartedWaypointId: null, segmentConnectionStarted: false }),
     }),
     {
       name: getLocalStorageKey("paths"),

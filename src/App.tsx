@@ -5,8 +5,10 @@ import { Menu } from "./components/Menu";
 import { LocationMarker } from "./components/LocationMarker";
 import { FileLaunchHandler } from "./FileLaunchHandler";
 import { SidePanel } from "./components/SidePanel";
-import { LayerProvider } from "./context/LayerContext";
 import { WaypointLayer } from "./renderer/layers/WaypointLayer";
+import { LayerProvider } from "./context/LayerContext";
+import { MapEventManager } from "./components/MapEventManager";
+import { WaypointArrowLayer } from "./renderer/layers/WaypointArrowLayer";
 
 export default function App() {
     const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
@@ -27,15 +29,17 @@ export default function App() {
                         maxZoom={22}
                         maxNativeZoom={18}
                     />
-                    <MapPersister setView={setView} />
-                    <ScaleControl position="bottomleft" imperial={false} />
                     {/* <WaypointOverlay /> */}
                     {/* <SegmentLayer /> */}
                     <WaypointLayer />
+                    <WaypointArrowLayer />
                     <LocationMarker />
-                    <Menu showSidePanel={showSidePanel} setShowSidePanel={setShowSidePanel} />
-                    {showSidePanel && <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} />}
                 </LayerProvider>
+                <MapEventManager />
+                <ScaleControl position="bottomleft" imperial={false} />
+                <MapPersister setView={setView} />
+                <Menu showSidePanel={showSidePanel} setShowSidePanel={setShowSidePanel} />
+                {showSidePanel && <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} />}
             </MapContainer>
         </>
     );

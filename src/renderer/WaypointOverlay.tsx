@@ -103,65 +103,6 @@ export function WaypointOverlay() {
         map.on("zoomend moveend", draw);
         draw();
 
-        const onMapClick = (e: L.LeafletMouseEvent) => {
-            if ((e.originalEvent.target as HTMLElement)?.closest("#menu")) return; // Ignore clicks on the menu
-            if (addMode && selectedId === null) {
-                addWaypoint(e.latlng.lat, e.latlng.lng);
-            } else if (addPathMode) {
-                cancelSegmentConnection();
-            } else {
-                deselectWaypoint();
-            }
-        };
-
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (selectedId === null) return;
-
-            const step = 0.000001;
-
-            // Update waypoint position with arrow keys
-            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                for (const wp of waypoints) {
-                    if (wp.id !== selectedId) continue;
-                    let { lat, lng } = wp;
-
-                    switch (e.key) {
-                        case "ArrowUp":
-                            lat += step;
-                            break;
-                        case "ArrowDown":
-                            lat -= step;
-                            break;
-                        case "ArrowLeft":
-                            lng -= step;
-                            break;
-                        case "ArrowRight":
-                            lng += step;
-                            break;
-                        default:
-                            return wp;
-                    }
-
-                    updateWaypointPosition(wp.id, lat, lng); // Update the waypoint in the context
-                    break; // Exit the loop after updating the selected waypoint
-                }
-            }
-
-            // Delete selected waypoint on "Delete" key press
-            if (e.key === "Delete" && selectedId !== null) {
-                if (!isDeletable(selectedId)) return;
-                const confirmed = window.confirm("Are you sure you want to delete this waypoint?");
-                if (!confirmed) return;
-                segments.forEach((segment) => {
-                    if (segment.from.waypointId === selectedId || segment.to.waypointId === selectedId) {
-                        deleteSegment(segment.id);
-                    }
-                });
-                deleteWaypoint(selectedId); // Delete the waypoint from the context
-                deselectWaypoint();
-            }
-        };
-
         let pathSegmentPreview = g
             .append("line")
             .attr("x1", 0)
@@ -194,14 +135,10 @@ export function WaypointOverlay() {
                 .attr("y2", toPoint.y);
         };
 
-        map.on("click", onMapClick);
-        window.addEventListener("keydown", onKeyDown);
         container.node()!.addEventListener("mousemove", onMouseMove);
 
         return () => {
             map.off("zoomend moveend", draw);
-            map.off("click", onMapClick);
-            window.removeEventListener("keydown", onKeyDown);
             container.node()!.removeEventListener("mousemove", onMouseMove);
         };
     }, [

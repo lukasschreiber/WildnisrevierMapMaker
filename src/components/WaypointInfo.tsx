@@ -8,7 +8,6 @@ import { usePathStore } from "../stores/usePaths";
 import { useWaypointGroupStore } from "../stores/useGroups";
 
 export function WaypointInfo(props: { id: number }) {
-    const getWaypointById = useWaypointStore((state) => state.getWaypointById);
     const addRelativeWaypoint = useWaypointStore((state) => state.addRelativeWaypoint);
     const deleteWaypoint = useWaypointStore((state) => state.deleteWaypoint);
     const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
@@ -28,7 +27,9 @@ export function WaypointInfo(props: { id: number }) {
     const [bearing, setBearing] = useState(0);
     const [newTypeId, setNewTypeId] = useState(0);
     const [newName, setNewName] = useState<string | null>(null);
-    const waypoint = useMemo(() => getWaypointById(props.id), [props.id, getWaypointById]);
+    const waypoint = useWaypointStore(
+        (state) => state.waypoints.find((w) => w.id === props.id)
+      );
 
     if (!waypoint) {
         return null;

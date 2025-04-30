@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { useMap } from "react-leaflet";
 import useLocalStorage from "../../hooks/useLocalStorage";
-import { useSettings } from "../../settings/useSettings";
 import { renderMarker } from "../../renderer/renderMarkers";
 import { Select } from "../inputs/Select";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { useWaypointGroupStore } from "../../stores/useGroups";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
+import { useSettingsStore } from "../../stores/useSettings";
 
 type GroupByOption = "type" | "group";
 type SortByOption = "id" | "name" | "type" | "group";
@@ -202,7 +202,9 @@ function WaypointListItem({
     const getWaypointGroupById = useWaypointGroupStore((state) => state.getWaypointGroupById);
     const waypointGroup = getWaypointGroupById(waypoint.groupId ?? -1);
     const containerRef = useRef<SVGSVGElement>(null);
-    const { settings } = useSettings();
+    const waypointBorderColor = useSettingsStore((state) => state.settings.waypointBorderColor);
+    const waypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
+    const showWaypointBorder = useSettingsStore((state) => state.settings.showWaypointBorder);
 
     useEffect(() => {
         if (containerRef.current && waypointType) {
@@ -215,12 +217,12 @@ function WaypointListItem({
                 10,
                 waypointType,
                 waypointGroup,
-                settings.waypointBorderWidth,
-                settings.waypointBorderColor,
-                settings.showWaypointBorder
+                waypointBorderWidth,
+                waypointBorderColor,
+                showWaypointBorder
             );
         }
-    }, [containerRef, waypointType, waypointGroup, settings]); // Updated dependencies
+    }, [containerRef, waypointType, waypointGroup, waypointBorderWidth, waypointBorderColor, showWaypointBorder]);
 
     return (
         <div
