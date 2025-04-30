@@ -1,18 +1,13 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useLayer } from "../../context/LayerContext";
-import { useWaypointContext } from "../../context/WaypointContext";
-import { useWaypointGroupContext } from "../../context/WaypointGroupContext";
-import { usePathContext } from "../../context/PathContext";
 import { useMap } from "react-leaflet";
 import { useSettings } from "../../settings/useSettings";
-import { haversineDistance } from "../relativeWaypoints";
-import { renderWaypointArrow } from "../renderWaypointArrow";
-import L, { icon } from "leaflet";
+import L from "leaflet";
 import * as d3 from "d3";
-import { renderLabel } from "../renderLabel";
-import { useWaypointTypeContext } from "../../context/WaypointTypeContext";
-import { applyMarkerFill, applyMarkerOpacity, renderMarker } from "../renderMarkers";
-import { useShapeContext } from "../../context/ShapeContext";
+import { applyMarkerFill, applyMarkerOpacity } from "../renderMarkers";
+import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
+import { useWaypointStore } from "../../stores/useWaypoints";
+import { useWaypointGroupStore } from "../../stores/useGroups";
 
 export function WaypointLayer() {
     const { g, registerLayerRedrawFn } = useLayer();
@@ -20,10 +15,11 @@ export function WaypointLayer() {
     const map = useMap();
     const { settings } = useSettings();
 
-    const { waypoints, selectedId, selectWaypoint, getWaypointById } = useWaypointContext();
+    const waypoints = useWaypointStore((state) => state.waypoints);
+    const selectedId = useWaypointStore((state) => state.selectedId);
+    const getWaypointGroupById = useWaypointGroupStore((state) => state.getWaypointGroupById);
 
-    const { getWaypointGroupById } = useWaypointGroupContext();
-    const { getWaypointTypeById } = useWaypointTypeContext();
+    const getTypeById = useWaypointTypeStore((state) => state.getTypeById);
 
     // const {
     //     addMode: addPathMode,
@@ -42,7 +38,7 @@ export function WaypointLayer() {
 
     const waypointColors = useMemo(() => {
         return waypoints.map((waypoint) => {
-            const type = getWaypointTypeById(waypoint.typeId)!;
+            const type = getTypeById(waypoint.typeId)!;
             return {
                 id: waypoint.id,
                 color: type.color,
@@ -50,11 +46,11 @@ export function WaypointLayer() {
                 hasTwoColors: type.hasTwoColors,
             };
         });
-    }, [waypoints, getWaypointTypeById]);
+    }, [waypoints, getTypeById]);
 
     const waypointHiddenStates = useMemo(() => {
         return waypoints.map((waypoint) => {
-            const type = getWaypointTypeById(waypoint.typeId)!;
+            const type = getTypeById(waypoint.typeId)!;
             const group = getWaypointGroupById(waypoint.groupId ?? -1);
             
             return {
@@ -63,7 +59,7 @@ export function WaypointLayer() {
                 typeHidden: type.hidden,
             };
         });
-    }, [waypoints, getWaypointTypeById, getWaypointGroupById]);
+    }, [waypoints, getTypeById, getWaypointGroupById]);
 
     const placeWaypoints = useCallback(
         (g: d3.Selection<SVGGElement, unknown, null, undefined>) => {

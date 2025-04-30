@@ -1,15 +1,20 @@
 import { useCallback } from "react";
-import { useWaypointContext } from "../../context/WaypointContext";
-import { useWaypointTypeContext } from "../../context/WaypointTypeContext";
-import { usePathContext } from "../../context/PathContext";
-import { useShapeContext } from "../../context/ShapeContext";
 import { useSettings } from "../../settings/useSettings";
+import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
+import { useWaypointStore } from "../../stores/useWaypoints";
+import { usePathStore } from "../../stores/usePaths";
+import { useShapeStore } from "../../stores/useShapes";
 
 export function IOPanel() {
-    const { waypoints, setWaypoints } = useWaypointContext();
-    const { waypointTypes, setWaypointTypes } = useWaypointTypeContext();
-    const { segments, setSegments } = usePathContext();
-    const { shapes, setShapes } = useShapeContext();
+    const waypoints = useWaypointStore((state) => state.waypoints);
+    const setWaypoints = useWaypointStore((state) => state.setWaypoints);
+    const types = useWaypointTypeStore((state) => state.types);
+    const setTypes = useWaypointTypeStore((state) => state.setTypes);
+    const segments = usePathStore((state) => state.segments);
+    const setSegments = usePathStore((state) => state.setSegments);
+    const shapes = useShapeStore((state) => state.shapes);
+    const setShapes = useShapeStore((state) => state.setShapes);
+    // TODO: persist groups
     const { settings } = useSettings();
 
     const downloadFile = (content: string, fileName: string, mimeType: string) => {
@@ -27,7 +32,7 @@ export function IOPanel() {
     const exportJson = useCallback(() => {
         const data = {
             waypoints,
-            waypointTypes,
+            types,
             segments,
             shapes,
         };
@@ -35,7 +40,7 @@ export function IOPanel() {
         const json = JSON.stringify(data, null, 2);
         const name = `export-${new Date().toISOString()}.wmap`;
         downloadFile(json, name, "application/json");
-    }, [waypoints, segments, waypointTypes]);
+    }, [waypoints, segments, types, shapes]);
 
     const exportSvg = useCallback(() => {
         const svgContentGroup = document.querySelector<SVGGElement>("g#waypoint-overlay");
@@ -119,7 +124,7 @@ export function IOPanel() {
                 try {
                     const data = JSON.parse(content);
                     if (data.waypointTypes) {
-                        setWaypointTypes(data.waypointTypes);
+                        setTypes(data.waypointTypes);
                     }
                     if (data.waypoints) {
                         setWaypoints(data.waypoints);

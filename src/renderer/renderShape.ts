@@ -1,4 +1,4 @@
-import { Shape } from "../context/ShapeContext";
+import { Shape } from "../stores/useShapes";
 import * as d3 from "d3";
 import { Vector } from "../utils/vector";
 

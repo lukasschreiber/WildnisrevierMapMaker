@@ -1,8 +1,10 @@
 import { useMemo } from "react";
-import { usePathContext } from "../context/PathContext";
+import { usePathStore } from "../stores/usePaths";
 
 export function SegmentInfo(props: { id: number }) {
-    const { getSegmentById, deleteSegment, deselectSegment } = usePathContext();
+    const getSegmentById = usePathStore((state) => state.getSegmentById);
+    const deleteSegment = usePathStore((state) => state.deleteSegment);
+    const deselectSegment = usePathStore((state) => state.deselectSegment);
     const segment = useMemo(() => getSegmentById(props.id), [props.id, getSegmentById]);
 
     if (!segment) {

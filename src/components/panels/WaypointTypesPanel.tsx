@@ -1,23 +1,25 @@
 import { memo } from "react";
-import { useWaypointTypeContext, WaypointType } from "../../context/WaypointTypeContext";
 import { Select } from "../inputs/Select";
 import { TextInput } from "../inputs/TextInput";
 import { NumberInput } from "../inputs/NumberInput";
 import { Checkbox } from "../inputs/Checkbox";
 import { ColorInput } from "../inputs/ColorInput";
+import { useWaypointTypeStore, WaypointType } from "../../stores/useWaypointTypes";
 
 export function WaypointTypesPanel() {
-    const { waypointTypes, addWaypointType } = useWaypointTypeContext();
+    const types = useWaypointTypeStore((state) => state.types);
+    const addType = useWaypointTypeStore((state) => state.addType);
+    const typeList = Object.values(types);
 
     return (
         <div className="flex flex-col gap-2">
             <h2 className="text-lg font-bold">Waypoint Types</h2>
-            {waypointTypes.map((type) => (
-                <MemoizedWaypointTypeListItem key={type.id} type={type}  />
+            {typeList.map((type) => (
+                <MemoizedWaypointTypeListItem key={type.id} type={type} isOnlyOne={typeList.length <= 1} />
             ))}
             <button
                 onClick={() =>
-                    addWaypointType({
+                    addType({
                         id: Date.now(),
                         name: "New Type",
                         icon: "circle",
@@ -36,20 +38,20 @@ export function WaypointTypesPanel() {
 
 const MemoizedWaypointTypeListItem = memo(WaypointTypeListItem);
 
-export function WaypointTypeListItem({ type }: { type: WaypointType }) {
-    const { waypointTypes, updateWaypointType, removeWaypointType, isDeletable } = useWaypointTypeContext();
-
-    if (!type) return null;
+export function WaypointTypeListItem({ type, isOnlyOne }: { type: WaypointType; isOnlyOne: boolean }) {
+    const updateType = useWaypointTypeStore((state) => state.updateType);
+    const removeType = useWaypointTypeStore((state) => state.removeType);
+    const isDeletable = useWaypointTypeStore((state) => state.isDeletable);
 
     return (
-        <div key={type.id} className="flex flex-row gap-2 items-center">
+        <div className="flex flex-row gap-2 items-center">
             <TextInput
                 value={type.name}
-                onChange={(value) => updateWaypointType(type.id, { name: value })}
+                onChange={(value) => updateType(type.id, { name: value })}
             />
             <Select
                 value={type.icon}
-                onChange={(value) => updateWaypointType(type.id, { icon: value })}
+                onChange={(value) => updateType(type.id, { icon: value })}
                 options={[
                     { label: "Circle", value: "circle" },
                     { label: "Square", value: "square" },
@@ -66,7 +68,7 @@ export function WaypointTypeListItem({ type }: { type: WaypointType }) {
                 min={-1}
                 max={100}
                 onChange={(value) =>
-                    updateWaypointType(type.id, {
+                    updateType(type.id, {
                         radiusOverride: value < 0 ? undefined : value,
                     })
                 }
@@ -75,27 +77,27 @@ export function WaypointTypeListItem({ type }: { type: WaypointType }) {
             />
             <ColorInput
                 value={type.color}
-                onChange={(value) => updateWaypointType(type.id, { color: value })}
+                onChange={(value) => updateType(type.id, { color: value })}
                 className="bg-black/50 p-1 rounded-md"
             />
             <ColorInput
                 value={type.color2 || "#000000"}
-                onChange={(value) => updateWaypointType(type.id, { color2: value })}
+                onChange={(value) => updateType(type.id, { color2: value })}
                 disabled={!type.hasTwoColors}
             />
             <Checkbox
                 label="Hidden"
                 value={type.hidden}
-                onChange={(value) => updateWaypointType(type.id, { hidden: value })}
+                onChange={(value) => updateType(type.id, { hidden: value })}
             />
             <Checkbox
                 label="Two Colors"
                 value={type.hasTwoColors}
-                onChange={(value) => updateWaypointType(type.id, { hasTwoColors: value })}
+                onChange={(value) => updateType(type.id, { hasTwoColors: value })}
             />
             <button
-                onClick={() => removeWaypointType(type.id)}
-                disabled={waypointTypes.length <= 1 || type.id === 1 || !isDeletable(type.id)}
+                onClick={() => removeType(type.id)}
+                disabled={isOnlyOne || type.id === 1 || !isDeletable(type.id)}
                 className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-red-500"
             >
                 Remove

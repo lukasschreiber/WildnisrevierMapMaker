@@ -1,22 +1,25 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { useMap } from "react-leaflet";
-import { useWaypointContext, Waypoint } from "../../context/WaypointContext";
-import { useWaypointTypeContext } from "../../context/WaypointTypeContext";
-import { useWaypointGroupContext } from "../../context/WaypointGroupContext";
 import useLocalStorage from "../../hooks/useLocalStorage";
 import { useSettings } from "../../settings/useSettings";
 import { renderMarker } from "../../renderer/renderMarkers";
 import { Select } from "../inputs/Select";
+import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
+import { useWaypointGroupStore } from "../../stores/useGroups";
+import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 
 type GroupByOption = "type" | "group";
 type SortByOption = "id" | "name" | "type" | "group";
 type SortDirection = "asc" | "desc";
 
 export function WaypointsPanel() {
-    const { waypoints, selectedId, selectWaypoint, deselectWaypoint } = useWaypointContext();
-    const { getWaypointTypeById } = useWaypointTypeContext();
-    const { getWaypointGroupById } = useWaypointGroupContext();
+    const waypoints = useWaypointStore((state) => state.waypoints);
+    const selectedId = useWaypointStore((state) => state.selectedId);
+    const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
+    const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
+    const getTypeById = useWaypointTypeStore((state) => state.getTypeById);
+    const getWaypointGroupById = useWaypointGroupStore((state) => state.getWaypointGroupById);
     const map = useMap();
 
     // NEW: state for grouping and sorting
@@ -140,7 +143,7 @@ export function WaypointsPanel() {
                 let title = "";
 
                 if (groupBy === "type") {
-                    const waypointType = getWaypointTypeById(Number(groupKey));
+                    const waypointType = getTypeById(Number(groupKey));
                     title = waypointType?.name ?? `Unknown Type (${groupKey})`;
                 } else if (groupBy === "group") {
                     const waypointGroup = getWaypointGroupById(Number(groupKey));
@@ -194,8 +197,10 @@ function WaypointListItem({
     selectedId: number | null;
     onClick: (id: number) => void;
 }) {
-    const waypointType = useWaypointTypeContext().getWaypointTypeById(waypoint.typeId);
-    const waypointGroup = useWaypointGroupContext().getWaypointGroupById(waypoint.groupId ?? -1);
+    const getTypeById = useWaypointTypeStore((state) => state.getTypeById);
+    const waypointType = getTypeById(waypoint.typeId);
+    const getWaypointGroupById = useWaypointGroupStore((state) => state.getWaypointGroupById);
+    const waypointGroup = getWaypointGroupById(waypoint.groupId ?? -1);
     const containerRef = useRef<SVGSVGElement>(null);
     const { settings } = useSettings();
 

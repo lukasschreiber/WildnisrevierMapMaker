@@ -1,8 +1,8 @@
 import { Marker } from "react-leaflet";
-import { useWaypointContext } from "../context/WaypointContext";
+import { useWaypointStore } from "../stores/useWaypoints";
 
 export function LocationMarker() {
-    const { currentPosition } = useWaypointContext();
+    const currentPosition = useWaypointStore((state) => state.currentPosition);
 
     return currentPosition === null ? null : (
         <Marker position={currentPosition}></Marker>

@@ -1,26 +1,29 @@
 import { useMemo, useState } from "react";
-import { useWaypointContext } from "../context/WaypointContext";
-import { useWaypointTypeContext } from "../context/WaypointTypeContext";
-import { usePathContext } from "../context/PathContext";
-import { useWaypointGroupContext } from "../context/WaypointGroupContext";
 import { Select } from "./inputs/Select";
 import { TextInput } from "./inputs/TextInput";
 import { NumberInput } from "./inputs/NumberInput";
+import { useWaypointTypeStore } from "../stores/useWaypointTypes";
+import { useWaypointStore } from "../stores/useWaypoints";
+import { usePathStore } from "../stores/usePaths";
+import { useWaypointGroupStore } from "../stores/useGroups";
 
 export function WaypointInfo(props: { id: number }) {
-    const {
-        getWaypointById,
-        deleteWaypoint,
-        deselectWaypoint,
-        addRelativeWaypoint,
-        isDeletable,
-        updateWaypointName,
-        updateWaypointType,
-        updateWaypointGroup,
-    } = useWaypointContext();
-    const { deleteSegment, segments } = usePathContext();
-    const { waypointTypes } = useWaypointTypeContext();
-    const { waypointGroups } = useWaypointGroupContext();
+    const getWaypointById = useWaypointStore((state) => state.getWaypointById);
+    const addRelativeWaypoint = useWaypointStore((state) => state.addRelativeWaypoint);
+    const deleteWaypoint = useWaypointStore((state) => state.deleteWaypoint);
+    const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
+    const isDeletable = useWaypointStore((state) => state.isDeletable);
+    const updateWaypointName = useWaypointStore((state) => state.updateWaypointName);
+    const updateWaypointType = useWaypointStore((state) => state.updateWaypointType);
+    const updateWaypointGroup = useWaypointStore((state) => state.updateWaypointGroup);
+
+    const deleteSegment = usePathStore((state) => state.deleteSegment);
+    const segments = usePathStore((state) => state.segments);
+
+    const types = useWaypointTypeStore((state) => state.types);
+
+    const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
+
     const [distance, setDistance] = useState(1);
     const [bearing, setBearing] = useState(0);
     const [newTypeId, setNewTypeId] = useState(0);
@@ -47,7 +50,7 @@ export function WaypointInfo(props: { id: number }) {
                 className="w-full"
                 value={waypoint.typeId}
                 onChange={(value) => updateWaypointType(waypoint.id, value)}
-                options={waypointTypes.map((type) => ({
+                options={Object.values(types).map((type) => ({
                     label: type.name,
                     value: type.id,
                 }))}
@@ -95,7 +98,7 @@ export function WaypointInfo(props: { id: number }) {
                 className="w-full"
                 value={newTypeId}
                 onChange={(value) => setNewTypeId(value)}
-                options={waypointTypes.map((type) => ({ label: type.name, value: type.id }))}
+                options={Object.values(types).map((type) => ({ label: type.name, value: type.id }))}
             />
             <div className="flex gap-2 flex-row">
                 <div className="w-1/2">Distance (m)</div>

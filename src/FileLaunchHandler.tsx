@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import { usePathContext } from "./context/PathContext";
-import { useWaypointTypeContext } from "./context/WaypointTypeContext";
-import { useWaypointContext } from "./context/WaypointContext";
+import { useWaypointTypeStore } from "./stores/useWaypointTypes";
+import { usePathStore } from "./stores/usePaths";
+import { useWaypointStore } from "./stores/useWaypoints";
 
 export function FileLaunchHandler() {
-    const { setWaypoints } = useWaypointContext();
-    const { setWaypointTypes } = useWaypointTypeContext();
-    const { setSegments } = usePathContext();
+    const setTypes = useWaypointTypeStore((state) => state.setTypes);
+    const setWaypoints = useWaypointStore((state) => state.setWaypoints);
+    const setSegments = usePathStore((state) => state.setSegments);
 
     useEffect(() => {
         console.log("FileLaunchHandler mounted", "launchQueue" in window);
@@ -40,7 +40,7 @@ export function FileLaunchHandler() {
                         try {
                             const data = JSON.parse(text);
                             if (data.waypointTypes) {
-                                setWaypointTypes(data.waypointTypes);
+                                setTypes(data.waypointTypes);
                             }
                             if (data.waypoints) {
                                 setWaypoints(data.waypoints);
@@ -48,6 +48,7 @@ export function FileLaunchHandler() {
                             if (data.segments) {
                                 setSegments(data.segments);
                             }
+                            // persist groups and shapes
                             alert(`Imported ${file.name} successfully.`);
                         } catch (error) {
                             alert("Failed to parse imported JSON file.");

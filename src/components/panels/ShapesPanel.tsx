@@ -1,6 +1,6 @@
-import { usePathContext } from "../../context/PathContext";
-import { useShapeContext } from "../../context/ShapeContext";
-import { useWaypointContext } from "../../context/WaypointContext";
+import { usePathStore } from "../../stores/usePaths";
+import { useShapeStore } from "../../stores/useShapes";
+import { useWaypointStore } from "../../stores/useWaypoints";
 import { Checkbox } from "../inputs/Checkbox";
 import { ColorInput } from "../inputs/ColorInput";
 import { NumberInput } from "../inputs/NumberInput";
@@ -8,18 +8,17 @@ import { Select } from "../inputs/Select";
 import { TextInput } from "../inputs/TextInput";
 
 export function ShapesPanel() {
-    const {
-        shapes,
-        addShape,
-        updateShape,
-        setAddMode,
-        addMode,
-        addModeReferenceShapeId,
-        setAddModeReferenceShapeId,
-        removeShape,
-    } = useShapeContext();
-    const { setAddMode: setAddWaypointMode } = useWaypointContext();
-    const { setAddMode: setAddPathsMode } = usePathContext();
+    const shapes = useShapeStore((state) => state.shapes);
+    const addShape = useShapeStore((state) => state.addShape);
+    const updateShape = useShapeStore((state) => state.updateShape);
+    const setAddMode = useShapeStore((state) => state.setAddMode);
+    const addMode = useShapeStore((state) => state.addMode);
+    const addModeReferenceShapeId = useShapeStore((state) => state.addModeReferenceShapeId);
+    const setAddModeReferenceShapeId = useShapeStore((state) => state.setAddModeReferenceShapeId);
+    const removeShape = useShapeStore((state) => state.removeShape);
+
+    const setAddWaypointMode = useWaypointStore((state) => state.setAddMode);
+    const setAddPathsMode = usePathStore((state) => state.setAddMode);
 
     return (
         <div className="flex flex-col gap-2">
@@ -67,7 +66,7 @@ export function ShapesPanel() {
                     <div>{shape.nodes?.length} points</div>
                     <button
                         onClick={() => {
-                            setAddMode((old) => !old);
+                            setAddMode(!addMode);
                             setAddPathsMode(false);
                             setAddWaypointMode(false);
                             setAddModeReferenceShapeId(shape.id);

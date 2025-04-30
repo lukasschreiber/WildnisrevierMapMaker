@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { LayoutGroup, Settings, getDefaultSettings } from "./settings_definition";
 import { getSettingsDefinition } from "./settings";
+import { getLocalStorageKey } from "../utils/keys";
 
 export interface IPublicSettingsContext {
     settings: Settings;
@@ -15,8 +16,7 @@ interface ISettingsContext extends IPublicSettingsContext {
 export const SettingsContext = createContext<ISettingsContext | undefined>(undefined);
 
 export function SettingsProvider(props: React.ComponentPropsWithoutRef<"div">) {
-
-    const LOCAL_STORAGE_KEY = "map_settings";
+    const LOCAL_STORAGE_KEY = getLocalStorageKey("settings");
     const [settings, setSettings] = useState<Settings>(() => {
         const storedSettings = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         return storedSettings ? JSON.parse(storedSettings) : getDefaultSettings(getSettingsDefinition());
@@ -49,7 +49,7 @@ export function SettingsProvider(props: React.ComponentPropsWithoutRef<"div">) {
     function isHidden<K extends keyof Settings>(key: K): boolean {
         const setting = layout.find((group) => Object.keys(group.settings).includes(key))?.settings[key];
         if (!setting) return false;
-        return typeof setting.hidden === "function" ? setting.hidden(settings) : setting.hidden ?? false;
+        return typeof setting.hidden === "function" ? setting.hidden(settings) : (setting.hidden ?? false);
     }
 
     return (

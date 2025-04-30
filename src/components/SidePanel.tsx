@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
-import { PathsPanel } from "./panels/PathsPanel";
 import { SettingsPanel } from "./panels/SettingsPanel";
 import { WaypointTypesPanel } from "./panels/WaypointTypesPanel";
 import { IOPanel } from "./panels/IOPanel";
@@ -44,12 +43,6 @@ export function SidePanel({activeTab, setActiveTab}:{activeTab: string, setActiv
                                 >
                                     Waypoint Groups
                                 </button>
-                                {/* <button
-                                    className={`p-2 rounded-md ${activeTab === "paths" ? "bg-blue-500" : ""}`}
-                                    onClick={() => setActiveTab("paths")}
-                                >
-                                    Paths
-                                </button> */}
                                 <button
                                     className={`p-2 rounded-md ${activeTab === "shapes" ? "bg-blue-500" : ""}`}
                                     onClick={() => setActiveTab("shapes")}
@@ -71,7 +64,6 @@ export function SidePanel({activeTab, setActiveTab}:{activeTab: string, setActiv
                             </div>
                         </div>
                         <div className="overflow-auto">
-                            {activeTab === "paths" && <PathsPanel />}
                             {activeTab === "settings" && <SettingsPanel />}
                             {activeTab === "types" && <WaypointTypesPanel />}
                             {activeTab === "io" && <IOPanel />}

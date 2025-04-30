@@ -7,13 +7,11 @@ import { FileLaunchHandler } from "./FileLaunchHandler";
 import { SidePanel } from "./components/SidePanel";
 import { LayerProvider } from "./context/LayerContext";
 import { WaypointLayer } from "./renderer/layers/WaypointLayer";
-import { WaypointOverlay } from "./renderer/WaypointOverlay";
-import { SegmentLayer } from "./renderer/layers/SegmentLayer";
 
 export default function App() {
     const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
     const [activeTab, setActiveTab] = useLocalStorage("active-tab", "waypoints");
-    const [view, setView] = useLocalStorage("map-view", {
+    const [view, setView] = useLocalStorage("view", {
         lat: 52.52,
         lng: 13.405,
         zoom: 13,

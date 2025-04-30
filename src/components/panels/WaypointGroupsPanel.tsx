@@ -1,9 +1,13 @@
-import { useWaypointGroupContext } from "../../context/WaypointGroupContext";
+import { useWaypointGroupStore } from "../../stores/useGroups";
 import { Checkbox } from "../inputs/Checkbox";
 import { TextInput } from "../inputs/TextInput";
 
 export function WaypointGroupsPanel() {
-    const { waypointGroups, updateWaypointGroup, addWaypointGroup, removeWaypointGroup, isDeletable } = useWaypointGroupContext();
+    const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
+    const addWaypointGroup = useWaypointGroupStore((state) => state.addWaypointGroup);
+    const removeWaypointGroup = useWaypointGroupStore((state) => state.removeWaypointGroup);
+    const updateWaypointGroup = useWaypointGroupStore((state) => state.updateWaypointGroup);
+    const isDeletable = useWaypointGroupStore((state) => state.isDeletable);
 
     const handleAddGroup = () => {
         const newGroup = { id: Date.now(), name: "New Group", hidden: false };
