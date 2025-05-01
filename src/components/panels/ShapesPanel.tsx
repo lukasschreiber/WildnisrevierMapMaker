@@ -158,11 +158,11 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                     Delete
                 </button>
             </div>
-            <div className="flex flex-row gap-1 pl-6">
+            {/* <div className="flex flex-row gap-1 pl-6">
                 {shape.nodes?.map((node) => (
                     <div key={node.waypointId} className="flex flex-row gap-2 items-center">
                         <div className="text-xs">{node.waypointId}</div>
-                        {/* <button
+                        <button
                         onClick={() => {
                             updateShape(shape.id, {
                                 nodes: shape.nodes.filter((n) => n.waypointId !== node.waypointId),
@@ -171,10 +171,10 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                         className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded"
                     >
                         Remove Node
-                    </button> */}
+                    </button>
                     </div>
                 ))}
-            </div>
+            </div> */}
         </div>
     );
 }, areEqual);
