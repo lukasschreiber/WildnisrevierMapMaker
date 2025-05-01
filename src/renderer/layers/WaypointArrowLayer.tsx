@@ -4,7 +4,7 @@ import { useWaypointStore } from "../../stores/useWaypoints";
 import { WaypointArrow } from "../elements/WaypointArrow";
 
 export function WaypointArrowLayer() {
-    const { g } = useLayer();
+    const g = useLayer(11);
     const waypoints = useWaypointStore((state) => state.waypoints);
     const relativeWaypoints = useMemo(() => waypoints.filter((wp) => wp.baseId !== undefined), [waypoints]);
 

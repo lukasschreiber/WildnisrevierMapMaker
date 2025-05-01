@@ -141,7 +141,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 return applyCommonAttrs(container as unknown as d3.Selection<SVGGElement, unknown, null, undefined>)
                 .attr("transform", `translate(${point.x - width / 2}, ${point.y - height / 2})`)
             } else {
-                console.warn("Unknown icon type and no matching SVG found:", type.icon);
+                console.warn("Unknown icon type and no matching SVG found:", type.icon, type.id, type.name);
                 return g;
             }
     }

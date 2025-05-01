@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Select } from "./inputs/Select";
 import { TextInput } from "./inputs/TextInput";
 import { NumberInput } from "./inputs/NumberInput";
@@ -25,7 +25,7 @@ export function WaypointInfo(props: { id: number }) {
 
     const [distance, setDistance] = useState(1);
     const [bearing, setBearing] = useState(0);
-    const [newTypeId, setNewTypeId] = useState(0);
+    const [newTypeId, setNewTypeId] = useState(1);
     const [newName, setNewName] = useState<string | null>(null);
     const waypoint = useWaypointStore(
         (state) => state.waypoints.find((w) => w.id === props.id)

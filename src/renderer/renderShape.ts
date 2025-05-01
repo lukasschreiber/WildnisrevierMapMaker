@@ -8,8 +8,10 @@ interface Point {
     notsmooth?: boolean;
 }
 
-export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean): void {
+export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
     const { color, name, shapeType, texture, hasOutline, alpha } = shape;
+
+    const renderedComponents: d3.Selection<any, any, any, undefined>[] = [];
 
     const patternId = `pattern-${Math.random().toString(36).substring(2, 15)}`;
 
@@ -27,7 +29,9 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
             .attr("r", 5)
-            .style("fill", "red");
+            .style("fill", "red")
+
+        renderedComponents.push(pointGroup);
     }
 
     if (showOriginalShapeEdges) {
@@ -36,11 +40,15 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .y(d => d.y)
             .curve(d3.curveLinearClosed); // like your ctx.lineTo + closePath
 
-        g.append("path")
+        renderedComponents.push(g.append("path")
             .attr("d", closedLine(dedupedPoints))
             .style("stroke", "#222")
             .style("stroke-width", 0.7)
-            .style("fill", "none");
+            .style("fill", "none"));
+    }
+
+    if (dedupedPoints.length <= 2) {
+        return [];
     }
 
     const controlPoints = smoothControlPoints(dedupedPoints, shapeType === "straight" ? 0 : alpha);
@@ -61,20 +69,20 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             );
         }
 
-        g.append("path")
+        renderedComponents.push(g.append("path")
             .attr("d", controlLine(controlPathPoints))
             .style("stroke", "blue")
             .style("stroke-width", 1)
-            .style("fill", "none");
+            .style("fill", "none"));
 
     }
 
     const p = d3.path();
 
     const m = controlPoints.length;
-    
+
     if (controlPoints.length < 1) {
-        return;
+        return [];
     }
 
     const start = controlPoints[1];
@@ -92,8 +100,10 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
         .style("stroke", hasOutline ? color : "none")
         .style("stroke-width", 1.5);
 
+    renderedComponents.push(path);
+
     if (texture === "gradient") {
-        g.append("defs").append("linearGradient")
+        const pattern = g.append("defs").append("linearGradient")
             .attr("id", patternId)
             .selectAll("stop")
             .data([
@@ -106,6 +116,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .attr("stop-color", d => d.color.formatHex());
 
         path.style("fill", `url(#${patternId})`);
+        renderedComponents.push(pattern);
     } else if (texture === "lines") {
         const pattern = g.append("defs").append("pattern")
             .attr("id", patternId)
@@ -119,6 +130,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("stroke-width", 1);
 
         path.style("fill", `url(#${patternId})`);
+        renderedComponents.push(pattern);
     } else if (texture === "dots") {
         const pattern = g.append("defs").append("pattern")
             .attr("id", patternId)
@@ -133,6 +145,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("fill", color);
 
         path.style("fill", `url(#${patternId})`);
+        renderedComponents.push(pattern);
     } else if (texture === "checkered") {
         const pattern = g.append("defs").append("pattern")
             .attr("id", patternId)
@@ -150,6 +163,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("stroke-width", 1);
 
         path.style("fill", `url(#${patternId})`);
+        renderedComponents.push(pattern);
     } else if (texture === "chessboard") {
         const patternSize = 10; // size of each small square
 
@@ -184,6 +198,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("fill", d3.rgb(color).darker(1).formatHex());
 
         path.style("fill", `url(#${patternId})`);
+        renderedComponents.push(pattern);
     } else if (texture === "crosses") {
         const patternSize = 12; // how far apart crosses are
         const crossSize = 4;    // size of each cross arm
@@ -213,8 +228,11 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("stroke-width", 1);
 
         path.style("fill", `url(#${patternId})`);
-    } else {
+        renderedComponents.push(pattern);
+    } else if (texture === "solid") {
         path.style("fill", color);
+    } else if (texture === "none") {
+        path.style("fill", "none");
     }
 
     const midPoint = dedupedPoints.reduce((acc, point) => {
@@ -226,12 +244,14 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
     midPoint.x /= dedupedPoints.length;
     midPoint.y /= dedupedPoints.length;
 
+    const labelText = `${name}`;
+
     if (showSolidBlockBehindLabel) {
 
         const text1 = g.append("text")
             .attr("x", midPoint.x)
             .attr("y", midPoint.y)
-            .text(name)
+            .text(labelText)
             .style("fill", labelColor)
             .style("font-size", "12px")
             .attr("text-anchor", "middle")
@@ -240,22 +260,24 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
         const bbox = text1.node()!.getBBox();
         text1.remove();
 
-        g.append("rect")
+        renderedComponents.push(g.append("rect")
             .attr("x", bbox.x - 2)
             .attr("y", bbox.y - 2)
             .attr("width", bbox.width + 4)
             .attr("height", bbox.height + 4)
-            .style("fill", color)
+            .style("fill", color))
     }
 
-    g.append("text")
+    renderedComponents.push(g.append("text")
         .attr("x", midPoint.x)
         .attr("y", midPoint.y)
-        .text(name)
+        .text(labelText)
         .style("fill", labelColor)
         .style("font-size", "12px")
         .attr("text-anchor", "middle")
-        .attr("alignment-baseline", "middle");
+        .attr("alignment-baseline", "middle"));
+
+    return renderedComponents;
 }
 
 

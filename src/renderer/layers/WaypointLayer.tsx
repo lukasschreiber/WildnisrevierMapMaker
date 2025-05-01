@@ -5,7 +5,7 @@ import { Waypoint } from "../elements/Waypoint";
 import { WaypointLabel } from "../elements/WaypointLabel";
 
 export function WaypointLayer() {
-    const { g } = useLayer();
+    const g = useLayer(12);
     const waypoints = useWaypointStore((state) => state.waypoints);
 
     return waypoints.map((waypoint) => (
@@ -15,41 +15,3 @@ export function WaypointLayer() {
         </React.Fragment>
     ));
 }
-
-// const draw = useCallback((g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
-//     waypoints.forEach(({ lat, lng, id, baseId, name, typeId, groupId }) => {
-//         const point = map.latLngToLayerPoint(new L.LatLng(lat, lng));
-//         const isSelected = id === selectedId;
-
-//         if (baseId !== undefined) {
-//             const baseWaypoint = getWaypointById(baseId)!;
-
-//             const basePoint = map.latLngToLayerPoint(new L.LatLng(baseWaypoint.lat, baseWaypoint.lng));
-//             const dist = haversineDistance(lat, lng, baseWaypoint.lat, baseWaypoint.lng);
-
-//             if (settings.showWaypointLines) {
-//                 renderWaypointArrow(
-//                     g,
-//                     point,
-//                     basePoint,
-//                     settings.waypointRadius,
-//                     settings.arrowColor,
-//                     settings.arrowSize,
-//                     settings.arrowWidth,
-//                     settings.arrowOpacity
-//                 );
-//             }
-
-//             if (settings.showWaypointDistances) {
-//                 renderLabel(
-//                     g,
-//                     (point.x + basePoint.x) / 2,
-//                     (point.y + basePoint.y) / 2 - 5,
-//                     `${dist.toFixed(2)} m`,
-//                     "distance-label",
-//                     settings.labelColor
-//                 );
-//             }
-//         }
-
-//     });

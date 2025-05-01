@@ -16,7 +16,7 @@ export type Waypoint = {
   groupId?: number;
 };
 
-interface WaypointState {
+export interface WaypointState {
   waypoints: Waypoint[];
   selectedId: number | null;
   currentPosition: { lat: number; lng: number } | null;

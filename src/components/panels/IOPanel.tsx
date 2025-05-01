@@ -4,6 +4,7 @@ import { useWaypointStore } from "../../stores/useWaypoints";
 import { usePathStore } from "../../stores/usePaths";
 import { useShapeStore } from "../../stores/useShapes";
 import { useSettingsStore } from "../../stores/useSettings";
+import { useWaypointGroupStore } from "../../stores/useGroups";
 
 export function IOPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
@@ -14,6 +15,7 @@ export function IOPanel() {
     const setSegments = usePathStore((state) => state.setSegments);
     const shapes = useShapeStore((state) => state.shapes);
     const setShapes = useShapeStore((state) => state.setShapes);
+    const setGroups = useWaypointGroupStore((state) => state.setWaypointGroups);
     // TODO: persist groups
     const hideArrowsInExport = useSettingsStore((state) => state.settings.hideArrowsInExport);
     const hideDistancesInExport = useSettingsStore((state) => state.settings.hideDistancesInExport);
@@ -108,12 +110,7 @@ export function IOPanel() {
 
         // Remove the temporary SVG
         document.getElementById("exported-svg")?.remove();
-    }, [
-        hideArrowsInExport,
-        hideDistancesInExport,
-        hideHiddenWaypointsInExport,
-        hideOriginalPathsInExport,
-    ]);
+    }, [hideArrowsInExport, hideDistancesInExport, hideHiddenWaypointsInExport, hideOriginalPathsInExport]);
 
     const importJson = useCallback((file: File) => {
         if (!confirm("Are you sure you want to import this file? This will overwrite your current data.")) {
@@ -127,7 +124,16 @@ export function IOPanel() {
                 try {
                     const data = JSON.parse(content);
                     if (data.waypointTypes) {
-                        setTypes(data.waypointTypes);
+                        if (Array.isArray(data.waypointTypes)) {
+                            // convert array to object where the id is the key
+                            const waypointTypes = data.waypointTypes.reduce((acc: Record<number, any>, type: any) => {
+                                acc[type.id] = type;
+                                return acc;
+                            }, {});
+                            setTypes(waypointTypes);
+                        } else {
+                            setTypes(data.waypointTypes);
+                        }
                     }
                     if (data.waypoints) {
                         setWaypoints(data.waypoints);
@@ -137,6 +143,9 @@ export function IOPanel() {
                     }
                     if (data.shapes) {
                         setShapes(data.shapes);
+                    }
+                    if (data.waypointGroups) {
+                        setGroups(data.waypointGroups);
                     }
                 } catch (error) {
                     alert("Error parsing JSON file");
@@ -173,6 +182,26 @@ export function IOPanel() {
                     if (confirm("Are you sure you want to reset all data?")) {
                         setWaypoints([]);
                         setSegments([]);
+                        setShapes([]);
+                        setTypes({
+                            1: {
+                                id: 1,
+                                name: "Default",
+                                icon: "circle",
+                                color: "#FF0000",
+                                hidden: false,
+                                hasTwoColors: false,
+                            },
+                            2: {
+                                id: 2,
+                                name: "Custom",
+                                icon: "square",
+                                color: "#00FF00",
+                                hidden: false,
+                                hasTwoColors: false,
+                            },
+                        });
+                        setGroups([]);
                     }
                 }}
                 className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-red-500"

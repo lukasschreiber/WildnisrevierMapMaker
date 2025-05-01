@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import L from "leaflet";
 import * as d3 from "d3";
@@ -28,8 +28,11 @@ export const WaypointArrow = React.memo(({ g, waypointId }: WaypointArrowProps) 
     const arrowWidth = useSettingsStore((state) => state.settings.arrowWidth);
     const arrowOpacity = useSettingsStore((state) => state.settings.arrowOpacity);
 
-    useEffect(() => {
-        if (!g || !waypoint || !baseWaypoint) return;
+    const draw = useCallback(() => {
+        if (!g || !waypoint || !baseWaypoint) return [];
+
+        g.select(`#waypoint-arrow-${waypoint.id}`).remove();
+        g.select(`#waypoint-distance-label-${waypoint.id}`).remove();
 
         const { lat, lng } = waypoint;
 
@@ -51,7 +54,7 @@ export const WaypointArrow = React.memo(({ g, waypointId }: WaypointArrowProps) 
                     arrowSize,
                     arrowWidth,
                     arrowOpacity
-                )
+                ).attr("id", `waypoint-arrow-${waypoint.id}`)
             );
         }
 
@@ -64,15 +67,11 @@ export const WaypointArrow = React.memo(({ g, waypointId }: WaypointArrowProps) 
                     `${dist.toFixed(2)} m`,
                     "distance-label",
                     labelColor
-                )
+                ).attr("id", `waypoint-distance-label-${waypoint.id}`)
             );
         }
 
-        return () => {
-            renderedComponents.forEach((component) => {
-                component.remove();
-            });
-        };
+        return renderedComponents;
     }, [
         waypoint,
         g,
@@ -88,22 +87,23 @@ export const WaypointArrow = React.memo(({ g, waypointId }: WaypointArrowProps) 
         arrowOpacity,
     ]);
 
-    // const updatePosition = useCallback(() => {
-    //     if (!g || !waypoint) return;
-    //     const point = getLabelPosition();
-    //     if (!point) return;
-    //     g.select(`#waypoint-label-${waypoint.id}`).attr("x", point.x).attr("y", point.y);
-    // }, [g, waypointId]);
+    useEffect(() => {
+        draw();
+    }, [draw]);
 
-    // useEffect(() => {
-    //     map.on("zoomend", updatePosition);
-    //     map.on("moveend", updatePosition);
+    const updatePosition = useCallback(() => {
+        draw();
+    }, [g, draw]);
 
-    //     return () => {
-    //         map.off("zoomend", updatePosition);
-    //         map.off("moveend", updatePosition);
-    //     };
-    // }, [map, g, waypoint]);
+    useEffect(() => {
+        map.on("zoomend", updatePosition);
+        map.on("moveend", updatePosition);
+
+        return () => {
+            map.off("zoomend", updatePosition);
+            map.off("moveend", updatePosition);
+        };
+    }, [map, updatePosition]);
 
     return null;
 }, areEqual);

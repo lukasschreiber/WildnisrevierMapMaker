@@ -63,7 +63,7 @@ export const WaypointLabel = React.memo(({ g, waypointId }: WaypointLabelProps) 
         const point = getLabelPosition();
         if (!point) return;
         g.select(`#waypoint-label-${waypoint.id}`).attr("x", point.x).attr("y", point.y);
-    }, [g, waypointId]);
+    }, [g, waypoint]);
 
     useEffect(() => {
         map.on("zoomend", updatePosition);

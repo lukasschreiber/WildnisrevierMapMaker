@@ -93,14 +93,22 @@ export const Waypoint = React.memo(({ g, waypointId }: WaypointProps) => {
         waypointBorderWidth,
         waypointBorderColor,
         showWaypointBorder,
+        addPathMode,
+        addShapeMode,
         map,
+        segmentConnectionStarted,
+        endSegmentConnection,
+        startSegmentConnection,
+        selectWaypoint,
+        addModeReferenceShapeId,
+        addShapeNode,
     ]);
 
     const updatePosition = useCallback(() => {
         if (!g || !waypoint) return;
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
         g.select(`#waypoint-${waypoint.id}`).attr("transform", `translate(${point.x}, ${point.y})`);
-    }, [g, waypointId]);
+    }, [g, waypoint]);
 
     useEffect(() => {
         map.on("zoomend", updatePosition);

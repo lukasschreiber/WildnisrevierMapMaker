@@ -1,10 +1,11 @@
 import L from "leaflet";
 import * as d3 from "d3";
-import { PathSegment } from "../context/PathContext";
+import { PathSegment } from "../stores/usePaths";
 
-export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undefined>, map: L.Map, segments: any[], getWaypointById: Function, useUniqueColors: boolean, pathWidth: number, pathColor: string, hideOriginalPaths: boolean, hideFancyPaths: boolean, tension: number, selectSegment: (id: number) => void) {
+export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undefined>, map: L.Map, segments: PathSegment[], getWaypointById: Function, useUniqueColors: boolean, pathWidth: number, pathColor: string, hideOriginalPaths: boolean, hideFancyPaths: boolean, tension: number, selectSegment: (id: number) => void) {
     const paths = getPaths(segments);
     const curve = d3.curveCardinal.tension(tension);
+    const renderedElements: d3.Selection<any, unknown, null, undefined>[] = [];
 
     if (!hideFancyPaths) {
         paths.forEach((path, index) => {
@@ -22,16 +23,16 @@ export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undef
             const color = useUniqueColors ? colors[index] : pathColor;
             const width = pathWidth;
 
-            g.append("path")
+            renderedElements.push(g.append("path")
                 .attr("d", line(points.map(({ x, y }) => [x, y]))) // Apply the curve path
                 .style("fill", "none")
                 .style("stroke", color)
                 .attr("stroke-linecap", "round")
-                .style("stroke-width", width);
+                .style("stroke-width", width));
         });
     }
 
-    if (hideOriginalPaths) return;
+    if (hideOriginalPaths) return renderedElements;
 
     // Draw the original segments as lines
     segments.forEach(({ from, to, id }) => {
@@ -41,7 +42,7 @@ export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undef
         const fromPoint = map.latLngToLayerPoint(new L.LatLng(fromWaypoint.lat, fromWaypoint.lng));
         const toPoint = map.latLngToLayerPoint(new L.LatLng(toWaypoint.lat, toWaypoint.lng));
 
-        g.append("line")
+        renderedElements.push(g.append("line")
             .attr("x1", fromPoint.x)
             .attr("y1", fromPoint.y)
             .attr("x2", toPoint.x)
@@ -56,8 +57,10 @@ export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undef
                 (event: MouseEvent) => {
                     event.stopPropagation();
                     selectSegment(id);
-                })
+                }))
     });
+
+    return renderedElements;
 }
 
 function getPaths(segments: PathSegment[]): number[][] {
