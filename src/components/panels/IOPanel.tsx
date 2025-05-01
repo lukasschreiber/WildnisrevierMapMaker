@@ -1,16 +1,26 @@
 import { useCallback } from "react";
-import { usePathContext } from "../context/PathContext";
-import { useWaypointContext } from "../context/WaypointContext";
-import { useWaypointTypeContext } from "../context/WaypointTypeContext";
-import { useSettings } from "../settings/useSettings";
-import { useShapeContext } from "../context/ShapeContext";
+import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
+import { useWaypointStore } from "../../stores/useWaypoints";
+import { usePathStore } from "../../stores/usePaths";
+import { useShapeStore } from "../../stores/useShapes";
+import { useSettingsStore } from "../../stores/useSettings";
+import { useWaypointGroupStore } from "../../stores/useGroups";
 
-export function ExportContainer() {
-    const { waypoints, setWaypoints } = useWaypointContext();
-    const { waypointTypes, setWaypointTypes } = useWaypointTypeContext();
-    const { segments, setSegments } = usePathContext();
-    const { shapes, setShapes } = useShapeContext();
-    const { settings } = useSettings();
+export function IOPanel() {
+    const waypoints = useWaypointStore((state) => state.waypoints);
+    const setWaypoints = useWaypointStore((state) => state.setWaypoints);
+    const types = useWaypointTypeStore((state) => state.types);
+    const setTypes = useWaypointTypeStore((state) => state.setTypes);
+    const segments = usePathStore((state) => state.segments);
+    const setSegments = usePathStore((state) => state.setSegments);
+    const shapes = useShapeStore((state) => state.shapes);
+    const setShapes = useShapeStore((state) => state.setShapes);
+    const setGroups = useWaypointGroupStore((state) => state.setWaypointGroups);
+    // TODO: persist groups
+    const hideArrowsInExport = useSettingsStore((state) => state.settings.hideArrowsInExport);
+    const hideDistancesInExport = useSettingsStore((state) => state.settings.hideDistancesInExport);
+    const hideOriginalPathsInExport = useSettingsStore((state) => state.settings.hideOriginalPathsInExport);
+    const hideHiddenWaypointsInExport = useSettingsStore((state) => state.settings.hideHiddenWaypointsInExport);
 
     const downloadFile = (content: string, fileName: string, mimeType: string) => {
         const blob = new Blob([content], { type: mimeType });
@@ -27,7 +37,7 @@ export function ExportContainer() {
     const exportJson = useCallback(() => {
         const data = {
             waypoints,
-            waypointTypes,
+            types,
             segments,
             shapes,
         };
@@ -35,7 +45,7 @@ export function ExportContainer() {
         const json = JSON.stringify(data, null, 2);
         const name = `export-${new Date().toISOString()}.wmap`;
         downloadFile(json, name, "application/json");
-    }, [waypoints, segments, waypointTypes]);
+    }, [waypoints, segments, types, shapes]);
 
     const exportSvg = useCallback(() => {
         const svgContentGroup = document.querySelector<SVGGElement>("g#waypoint-overlay");
@@ -69,19 +79,19 @@ export function ExportContainer() {
         svgContent.appendChild(clonedGroup);
 
         const kindsToHide = [];
-        if (settings.hideArrowsInExport) {
+        if (hideArrowsInExport) {
             kindsToHide.push("arrow");
         }
 
-        if (settings.hideDistancesInExport) {
+        if (hideDistancesInExport) {
             kindsToHide.push("distance-label");
         }
 
-        if (settings.hideOriginalPathsInExport) {
+        if (hideOriginalPathsInExport) {
             kindsToHide.push("original-path");
         }
 
-        if (settings.hideHiddenWaypointsInExport) {
+        if (hideHiddenWaypointsInExport) {
             kindsToHide.push("hidden-marker");
         }
 
@@ -100,12 +110,7 @@ export function ExportContainer() {
 
         // Remove the temporary SVG
         document.getElementById("exported-svg")?.remove();
-    }, [
-        settings.hideArrowsInExport,
-        settings.hideDistancesInExport,
-        settings.hideHiddenWaypointsInExport,
-        settings.hideOriginalPathsInExport,
-    ]);
+    }, [hideArrowsInExport, hideDistancesInExport, hideHiddenWaypointsInExport, hideOriginalPathsInExport]);
 
     const importJson = useCallback((file: File) => {
         if (!confirm("Are you sure you want to import this file? This will overwrite your current data.")) {
@@ -119,7 +124,16 @@ export function ExportContainer() {
                 try {
                     const data = JSON.parse(content);
                     if (data.waypointTypes) {
-                        setWaypointTypes(data.waypointTypes);
+                        if (Array.isArray(data.waypointTypes)) {
+                            // convert array to object where the id is the key
+                            const waypointTypes = data.waypointTypes.reduce((acc: Record<number, any>, type: any) => {
+                                acc[type.id] = type;
+                                return acc;
+                            }, {});
+                            setTypes(waypointTypes);
+                        } else {
+                            setTypes(data.waypointTypes);
+                        }
                     }
                     if (data.waypoints) {
                         setWaypoints(data.waypoints);
@@ -129,6 +143,9 @@ export function ExportContainer() {
                     }
                     if (data.shapes) {
                         setShapes(data.shapes);
+                    }
+                    if (data.waypointGroups) {
+                        setGroups(data.waypointGroups);
                     }
                 } catch (error) {
                     alert("Error parsing JSON file");
@@ -158,13 +175,33 @@ export function ExportContainer() {
                         importJson(file);
                     }
                 }}
-                className="bg-black/50 p-1 rounded-md"
+                className="bg-black/50 p-1 rounded-md h-20 border-white border-1 border-dashed cursor-pointer hover:bg-black/30 transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-black/50 disabled:bg-black/50 disabled:border-gray-500 disabled:text-gray-500"
             />
             <button
                 onClick={() => {
                     if (confirm("Are you sure you want to reset all data?")) {
                         setWaypoints([]);
                         setSegments([]);
+                        setShapes([]);
+                        setTypes({
+                            1: {
+                                id: 1,
+                                name: "Default",
+                                icon: "circle",
+                                color: "#FF0000",
+                                hidden: false,
+                                hasTwoColors: false,
+                            },
+                            2: {
+                                id: 2,
+                                name: "Custom",
+                                icon: "square",
+                                color: "#00FF00",
+                                hidden: false,
+                                hasTwoColors: false,
+                            },
+                        });
+                        setGroups([]);
                     }
                 }}
                 className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-red-500"

@@ -22,4 +22,6 @@ export function renderLabel(
     if (hiddenOnExportKind) {
         t.attr("data-kind", hiddenOnExportKind);
     }
+
+    return t;
 }

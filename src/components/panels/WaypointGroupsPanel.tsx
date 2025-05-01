@@ -1,7 +1,13 @@
-import { useWaypointGroupContext } from "../context/WaypointGroupContext";
+import { useWaypointGroupStore } from "../../stores/useGroups";
+import { Checkbox } from "../inputs/Checkbox";
+import { TextInput } from "../inputs/TextInput";
 
-export function WaypointGroupContainer() {
-    const { waypointGroups, updateWaypointGroup, addWaypointGroup, removeWaypointGroup, isDeletable } = useWaypointGroupContext();
+export function WaypointGroupsPanel() {
+    const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
+    const addWaypointGroup = useWaypointGroupStore((state) => state.addWaypointGroup);
+    const removeWaypointGroup = useWaypointGroupStore((state) => state.removeWaypointGroup);
+    const updateWaypointGroup = useWaypointGroupStore((state) => state.updateWaypointGroup);
+    const isDeletable = useWaypointGroupStore((state) => state.isDeletable);
 
     const handleAddGroup = () => {
         const newGroup = { id: Date.now(), name: "New Group", hidden: false };
@@ -12,20 +18,15 @@ export function WaypointGroupContainer() {
         <div className="flex flex-col gap-2">
             {waypointGroups.map((group) => (
                 <div key={group.id} className="flex items-center gap-2">
-                    <input
-                        type="text"
+                    <TextInput
                         value={group.name}
-                        onChange={(e) => updateWaypointGroup(group.id, { name: e.target.value })}
-                        className="bg-black/50 p-1 rounded-md"
+                        onChange={(value) => updateWaypointGroup(group.id, { name: value })}
                     />
-                    <input
-                        type="checkbox"
-                        id={group.id.toString()}
-                        checked={group.hidden}
-                        onChange={(e) => updateWaypointGroup(group.id, { hidden: e.target.checked })}
-                        className="bg-black/50 p-1 rounded-md"
+                    <Checkbox
+                        label="Hidden"
+                        value={group.hidden}
+                        onChange={(value) => updateWaypointGroup(group.id, { hidden: value })}
                     />
-                    <label className="text-xs" htmlFor={group.id.toString()}>Hidden</label>
                     <button
                         onClick={() => removeWaypointGroup(group.id)}
                         disabled={!isDeletable(group.id)}

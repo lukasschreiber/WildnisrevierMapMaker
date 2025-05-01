@@ -1,21 +1,25 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useWaypointContext, Waypoint } from "../context/WaypointContext";
-import { useWaypointTypeContext } from "../context/WaypointTypeContext";
-import { renderMarker } from "../renderer/renderMarkers";
-import { useSettings } from "../settings/useSettings";
 import * as d3 from "d3";
 import { useMap } from "react-leaflet";
-import { useWaypointGroupContext } from "../context/WaypointGroupContext";
-import useLocalStorage from "../hooks/useLocalStorage";
+import useLocalStorage from "../../hooks/useLocalStorage";
+import { renderMarker } from "../../renderer/renderMarkers";
+import { Select } from "../inputs/Select";
+import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
+import { useWaypointGroupStore } from "../../stores/useGroups";
+import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
+import { useSettingsStore } from "../../stores/useSettings";
 
 type GroupByOption = "type" | "group";
 type SortByOption = "id" | "name" | "type" | "group";
 type SortDirection = "asc" | "desc";
 
-export function WaypointListContainer() {
-    const { waypoints, selectedId, selectWaypoint, deselectWaypoint } = useWaypointContext();
-    const { getWaypointTypeById } = useWaypointTypeContext();
-    const { getWaypointGroupById } = useWaypointGroupContext();
+export function WaypointsPanel() {
+    const waypoints = useWaypointStore((state) => state.waypoints);
+    const selectedId = useWaypointStore((state) => state.selectedId);
+    const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
+    const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
+    const getTypeById = useWaypointTypeStore((state) => state.getTypeById);
+    const getWaypointGroupById = useWaypointGroupStore((state) => state.getWaypointGroupById);
     const map = useMap();
 
     // NEW: state for grouping and sorting
@@ -94,38 +98,38 @@ export function WaypointListContainer() {
             <div className="flex flex-row gap-4 mb-4">
                 <div>
                     <label className="block text-xs mb-1">Group By</label>
-                    <select
+                    <Select
                         value={groupBy}
-                        onChange={(e) => setGroupBy(e.target.value as GroupByOption)}
-                        className="w-full bg-black/50 p-1 rounded-md"
-                    >
-                        <option value="type">Type</option>
-                        <option value="group">Group</option>
-                    </select>
+                        onChange={(value) => setGroupBy(value as GroupByOption)}
+                        options={[
+                            { label: "Type", value: "type" },
+                            { label: "Group", value: "group" },
+                        ]}
+                    />
                 </div>
                 <div>
                     <label className="block text-xs mb-1">Sort By</label>
-                    <select
+                    <Select
                         value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortByOption)}
-                        className="w-full bg-black/50 p-1 rounded-md"
-                    >
-                        <option value="id">ID</option>
-                        <option value="name">Name</option>
-                        <option value="type">Type</option>
-                        <option value="group">Group</option>
-                    </select>
+                        onChange={(value) => setSortBy(value as SortByOption)}
+                        options={[
+                            { label: "ID", value: "id" },
+                            { label: "Name", value: "name" },
+                            { label: "Type", value: "type" },
+                            { label: "Group", value: "group" },
+                        ]}
+                    />
                 </div>
                 <div>
                     <label className="block text-xs mb-1">Direction</label>
-                    <select
+                    <Select
                         value={sortDirection}
-                        onChange={(e) => setSortDirection(e.target.value as SortDirection)}
-                        className="w-full bg-black/50 p-1 rounded-md"
-                    >
-                        <option value="asc">Ascending</option>
-                        <option value="desc">Descending</option>
-                    </select>
+                        options={[
+                            { label: "Ascending", value: "asc" },
+                            { label: "Descending", value: "desc" },
+                        ]}
+                        onChange={(value) => setSortDirection(value as SortDirection)}
+                    />
                 </div>
             </div>
             {waypointsInNeedOfClassification.length > 0 && (
@@ -139,7 +143,7 @@ export function WaypointListContainer() {
                 let title = "";
 
                 if (groupBy === "type") {
-                    const waypointType = getWaypointTypeById(Number(groupKey));
+                    const waypointType = getTypeById(Number(groupKey));
                     title = waypointType?.name ?? `Unknown Type (${groupKey})`;
                 } else if (groupBy === "group") {
                     const waypointGroup = getWaypointGroupById(Number(groupKey));
@@ -193,10 +197,14 @@ function WaypointListItem({
     selectedId: number | null;
     onClick: (id: number) => void;
 }) {
-    const waypointType = useWaypointTypeContext().getWaypointTypeById(waypoint.typeId);
-    const waypointGroup = useWaypointGroupContext().getWaypointGroupById(waypoint.groupId ?? -1);
+    const getTypeById = useWaypointTypeStore((state) => state.getTypeById);
+    const waypointType = getTypeById(waypoint.typeId);
+    const getWaypointGroupById = useWaypointGroupStore((state) => state.getWaypointGroupById);
+    const waypointGroup = getWaypointGroupById(waypoint.groupId ?? -1);
     const containerRef = useRef<SVGSVGElement>(null);
-    const { settings } = useSettings();
+    const waypointBorderColor = useSettingsStore((state) => state.settings.waypointBorderColor);
+    const waypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
+    const showWaypointBorder = useSettingsStore((state) => state.settings.showWaypointBorder);
 
     useEffect(() => {
         if (containerRef.current && waypointType) {
@@ -209,12 +217,12 @@ function WaypointListItem({
                 10,
                 waypointType,
                 waypointGroup,
-                settings.waypointBorderWidth,
-                settings.waypointBorderColor,
-                settings.showWaypointBorder
+                waypointBorderWidth,
+                waypointBorderColor,
+                showWaypointBorder
             );
         }
-    }, [containerRef, waypointType, waypointGroup, settings]); // Updated dependencies
+    }, [containerRef, waypointType, waypointGroup, waypointBorderWidth, waypointBorderColor, showWaypointBorder]);
 
     return (
         <div
