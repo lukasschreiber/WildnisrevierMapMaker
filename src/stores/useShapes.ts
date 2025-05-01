@@ -63,7 +63,8 @@ export const useShapeStore = create<ShapeState>()(
 
             addShape: (name, color, texture, shapeType = "smooth") => {
                 const nextId = get().shapes.length > 0 ? Math.max(...get().shapes.map((s) => s.id)) + 1 : 1;
-                const newShape: Shape = { id: nextId, nodes: [], name, color, texture, shapeType };
+                const maxOrder = Math.max(...get().shapes.map((s) => s.order ?? 0), 0);
+                const newShape: Shape = { id: nextId, nodes: [], name, color, texture, shapeType, order: maxOrder + 1 };
                 set((state) => ({ shapes: [...state.shapes, newShape] }));
             },
 

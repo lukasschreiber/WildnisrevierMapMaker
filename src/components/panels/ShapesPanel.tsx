@@ -92,70 +92,89 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="flex flex-row gap-2 items-center border p-1">
-            <div {...attributes} {...listeners} className="cursor-grab p-1 select-none">
-                ⋮⋮
+        <div ref={setNodeRef} style={style} className="flex flex-col gap-1 border p-1">
+            <div className="flex flex-row gap-2 items-center">
+                <div {...attributes} {...listeners} className="cursor-grab p-1 select-none">
+                    ⋮⋮
+                </div>
+                <TextInput value={shape.name} onChange={(value) => updateShape(shape.id, { name: value })} />
+                <Select
+                    value={shape.shapeType}
+                    onChange={(value) => updateShape(shape.id, { shapeType: value })}
+                    options={[
+                        { label: "Smooth", value: "smooth" },
+                        { label: "Straight", value: "straight" },
+                    ]}
+                />
+                <NumberInput
+                    value={shape.alpha}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={(value) => updateShape(shape.id, { alpha: value })}
+                    className="max-w-14"
+                    placeholder="Alpha"
+                />
+                <Select
+                    value={shape.texture || "solid"}
+                    onChange={(value) => updateShape(shape.id, { texture: value })}
+                    options={[
+                        { label: "None", value: "none" },
+                        { label: "Solid", value: "solid" },
+                        { label: "Gradient", value: "gradient" },
+                        { label: "Lines", value: "lines" },
+                        { label: "Dots", value: "dots" },
+                        { label: "Checkered", value: "checkered" },
+                        { label: "Chessboard", value: "chessboard" },
+                        { label: "Crosses", value: "crosses" },
+                    ]}
+                />
+                <ColorInput value={shape.color} onChange={(value) => updateShape(shape.id, { color: value })} />
+                <Checkbox
+                    id={shape.id.toString()}
+                    label="Has Outline"
+                    value={shape.hasOutline}
+                    onChange={(checked) => updateShape(shape.id, { hasOutline: checked })}
+                />
+                <Checkbox
+                    id={`${shape.id}-hidden`}
+                    label="Hidden"
+                    value={shape.hidden}
+                    onChange={(checked) => updateShape(shape.id, { hidden: checked })}
+                />
+                <div>{shape.nodes?.length} points</div>
+                <button
+                    onClick={() => {
+                        setAddMode(!addMode);
+                        setAddPathsMode(false);
+                        setAddWaypointMode(false);
+                        setAddModeReferenceShapeId(shape.id);
+                    }}
+                    className="px-3 py-1 bg-green-500 hover:bg-green-600 rounded"
+                >
+                    {addMode && addModeReferenceShapeId === shape.id ? "Cancel" : "Edit Points"}
+                </button>
+                <button onClick={() => removeShape(shape.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
+                    Delete
+                </button>
             </div>
-            <TextInput value={shape.name} onChange={(value) => updateShape(shape.id, { name: value })} />
-            <Select
-                value={shape.shapeType}
-                onChange={(value) => updateShape(shape.id, { shapeType: value })}
-                options={[
-                    { label: "Smooth", value: "smooth" },
-                    { label: "Straight", value: "straight" },
-                ]}
-            />
-            <NumberInput
-                value={shape.alpha}
-                min={0}
-                max={1}
-                step={0.01}
-                onChange={(value) => updateShape(shape.id, { alpha: value })}
-                className="max-w-14"
-                placeholder="Alpha"
-            />
-            <Select
-                value={shape.texture || "solid"}
-                onChange={(value) => updateShape(shape.id, { texture: value })}
-                options={[
-                    { label: "None", value: "none" },
-                    { label: "Solid", value: "solid" },
-                    { label: "Gradient", value: "gradient" },
-                    { label: "Lines", value: "lines" },
-                    { label: "Dots", value: "dots" },
-                    { label: "Checkered", value: "checkered" },
-                    { label: "Chessboard", value: "chessboard" },
-                    { label: "Crosses", value: "crosses" },
-                ]}
-            />
-            <ColorInput value={shape.color} onChange={(value) => updateShape(shape.id, { color: value })} />
-            <Checkbox
-                id={shape.id.toString()}
-                label="Has Outline"
-                value={shape.hasOutline}
-                onChange={(checked) => updateShape(shape.id, { hasOutline: checked })}
-            />
-            <Checkbox
-                id={`${shape.id}-hidden`}
-                label="Hidden"
-                value={shape.hidden}
-                onChange={(checked) => updateShape(shape.id, { hidden: checked })}
-            />
-            <div>{shape.nodes?.length} points</div>
-            <button
-                onClick={() => {
-                    setAddMode(!addMode);
-                    setAddPathsMode(false);
-                    setAddWaypointMode(false);
-                    setAddModeReferenceShapeId(shape.id);
-                }}
-                className="px-3 py-1 bg-green-500 hover:bg-green-600 rounded"
-            >
-                {addMode && addModeReferenceShapeId === shape.id ? "Cancel" : "Edit Points"}
-            </button>
-            <button onClick={() => removeShape(shape.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
-                Delete
-            </button>
+            <div className="flex flex-row gap-1 pl-6">
+                {shape.nodes?.map((node) => (
+                    <div key={node.waypointId} className="flex flex-row gap-2 items-center">
+                        <div className="text-xs">{node.waypointId}</div>
+                        {/* <button
+                        onClick={() => {
+                            updateShape(shape.id, {
+                                nodes: shape.nodes.filter((n) => n.waypointId !== node.waypointId),
+                            });
+                        }}
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded"
+                    >
+                        Remove Node
+                    </button> */}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }, areEqual);

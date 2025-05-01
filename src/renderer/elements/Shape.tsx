@@ -27,8 +27,9 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
 
     const waypoints = useMemo(() => {
         if (!shape) return [];
-        const ids = new Set(shape.nodes.map((n) => n.waypointId));
-        return allWaypoints.filter((wp) => ids.has(wp.id));
+        const idList = shape.nodes.map((n) => n.waypointId);
+        const waypointMap = new Map(allWaypoints.map((wp) => [wp.id, wp]));
+        return idList.map((id) => waypointMap.get(id)!).filter(Boolean);
     }, [allWaypoints, shape]);
 
     const draw = useCallback(() => {
