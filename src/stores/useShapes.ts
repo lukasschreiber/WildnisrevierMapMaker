@@ -17,6 +17,7 @@ export type Shape = {
     shapeType: "smooth" | "straight";
     hidden?: boolean;
     order?: number;
+    labelHidden?: boolean;
 };
 
 type ShapeState = {

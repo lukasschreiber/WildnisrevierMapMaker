@@ -142,6 +142,12 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                     value={shape.hidden}
                     onChange={(checked) => updateShape(shape.id, { hidden: checked })}
                 />
+                <Checkbox
+                    id={`${shape.id}-labelHidden`}
+                    label="Label Hidden"
+                    value={shape.labelHidden}
+                    onChange={(checked) => updateShape(shape.id, { labelHidden: checked })}
+                />
                 <div>{shape.nodes?.length?.toFixed(0).padStart(2, "0")} points</div>
                 <button
                     onClick={() => {
