@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import L from "leaflet";
 import * as d3 from "d3";
@@ -10,9 +10,10 @@ import { renderShape } from "../renderShape";
 type ShapeProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
     shapeId: number;
+    order?: number;
 };
 
-export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
+export const Shape = React.memo(({ g, shapeId, order }: ShapeProps) => {
     const map = useMap();
 
     const {
@@ -25,6 +26,7 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
 
     const shape = useShapeStore((state) => state.shapes.find((s) => s.id === shapeId));
     const allWaypoints = useWaypointStore((state) => state.waypoints);
+    const renderedOrder = useRef(order);
 
     const waypoints = useMemo(() => {
         if (!shape) return [];
@@ -36,6 +38,11 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
         if (!g || !waypoints || waypoints.length === 0 || !shape) return;
 
         const existing = g.select(`#shape-${shape.id}`);
+
+        if (renderedOrder.current !== order) {
+            existing.remove();
+            renderedOrder.current = order;
+        }
 
         if (shape.hidden) {
             existing.remove();
@@ -75,6 +82,7 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
         showShapeControlPointEdges,
         shapeLabelColor,
         showSolidBlockBehindLabels,
+        order
     ]);
 
     useEffect(() => {
@@ -98,5 +106,5 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
 }, areEqual);
 
 function areEqual(prev: ShapeProps, next: ShapeProps) {
-    return prev.shapeId === next.shapeId && prev.g === next.g;
+    return prev.shapeId === next.shapeId && prev.g === next.g && prev.order === next.order;
 }
