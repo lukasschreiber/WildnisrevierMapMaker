@@ -107,13 +107,22 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                     ]}
                 />
                 <NumberInput
-                    value={shape.alpha}
-                    min={0}
+                    value={shape.alpha ?? "" as unknown as number}
+                    min={-0.01}
                     max={1}
                     step={0.01}
-                    onChange={(value) => updateShape(shape.id, { alpha: value })}
+                    onChange={(value) => updateShape(shape.id, { alpha: value < 0 ? undefined : value })}
                     className="max-w-14"
                     placeholder="Alpha"
+                />
+                <NumberInput
+                    value={shape.opacity ?? "" as unknown as number}
+                    min={-0.01}
+                    max={1}
+                    step={0.01}
+                    onChange={(value) => updateShape(shape.id, { opacity: value < 0 ? undefined : value })}
+                    className="max-w-14"
+                    placeholder="Opacity"
                 />
                 <Select
                     value={shape.texture || "solid"}

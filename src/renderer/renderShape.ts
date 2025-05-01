@@ -98,7 +98,8 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
     const path = group.append("path")
         .attr("d", p.toString())
         .style("stroke", hasOutline ? color : "none")
-        .style("stroke-width", 1.5);
+        .style("stroke-width", 1.5)
+        .style("fill-opacity", shape.opacity ?? 0.5)
 
     if (texture === "gradient") {
         group.append("defs").append("linearGradient")

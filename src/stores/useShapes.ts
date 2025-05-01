@@ -18,6 +18,7 @@ export type Shape = {
     hidden?: boolean;
     order?: number;
     labelHidden?: boolean;
+    opacity?: number;
 };
 
 type ShapeState = {
