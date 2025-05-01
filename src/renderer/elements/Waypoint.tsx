@@ -66,7 +66,6 @@ export const Waypoint = React.memo(({ g, waypointId }: WaypointProps) => {
                 }
             } else if (addShapeMode) {
                 if (addModeReferenceShapeId) {
-                    console.log("Adding node to shape", addModeReferenceShapeId);
                     addShapeNode(addModeReferenceShapeId, waypoint.id);
                 }
             } else {

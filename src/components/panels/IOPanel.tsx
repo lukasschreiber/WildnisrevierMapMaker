@@ -15,6 +15,7 @@ export function IOPanel() {
     const setSegments = usePathStore((state) => state.setSegments);
     const shapes = useShapeStore((state) => state.shapes);
     const setShapes = useShapeStore((state) => state.setShapes);
+    const groups = useWaypointGroupStore((state) => state.waypointGroups);
     const setGroups = useWaypointGroupStore((state) => state.setWaypointGroups);
     // TODO: persist groups
     const hideArrowsInExport = useSettingsStore((state) => state.settings.hideArrowsInExport);
@@ -37,15 +38,16 @@ export function IOPanel() {
     const exportJson = useCallback(() => {
         const data = {
             waypoints,
-            types,
+            waypointTypes: types,
             segments,
             shapes,
+            groups,
         };
 
         const json = JSON.stringify(data, null, 2);
         const name = `export-${new Date().toISOString()}.wmap`;
         downloadFile(json, name, "application/json");
-    }, [waypoints, segments, types, shapes]);
+    }, [waypoints, segments, types, shapes, groups]);
 
     const exportSvg = useCallback(() => {
         const svgContentGroup = document.querySelector<SVGGElement>("g#waypoint-overlay");
