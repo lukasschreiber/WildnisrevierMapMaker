@@ -11,7 +11,9 @@ interface Point {
 export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
     const { color, name, shapeType, texture, hasOutline, alpha } = shape;
 
-    const renderedComponents: d3.Selection<any, any, any, undefined>[] = [];
+    // create a group and put everything in the group
+    const group = g.append("g")
+        .attr("id", `shape-${shape.id}`)
 
     const patternId = `pattern-${Math.random().toString(36).substring(2, 15)}`;
 
@@ -21,7 +23,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
     });
 
     if (showOriginalShapeVertices) {
-        const pointGroup = g.append("g");
+        const pointGroup = group.append("g");
 
         pointGroup.selectAll("circle")
             .data(dedupedPoints)
@@ -30,8 +32,6 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .attr("cy", d => d.y)
             .attr("r", 5)
             .style("fill", "red")
-
-        renderedComponents.push(pointGroup);
     }
 
     if (showOriginalShapeEdges) {
@@ -40,15 +40,15 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .y(d => d.y)
             .curve(d3.curveLinearClosed); // like your ctx.lineTo + closePath
 
-        renderedComponents.push(g.append("path")
+        group.append("path")
             .attr("d", closedLine(dedupedPoints))
             .style("stroke", "#222")
             .style("stroke-width", 0.7)
-            .style("fill", "none"));
+            .style("fill", "none")
     }
 
     if (dedupedPoints.length <= 2) {
-        return [];
+        return null;
     }
 
     const controlPoints = smoothControlPoints(dedupedPoints, shapeType === "straight" ? 0 : alpha);
@@ -69,11 +69,11 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             );
         }
 
-        renderedComponents.push(g.append("path")
+        group.append("path")
             .attr("d", controlLine(controlPathPoints))
             .style("stroke", "blue")
             .style("stroke-width", 1)
-            .style("fill", "none"));
+            .style("fill", "none")
 
     }
 
@@ -82,7 +82,7 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
     const m = controlPoints.length;
 
     if (controlPoints.length < 1) {
-        return [];
+        return null;
     }
 
     const start = controlPoints[1];
@@ -95,15 +95,13 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
         p.bezierCurveTo(b.x, b.y, c.x, c.y, d.x, d.y);
     }
 
-    const path = g.append("path")
+    const path = group.append("path")
         .attr("d", p.toString())
         .style("stroke", hasOutline ? color : "none")
         .style("stroke-width", 1.5);
 
-    renderedComponents.push(path);
-
     if (texture === "gradient") {
-        const pattern = g.append("defs").append("linearGradient")
+        group.append("defs").append("linearGradient")
             .attr("id", patternId)
             .selectAll("stop")
             .data([
@@ -116,9 +114,8 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .attr("stop-color", d => d.color.formatHex());
 
         path.style("fill", `url(#${patternId})`);
-        renderedComponents.push(pattern);
     } else if (texture === "lines") {
-        const pattern = g.append("defs").append("pattern")
+        const pattern = group.append("defs").append("pattern")
             .attr("id", patternId)
             .attr("patternUnits", "userSpaceOnUse")
             .attr("width", 8)
@@ -130,9 +127,8 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("stroke-width", 1);
 
         path.style("fill", `url(#${patternId})`);
-        renderedComponents.push(pattern);
     } else if (texture === "dots") {
-        const pattern = g.append("defs").append("pattern")
+        const pattern = group.append("defs").append("pattern")
             .attr("id", patternId)
             .attr("patternUnits", "userSpaceOnUse")
             .attr("width", 4)
@@ -145,9 +141,8 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("fill", color);
 
         path.style("fill", `url(#${patternId})`);
-        renderedComponents.push(pattern);
     } else if (texture === "checkered") {
-        const pattern = g.append("defs").append("pattern")
+        const pattern = group.append("defs").append("pattern")
             .attr("id", patternId)
             .attr("patternUnits", "userSpaceOnUse")
             .attr("width", 8)
@@ -163,11 +158,10 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("stroke-width", 1);
 
         path.style("fill", `url(#${patternId})`);
-        renderedComponents.push(pattern);
     } else if (texture === "chessboard") {
         const patternSize = 10; // size of each small square
 
-        const pattern = g.append("defs").append("pattern")
+        const pattern = group.append("defs").append("pattern")
             .attr("id", patternId)
             .attr("patternUnits", "userSpaceOnUse")
             .attr("width", patternSize * 2) // pattern covers 2x2 squares
@@ -198,12 +192,11 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("fill", d3.rgb(color).darker(1).formatHex());
 
         path.style("fill", `url(#${patternId})`);
-        renderedComponents.push(pattern);
     } else if (texture === "crosses") {
         const patternSize = 12; // how far apart crosses are
         const crossSize = 4;    // size of each cross arm
 
-        const pattern = g.append("defs").append("pattern")
+        const pattern = group.append("defs").append("pattern")
             .attr("id", patternId)
             .attr("patternUnits", "userSpaceOnUse")
             .attr("width", patternSize)
@@ -228,7 +221,6 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
             .style("stroke-width", 1);
 
         path.style("fill", `url(#${patternId})`);
-        renderedComponents.push(pattern);
     } else if (texture === "solid") {
         path.style("fill", color);
     } else if (texture === "none") {
@@ -246,9 +238,13 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
 
     const labelText = `${name}`;
 
+    if (!labelText || labelText.length === 0 || shape.labelHidden) {
+        return group;
+    }
+
     if (showSolidBlockBehindLabel) {
 
-        const text1 = g.append("text")
+        const text1 = group.append("text")
             .attr("x", midPoint.x)
             .attr("y", midPoint.y)
             .text(labelText)
@@ -260,24 +256,24 @@ export function renderShape(g: d3.Selection<SVGGElement, unknown, null, undefine
         const bbox = text1.node()!.getBBox();
         text1.remove();
 
-        renderedComponents.push(g.append("rect")
+        group.append("rect")
             .attr("x", bbox.x - 2)
             .attr("y", bbox.y - 2)
             .attr("width", bbox.width + 4)
             .attr("height", bbox.height + 4)
-            .style("fill", color))
+            .style("fill", color)
     }
 
-    renderedComponents.push(g.append("text")
+    group.append("text")
         .attr("x", midPoint.x)
         .attr("y", midPoint.y)
         .text(labelText)
         .style("fill", labelColor)
         .style("font-size", "12px")
         .attr("text-anchor", "middle")
-        .attr("alignment-baseline", "middle"));
+        .attr("alignment-baseline", "middle")
 
-    return renderedComponents;
+    return group;
 }
 
 

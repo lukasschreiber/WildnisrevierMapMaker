@@ -35,16 +35,14 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
     const draw = useCallback(() => {
         if (!g || !waypoints || waypoints.length === 0 || !shape) return;
 
-        const existing = g.select(`.shape-${shape.id}`);
+        const existing = g.select(`#shape-${shape.id}`);
 
         if (shape.hidden) {
             existing.remove();
             return;
         }
 
-        const points = waypoints.map((waypoint) =>
-            map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng))
-        );
+        const points = waypoints.map((waypoint) => map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)));
 
         const rendered = renderShape(
             g,
@@ -57,15 +55,16 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
             showSolidBlockBehindLabels
         );
 
-        rendered.forEach((component) => {
-            component.classed(`shape-${shape.id}`, true);
+        if (rendered) {
             if (!existing.empty()) {
+                console.log("Replacing existing shape");
                 const node = existing.node()! as SVGElement;
-                node.replaceWith(component.node()!);
+                node.replaceWith(rendered.node()!);
             } else {
-                g.node()?.appendChild(component.node()!);
+                console.log("Appending new shape");
+                g.node()?.appendChild(rendered.node()!);
             }
-        });
+        }
     }, [
         g,
         shape,
