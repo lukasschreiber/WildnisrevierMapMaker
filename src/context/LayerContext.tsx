@@ -49,6 +49,7 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
 
         const g = svg.append("g")
             .classed("leaflet-overlay", true)
+            .classed("waypoint-overlay", true)
             .attr("data-z", zIndex)
             .attr("id", `overlay-z-${zIndex}`);
 

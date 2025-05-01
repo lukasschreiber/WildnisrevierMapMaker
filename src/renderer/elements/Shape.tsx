@@ -15,35 +15,38 @@ type ShapeProps = {
 export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
     const map = useMap();
 
-    const showOriginalShapeEdges = useSettingsStore((state) => state.settings.showOriginalShapeEdges);
-    const showOriginalShapeVertices = useSettingsStore((state) => state.settings.showOriginalShapeVertices);
-    const showShapeControlPointEdges = useSettingsStore((state) => state.settings.showShapeControlPointEdges);
-    const shapeLabelColor = useSettingsStore((state) => state.settings.shapeLabelColor);
-    const showSolidBlockBehindLabels = useSettingsStore((state) => state.settings.showSolidBlockBehindLabels);
+    const {
+        showOriginalShapeEdges,
+        showOriginalShapeVertices,
+        showShapeControlPointEdges,
+        shapeLabelColor,
+        showSolidBlockBehindLabels,
+    } = useSettingsStore((state) => state.settings);
 
     const shape = useShapeStore((state) => state.shapes.find((s) => s.id === shapeId));
-
     const allWaypoints = useWaypointStore((state) => state.waypoints);
 
     const waypoints = useMemo(() => {
         if (!shape) return [];
-        const idList = shape.nodes.map((n) => n.waypointId);
         const waypointMap = new Map(allWaypoints.map((wp) => [wp.id, wp]));
-        return idList.map((id) => waypointMap.get(id)!).filter(Boolean);
+        return shape.nodes.map((n) => waypointMap.get(n.waypointId)!).filter(Boolean);
     }, [allWaypoints, shape]);
 
     const draw = useCallback(() => {
-        if (!g || !waypoints || waypoints.length === 0 || !shape) return [];
+        if (!g || !waypoints || waypoints.length === 0 || !shape) return;
 
-        g.selectAll(`.shape-${shape.id}`).remove();
+        const existing = g.select(`.shape-${shape.id}`);
 
         if (shape.hidden) {
-            return
+            existing.remove();
+            return;
         }
 
-        const points = waypoints.map((waypoint) => map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)));
+        const points = waypoints.map((waypoint) =>
+            map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng))
+        );
 
-        renderShape(
+        const rendered = renderShape(
             g,
             shape,
             points,
@@ -52,14 +55,21 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
             showShapeControlPointEdges,
             shapeLabelColor,
             showSolidBlockBehindLabels
-        ).map((renderedComponent) => {
-            renderedComponent.classed(`shape-${shape.id}`, true);
-            return renderedComponent;
+        );
+
+        rendered.forEach((component) => {
+            component.classed(`shape-${shape.id}`, true);
+            if (!existing.empty()) {
+                const node = existing.node()! as SVGElement;
+                node.replaceWith(component.node()!);
+            } else {
+                g.node()?.appendChild(component.node()!);
+            }
         });
     }, [
-        waypoints,
-        shape,
         g,
+        shape,
+        waypoints,
         map,
         showOriginalShapeEdges,
         showOriginalShapeVertices,
@@ -74,12 +84,11 @@ export const Shape = React.memo(({ g, shapeId }: ShapeProps) => {
 
     const updatePosition = useCallback(() => {
         draw();
-    }, [g, draw]);
+    }, [draw]);
 
     useEffect(() => {
         map.on("zoomend", updatePosition);
         map.on("moveend", updatePosition);
-
         return () => {
             map.off("zoomend", updatePosition);
             map.off("moveend", updatePosition);

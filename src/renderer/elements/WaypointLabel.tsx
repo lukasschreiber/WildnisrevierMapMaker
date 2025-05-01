@@ -34,6 +34,13 @@ export const WaypointLabel = React.memo(({ g, waypointId }: WaypointLabelProps) 
         const point = getLabelPosition();
         if (!point) return;
 
+        const isHidden = type.hidden || group?.hidden;
+
+        if (isHidden) {
+            g.select(`#waypoint-label-${waypoint.id}`).remove();
+            return;
+        }
+
         const { id, name } = waypoint;
 
         const renderedLabel = renderLabel(

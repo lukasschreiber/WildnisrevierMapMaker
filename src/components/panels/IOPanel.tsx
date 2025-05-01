@@ -50,69 +50,69 @@ export function IOPanel() {
     }, [waypoints, segments, types, shapes, groups]);
 
     const exportSvg = useCallback(() => {
-        const svgContentGroup = document.querySelector<SVGGElement>("g#waypoint-overlay");
-        if (!svgContentGroup) {
+        const svgContentGroups = document.querySelectorAll<SVGGElement>(".waypoint-overlay");
+        if (!svgContentGroups || svgContentGroups.length === 0) {
             alert("No SVG content found");
             return;
         }
-
-        // Get bounding box and calculate the position
+    
+        // Combine all SVG groups into one <g>
+        const svgContentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        svgContentGroups.forEach((group) => {
+            const clonedGroup = group.cloneNode(true);
+            svgContentGroup.appendChild(clonedGroup);
+        });
+    
+        // Create a temporary SVG to compute the bounding box
+        const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        tempSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        tempSvg.setAttribute("style", "position: absolute; top: -9999px; left: -9999px; visibility: hidden;");
+        tempSvg.appendChild(svgContentGroup);
+        document.body.appendChild(tempSvg);
+    
         const bbox = svgContentGroup.getBBox();
         const svgWidth = bbox.width;
         const svgHeight = bbox.height;
         const svgX = bbox.x;
         const svgY = bbox.y;
-
-        // Create a new SVG element
+    
+        // Remove the temporary SVG
+        tempSvg.remove();
+    
+        // Now create the actual exportable SVG
         const svgContent = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-
         svgContent.setAttribute("width", `${svgWidth}`);
         svgContent.setAttribute("height", `${svgHeight}`);
-        svgContent.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         svgContent.setAttribute("viewBox", `${svgX} ${svgY} ${svgWidth} ${svgHeight}`);
+        svgContent.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svgContent.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
         svgContent.setAttribute("style", "background: white;");
         svgContent.setAttribute("preserveAspectRatio", "xMinYMin meet");
         svgContent.setAttribute("version", "1.1");
-        svgContent.setAttribute("id", "exported-svg");
-        svgContent.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-
-        // Clone the group element and append it to the new SVG
-        const clonedGroup = svgContentGroup.cloneNode(true);
-        svgContent.appendChild(clonedGroup);
-
+    
+        // Clone the original group again (to avoid using the DOM-modified one)
+        const finalGroup = svgContentGroup.cloneNode(true);
+        svgContent.appendChild(finalGroup);
+    
+        // Apply hiding rules
         const kindsToHide = [];
-        if (hideArrowsInExport) {
-            kindsToHide.push("arrow");
-        }
-
-        if (hideDistancesInExport) {
-            kindsToHide.push("distance-label");
-        }
-
-        if (hideOriginalPathsInExport) {
-            kindsToHide.push("original-path");
-        }
-
-        if (hideHiddenWaypointsInExport) {
-            kindsToHide.push("hidden-marker");
-        }
-
+        if (hideArrowsInExport) kindsToHide.push("arrow");
+        if (hideDistancesInExport) kindsToHide.push("distance-label");
+        if (hideOriginalPathsInExport) kindsToHide.push("original-path");
+        if (hideHiddenWaypointsInExport) kindsToHide.push("hidden-marker");
+    
         for (const kind of kindsToHide) {
             svgContent.querySelectorAll(`*[data-kind="${kind}"]`).forEach((el) => {
                 el.setAttribute("visibility", "hidden");
             });
         }
-
-        // Use XMLSerializer to serialize the SVG content
+    
+        // Serialize and download
         const serializer = new XMLSerializer();
         const svgString = serializer.serializeToString(svgContent);
-
-        // Download the file
         downloadFile(svgString, `export-${new Date().toISOString()}.svg`, "image/svg+xml");
-
-        // Remove the temporary SVG
-        document.getElementById("exported-svg")?.remove();
     }, [hideArrowsInExport, hideDistancesInExport, hideHiddenWaypointsInExport, hideOriginalPathsInExport]);
+    
 
     const importJson = useCallback((file: File) => {
         if (!confirm("Are you sure you want to import this file? This will overwrite your current data.")) {
