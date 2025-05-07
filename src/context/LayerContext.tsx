@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import * as d3 from "d3";
@@ -14,6 +14,8 @@ const LayerContext = createContext<LayerContextType | undefined>(undefined);
 export function LayerProvider({ children }: React.PropsWithChildren) {
     const map = useMap();
     const gMapRef = useRef<GMap>(new Map());
+    const svgRef = useRef<d3.Selection<SVGSVGElement, unknown, null, undefined> | null>(null);
+    const [isSvgReady, setSvgReady] = useState(false);
 
     useEffect(() => {
         const svgLayer = L.svg();
@@ -21,8 +23,9 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
 
         const svg = d3.select(map.getPanes().overlayPane).select<SVGSVGElement>("svg");
         svg.attr("pointer-events", "auto");
+        svgRef.current = svg;
+        setSvgReady(true);
 
-        // Optional: sort layers by zIndex when DOM updates happen
         const updateLayerOrder = () => {
             const gs = Array.from(gMapRef.current.entries()).sort(([a], [b]) => a - b);
             gs.forEach(([_, g]) => {
@@ -30,22 +33,23 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
             });
         };
 
-        // Initial layer order (though initially empty)
         updateLayerOrder();
 
         return () => {
             svgLayer.remove();
             gMapRef.current.clear();
+            svgRef.current = null;
+            setSvgReady(false);
         };
     }, [map]);
 
-    const getLayer = (zIndex: number) => {
+    const getLayer = useCallback((zIndex: number) => {
+        const svg = svgRef.current;
+        if (!svg) return null;
+
         if (gMapRef.current.has(zIndex)) {
             return gMapRef.current.get(zIndex)!;
         }
-
-        const svg = d3.select(map.getPanes().overlayPane).select<SVGSVGElement>("svg");
-        if (svg.empty()) return null;
 
         const g = svg.append("g")
             .classed("leaflet-overlay", true)
@@ -55,16 +59,15 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
 
         gMapRef.current.set(zIndex, g);
 
-        // Optional: re-sort layers after creation
         const sorted = Array.from(gMapRef.current.entries()).sort(([a], [b]) => a - b);
         sorted.forEach(([_, layer]) => svg.node()?.appendChild(layer.node()!));
 
         return g;
-    };
+    }, []);
 
     return (
         <LayerContext.Provider value={{ getLayer }}>
-            {children}
+            {isSvgReady && children}
         </LayerContext.Provider>
     );
 }

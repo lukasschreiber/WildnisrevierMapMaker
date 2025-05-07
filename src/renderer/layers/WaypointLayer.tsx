@@ -8,6 +8,8 @@ export function WaypointLayer() {
     const g = useLayer(12);
     const waypoints = useWaypointStore((state) => state.waypoints);
 
+    if (!g) return null; // Ensure g is defined before proceeding
+
     return waypoints.map((waypoint) => (
         <React.Fragment key={waypoint.id}>
             <Waypoint g={g} waypointId={waypoint.id} />

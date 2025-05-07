@@ -82,11 +82,12 @@ export const Shape = React.memo(({ g, shapeId, order }: ShapeProps) => {
         showShapeControlPointEdges,
         shapeLabelColor,
         showSolidBlockBehindLabels,
-        order
+        order,
     ]);
 
     useEffect(() => {
         draw();
+        console.log("Calling draw");
     }, [draw]);
 
     const updatePosition = useCallback(() => {

@@ -24,7 +24,7 @@ export const Waypoint = React.memo(({ g, waypointId }: WaypointProps) => {
 
     const type = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
     const group = useWaypointGroupStore((state) =>
-        waypoint ? state.getWaypointGroupById(waypoint.groupId ?? -1) : undefined
+        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
     );
 
     const waypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
