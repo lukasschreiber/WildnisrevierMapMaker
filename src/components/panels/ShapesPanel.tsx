@@ -11,6 +11,7 @@ import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } 
 import React, { useMemo } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { approximatePathArea } from "../../utils/area";
 
 export function ShapesPanel() {
     const shapes = useShapeStore((state) => state.shapes);

@@ -52,6 +52,7 @@ export const Shape = React.memo(({ g, shapeId, order }: ShapeProps) => {
         const points = waypoints.map((waypoint) => map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)));
 
         const rendered = renderShape(
+            map,
             g,
             shape,
             points,
