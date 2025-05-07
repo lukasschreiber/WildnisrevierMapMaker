@@ -20,7 +20,7 @@ export const WaypointLabel = React.memo(({ g, waypointId }: WaypointLabelProps) 
 
     const type = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
     const group = useWaypointGroupStore((state) =>
-        waypoint ? state.getWaypointGroupById(waypoint.groupId ?? -1) : undefined
+        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
     );
 
     const showLabels = useSettingsStore((state) => state.settings.showLabels);
