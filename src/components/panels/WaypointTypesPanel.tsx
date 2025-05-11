@@ -75,6 +75,16 @@ export function WaypointTypeListItem({ type, isOnlyOne }: { type: WaypointType; 
                 className="bg-black/50 p-1 rounded-md max-w-12"
                 placeholder="size"
             />
+            <NumberInput
+                value={type.rotation ?? "" as unknown as number}
+                min={0}
+                max={360}
+                onChange={(value) => updateType(type.id, {
+                    rotation: value < 0 ? undefined : value,
+                })}
+                className="bg-black/50 p-1 rounded-md max-w-12"
+                placeholder="rotation"
+            />
             <ColorInput
                 value={type.color}
                 onChange={(value) => updateType(type.id, { color: value })}

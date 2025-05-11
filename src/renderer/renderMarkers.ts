@@ -32,7 +32,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
         applyMarkerOpacity(shape, isSelected, group?.hidden || false, type.hidden);
 
         return shape
-            .attr("transform", `translate(${point.x}, ${point.y})`)
+            .attr("transform", `translate(${point.x}, ${point.y}) rotate(${type.rotation ?? 0})`)
             .style("stroke", stroke)
             .style("stroke-width", isSelected ? outlineWidth : borderWidth)
             .style("cursor", "pointer") as unknown as E;

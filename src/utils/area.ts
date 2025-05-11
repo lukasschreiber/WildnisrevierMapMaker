@@ -1,4 +1,4 @@
-import L, { LatLng } from 'leaflet';
+import L from 'leaflet';
 import { svgPathProperties } from 'svg-path-properties';
 
 export function approximatePathArea(map: L.Map, pathData: string, samplePoints = 500): number {

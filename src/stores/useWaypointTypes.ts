@@ -12,6 +12,7 @@ export type WaypointType = {
     radiusOverride?: number;
     color2?: string;
     hidden: boolean;
+    rotation?: number;
 };
 
 interface WaypointTypeState {
