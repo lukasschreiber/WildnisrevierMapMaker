@@ -13,9 +13,15 @@ import { useShapeStore } from "../../stores/useShapes";
 type WaypointProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
     waypointId: number;
-    waypoint?: TWaypoint
-    type?: WaypointType
-    group?: WaypointGroup
+    waypoint?: TWaypoint;
+    type?: WaypointType;
+    group?: WaypointGroup;
+    borderWidth?: number;
+    radius?: number;
+    borderColor?: string;
+    showBorder?: boolean;
+    visualizeHiddenItems?: boolean;
+    disableSelection?: boolean;
 };
 
 export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) => {
@@ -25,15 +31,18 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
     const map = useMap();
 
-    const type = props.type ?? useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
-    const group = props.group ?? useWaypointGroupStore((state) =>
-        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
-    );
+    const type =
+        props.type ?? useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
+    const group =
+        props.group ??
+        useWaypointGroupStore((state) =>
+            waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
+        );
 
-    const waypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
-    const waypointBorderColor = useSettingsStore((state) => state.settings.waypointBorderColor);
-    const showWaypointBorder = useSettingsStore((state) => state.settings.showWaypointBorder);
-    const waypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
+    const waypointRadius = props.radius ?? useSettingsStore((state) => state.settings.waypointRadius);
+    const waypointBorderColor = props.borderColor ?? useSettingsStore((state) => state.settings.waypointBorderColor);
+    const showWaypointBorder = props.showBorder ?? useSettingsStore((state) => state.settings.showWaypointBorder);
+    const waypointBorderWidth = props.borderWidth ?? useSettingsStore((state) => state.settings.waypointBorderWidth);
 
     const addPathMode = usePathStore((state) => state.addMode);
     const addShapeMode = useShapeStore((state) => state.addMode);
@@ -58,27 +67,32 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             group,
             waypointBorderWidth,
             waypointBorderColor,
-            showWaypointBorder
-        ).on("click", (event: MouseEvent) => {
-            event.stopPropagation();
-            if (addPathMode) {
-                if (segmentConnectionStarted) {
-                    endSegmentConnection(waypoint.id);
+            showWaypointBorder,
+            props.visualizeHiddenItems ?? true,
+        );
+
+        if (!props.disableSelection) {
+            renderedMarker.on("click", (event: MouseEvent) => {
+                event.stopPropagation();
+                if (addPathMode) {
+                    if (segmentConnectionStarted) {
+                        endSegmentConnection(waypoint.id);
+                    } else {
+                        startSegmentConnection(waypoint.id);
+                    }
+                } else if (addShapeMode) {
+                    if (addModeReferenceShapeId) {
+                        addShapeNode(addModeReferenceShapeId, waypoint.id);
+                    }
                 } else {
-                    startSegmentConnection(waypoint.id);
+                    selectWaypoint(waypoint.id);
+                    if (waypoint) {
+                        const { lat, lng } = waypoint;
+                        map.setView([lat, lng], map.getZoom());
+                    }
                 }
-            } else if (addShapeMode) {
-                if (addModeReferenceShapeId) {
-                    addShapeNode(addModeReferenceShapeId, waypoint.id);
-                }
-            } else {
-                selectWaypoint(waypoint.id);
-                if (waypoint) {
-                    const { lat, lng } = waypoint;
-                    map.setView([lat, lng], map.getZoom());
-                }
-            }
-        });
+            });
+        }
 
         renderedMarker.attr("id", `waypoint-${waypoint.id}`).classed("waypoint");
 
@@ -104,6 +118,8 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         selectWaypoint,
         addModeReferenceShapeId,
         addShapeNode,
+        props.disableSelection,
+        props.visualizeHiddenItems,
     ]);
 
     const updatePosition = useCallback(() => {

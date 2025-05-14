@@ -1,31 +1,33 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { useWaypointStore } from "../../stores/useWaypoints";
+import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import L from "leaflet";
 import * as d3 from "d3";
 import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
-import { useShapeStore } from "../../stores/useShapes";
+import { useShapeStore, Shape as TShape } from "../../stores/useShapes";
 import { renderShape } from "../renderShape";
 
 type ShapeProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
     shapeId: number;
+    shape?: TShape;
+    waypoints?: Waypoint[];
     order?: number;
+    shapeLabelColor?: string;
+    showSolidBlockBehindLabels?: boolean;
 };
 
-export const Shape = React.memo(({ g, shapeId, order }: ShapeProps) => {
+export const Shape = React.memo(({ g, shapeId, order, ...props }: ShapeProps) => {
     const map = useMap();
 
-    const {
-        showOriginalShapeEdges,
-        showOriginalShapeVertices,
-        showShapeControlPointEdges,
-        shapeLabelColor,
-        showSolidBlockBehindLabels,
-    } = useSettingsStore((state) => state.settings);
+    const showOriginalShapeEdges = useSettingsStore((state) => state.settings.showOriginalShapeEdges);
+    const showOriginalShapeVertices = useSettingsStore((state) => state.settings.showOriginalShapeVertices);
+    const showShapeControlPointEdges = useSettingsStore((state) => state.settings.showShapeControlPointEdges);
+    const shapeLabelColor = props.shapeLabelColor ?? useSettingsStore((state) => state.settings.shapeLabelColor);
+    const showSolidBlockBehindLabels = props.showSolidBlockBehindLabels ?? useSettingsStore((state) => state.settings.showSolidBlockBehindLabels);
 
-    const shape = useShapeStore((state) => state.shapes.find((s) => s.id === shapeId));
-    const allWaypoints = useWaypointStore((state) => state.waypoints);
+    const shape = props.shape ?? useShapeStore((state) => state.shapes.find((s) => s.id === shapeId));
+    const allWaypoints = props.waypoints ?? useWaypointStore((state) => state.waypoints);
     const renderedOrder = useRef(order);
 
     const waypoints = useMemo(() => {

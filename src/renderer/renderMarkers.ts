@@ -13,7 +13,8 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     group: WaypointGroup | undefined,
     borderWidth: number,
     borderColor: string,
-    showBorder: boolean
+    showBorder: boolean,
+    visualizeHiddenItems: boolean,
 ): E {
     const r = radius;
     const isHidden = group?.hidden || type.hidden;
@@ -30,6 +31,10 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
 
         applyMarkerFill(g, shape, type.color, type.color2, type.hasTwoColors);
         applyMarkerOpacity(shape, isSelected, group?.hidden || false, type.hidden);
+
+        if (isHidden && !visualizeHiddenItems) {
+            shape.attr("visibility", "hidden");
+        }
 
         return shape
             .attr("transform", `translate(${point.x}, ${point.y}) rotate(${type.rotation ?? 0})`)

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
-import { useWaypointStore } from "../../stores/useWaypoints";
-import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
-import { useWaypointGroupStore } from "../../stores/useGroups";
+import { useWaypointStore, Waypoint as TWaypoint } from "../../stores/useWaypoints";
+import { useWaypointTypeStore, WaypointType } from "../../stores/useWaypointTypes";
+import { useWaypointGroupStore, WaypointGroup } from "../../stores/useGroups";
 import L from "leaflet";
 import * as d3 from "d3";
 import { useMap } from "../../context/MapContext";
@@ -11,21 +11,27 @@ import { renderLabel } from "../renderLabel";
 type WaypointLabelProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
     waypointId: number;
+    waypoint?: TWaypoint;
+    type?: WaypointType;
+    group?: WaypointGroup;
+    radius?: number;
+    labelColor?: string;
+    showLabels?: boolean;
 };
 
-export const WaypointLabel = React.memo(({ g, waypointId }: WaypointLabelProps) => {
-    const waypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLabelProps) => {
+    const waypoint = props.waypoint ?? useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
 
     const map = useMap();
 
-    const type = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
-    const group = useWaypointGroupStore((state) =>
+    const type = props.type ?? useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
+    const group = props.group ?? useWaypointGroupStore((state) =>
         waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
     );
 
-    const showLabels = useSettingsStore((state) => state.settings.showLabels);
-    const waypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
-    const labelColor = useSettingsStore((state) => state.settings.labelColor);
+    const showLabels = props.showLabels ?? useSettingsStore((state) => state.settings.showLabels);
+    const waypointRadius = props.radius ?? useSettingsStore((state) => state.settings.waypointRadius);
+    const labelColor = props.labelColor ?? useSettingsStore((state) => state.settings.labelColor);
 
     useEffect(() => {
         if (!g || !waypoint || !type) return;
