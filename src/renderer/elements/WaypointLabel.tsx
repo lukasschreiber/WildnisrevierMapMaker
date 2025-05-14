@@ -4,7 +4,7 @@ import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { useWaypointGroupStore } from "../../stores/useGroups";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap } from "react-leaflet";
+import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { renderLabel } from "../renderLabel";
 

@@ -2,7 +2,7 @@ import L from "leaflet";
 import * as d3 from "d3";
 import { PathSegment } from "../stores/usePaths";
 
-export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undefined>, map: L.Map, segments: PathSegment[], getWaypointById: Function, useUniqueColors: boolean, pathWidth: number, pathColor: string, hideOriginalPaths: boolean, hideFancyPaths: boolean, tension: number, selectSegment: (id: number) => void) {
+export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undefined>, map: L.Map, segments: PathSegment[], getWaypointById: Function, useUniqueColors: boolean, pathWidth: number, pathColor: string, pathOutlineWidth: number, pathOutlineColor: string, hideOriginalPaths: boolean, hideFancyPaths: boolean, tension: number, selectSegment: (id: number) => void) {
     const paths = getPaths(segments);
     const curve = d3.curveCardinal.tension(tension);
     const renderedElements: d3.Selection<any, unknown, null, undefined>[] = [];
@@ -22,6 +22,15 @@ export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undef
             const colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#008000", "#000080", "#808000", "#800000", "#808080"];
             const color = useUniqueColors ? colors[index] : pathColor;
             const width = pathWidth;
+
+            if (pathOutlineWidth > 0) {
+                renderedElements.push(g.append("path")
+                    .attr("d", line(points.map(({ x, y }) => [x, y]))) // Apply the curve path
+                    .style("fill", "none")
+                    .style("stroke", pathOutlineColor)
+                    .attr("stroke-linecap", "round")
+                    .style("stroke-width", pathOutlineWidth * 2 + width));
+            }
 
             renderedElements.push(g.append("path")
                 .attr("d", line(points.map(({ x, y }) => [x, y]))) // Apply the curve path

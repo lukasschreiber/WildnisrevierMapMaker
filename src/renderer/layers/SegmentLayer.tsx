@@ -3,7 +3,7 @@ import { useLayer } from "../../context/LayerContext";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { usePathStore } from "../../stores/usePaths";
 import { renderSegments } from "../renderSegments";
-import { useMap } from "react-leaflet";
+import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import L from "leaflet";
 
@@ -17,6 +17,8 @@ export function SegmentLayer() {
     const hideFancyPaths = useSettingsStore((state) => state.settings.hideFancyPaths);
     const pathWidth = useSettingsStore((state) => state.settings.pathWidth);
     const pathColor = useSettingsStore((state) => state.settings.pathColor);
+    const pathOutlineColor = useSettingsStore((state) => state.settings.pathOutlineColor);
+    const pathOutlineWidth = useSettingsStore((state) => state.settings.pathOutlineWidth);
     const pathTension = useSettingsStore((state) => state.settings.pathTension);
 
     const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
@@ -35,6 +37,8 @@ export function SegmentLayer() {
             showSinglePaths,
             pathWidth,
             pathColor,
+            pathOutlineWidth,
+            pathOutlineColor,
             hideOriginalPaths,
             hideFancyPaths,
             pathTension,
@@ -53,6 +57,8 @@ export function SegmentLayer() {
         pathColor,
         hideOriginalPaths,
         hideFancyPaths,
+        pathOutlineColor,
+        pathOutlineWidth,
         pathTension,
         selectSegment,
     ]);

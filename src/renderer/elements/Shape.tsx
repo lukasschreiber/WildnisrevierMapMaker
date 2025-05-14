@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap } from "react-leaflet";
+import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { useShapeStore } from "../../stores/useShapes";
 import { renderShape } from "../renderShape";
@@ -65,11 +65,9 @@ export const Shape = React.memo(({ g, shapeId, order }: ShapeProps) => {
 
         if (rendered) {
             if (!existing.empty()) {
-                console.log("Replacing existing shape");
                 const node = existing.node()! as SVGElement;
                 node.replaceWith(rendered.node()!);
             } else {
-                console.log("Appending new shape");
                 g.node()?.appendChild(rendered.node()!);
             }
         }
@@ -88,7 +86,6 @@ export const Shape = React.memo(({ g, shapeId, order }: ShapeProps) => {
 
     useEffect(() => {
         draw();
-        console.log("Calling draw");
     }, [draw]);
 
     const updatePosition = useCallback(() => {

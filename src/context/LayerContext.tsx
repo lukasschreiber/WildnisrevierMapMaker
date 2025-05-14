@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useMap } from "react-leaflet";
+import { useMap } from "../context/MapContext";
 import L from "leaflet";
 import * as d3 from "d3";
 
@@ -13,13 +13,17 @@ const LayerContext = createContext<LayerContextType | undefined>(undefined);
 
 export function LayerProvider({ children }: React.PropsWithChildren) {
     const map = useMap();
+    const layerRef = useRef<L.SVG | null>(null);
     const gMapRef = useRef<GMap>(new Map());
     const svgRef = useRef<d3.Selection<SVGSVGElement, unknown, null, undefined> | null>(null);
     const [isSvgReady, setSvgReady] = useState(false);
 
     useEffect(() => {
         const svgLayer = L.svg();
+
         svgLayer.addTo(map);
+
+        layerRef.current = svgLayer;
 
         const svg = d3.select(map.getPanes().overlayPane).select<SVGSVGElement>("svg");
         svg.attr("pointer-events", "auto");
@@ -51,7 +55,8 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
             return gMapRef.current.get(zIndex)!;
         }
 
-        const g = svg.append("g")
+        const g = svg
+            .append("g")
             .classed("leaflet-overlay", true)
             .classed("waypoint-overlay", true)
             .attr("data-z", zIndex)
@@ -65,11 +70,21 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
         return g;
     }, []);
 
-    return (
-        <LayerContext.Provider value={{ getLayer }}>
-            {isSvgReady && children}
-        </LayerContext.Provider>
-    );
+    useEffect(() => {
+        if (!layerRef.current) return;
+
+        function handleMove(ev: L.LeafletEvent) {
+            layerRef.current?.getEvents?.().moveend?.call(layerRef.current, ev);
+        }
+
+        map.on("move", handleMove);
+
+        return () => {
+            map.off("move", handleMove);
+        }
+    }, [isSvgReady, map]);
+
+    return <LayerContext.Provider value={{ getLayer }}>{isSvgReady && children}</LayerContext.Provider>;
 }
 
 export function useLayer(zIndex: number) {

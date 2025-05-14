@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
-import { useMap } from "react-leaflet";
 import useLocalStorage from "../../hooks/useLocalStorage";
 import { renderMarker } from "../../renderer/renderMarkers";
 import { Select } from "../inputs/Select";
@@ -8,6 +7,7 @@ import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { useWaypointGroupStore } from "../../stores/useGroups";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import { useSettingsStore } from "../../stores/useSettings";
+import { useMap } from "../../context/MapContext";
 
 type GroupByOption = "type" | "group";
 type SortByOption = "id" | "name" | "type" | "group";

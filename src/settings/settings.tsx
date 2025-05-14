@@ -1,4 +1,5 @@
-import { CheckboxSetting, ColorSetting, defineSettings, RangeSetting } from "./settings_definition";
+import { TileLayerVersion } from "../utils/tiles";
+import { CheckboxSetting, ColorSetting, defineSettings, RangeSetting, SelectSetting } from "./settings_definition";
 
 export interface LayoutSettings {
     showWaypointLines: CheckboxSetting;
@@ -9,6 +10,9 @@ export interface LayoutSettings {
     waypointBorderColor: ColorSetting;
     showWaypointBorder: CheckboxSetting;
 
+    mapVersion: SelectSetting<TileLayerVersion>;
+    maxZoom: RangeSetting;
+
     arrowOpacity: RangeSetting;
     arrowSize: RangeSetting;
     arrowColor: ColorSetting;
@@ -17,6 +21,8 @@ export interface LayoutSettings {
 
     showSinglePaths: CheckboxSetting;
     pathWidth: RangeSetting;
+    pathOutlineWidth: RangeSetting;
+    pathOutlineColor: ColorSetting;
     pathColor: ColorSetting;
     hideOriginalPaths: CheckboxSetting;
     hideFancyPaths: CheckboxSetting;
@@ -36,6 +42,33 @@ export interface LayoutSettings {
 
 export function getSettingsDefinition() {
     return defineSettings([
+        {
+            name: "Map Settings",
+            settings: {
+                mapVersion: {
+                    type: "select",
+                    default: TileLayerVersion.OSM,
+                    label: "Map Version",
+                    helpText: "Select the map version to use.",
+                    options: [
+                        { value: TileLayerVersion.OSM, label: "OpenStreetMap" },
+                        { value: TileLayerVersion.Voyager, label: "Voyager" },
+                        { value: TileLayerVersion.LightAll, label: "Carto Light" },
+                        { value: TileLayerVersion.DarkAll, label: "Carto Dark" },
+                        { value: TileLayerVersion.Liberty, label: "Liberty" },
+                    ],
+                },
+                maxZoom: {
+                    type: "range",
+                    default: 22,
+                    min: 1,
+                    max: 30,
+                    stepSize: 1,
+                    label: "Max Zoom Level",
+                    helpText: "Maximum zoom level for the map.",
+                },
+            },
+        },
         {
             name: "Waypoint Settings",
             settings: {
@@ -156,6 +189,21 @@ export function getSettingsDefinition() {
                     default: "#00FF00",
                     label: "Path Color",
                     helpText: "Color of the paths.",
+                },
+                pathOutlineWidth:{
+                    type: "range",
+                    default: 1,
+                    min: 0,
+                    max: 10,
+                    stepSize: 1,
+                    label: "Path Outline Width",
+                    helpText: "Width of the path outline.",
+                },
+                pathOutlineColor: {
+                    type: "color",
+                    default: "#000000",
+                    label: "Path Outline Color",
+                    helpText: "Color of the path outline.",
                 },
                 hideOriginalPaths: {
                     type: "checkbox",

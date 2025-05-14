@@ -1,6 +1,7 @@
 import { useSettingsStore } from "../../stores/useSettings";
 import { Checkbox } from "../inputs/Checkbox";
 import { ColorInput } from "../inputs/ColorInput";
+import { Select } from "../inputs/Select";
 
 export function SettingsPanel() {
     const settings = useSettingsStore((state) => state.settings);
@@ -32,6 +33,21 @@ export function SettingsPanel() {
                                     className="flex flex-col"
                                 />
                             );
+                        } else if (setting.type === "select") {
+                            return (
+                                <div key={key} className="flex flex-col gap-1">
+                                    <label>{setting.label}</label>
+                                    <Select
+                                        key={key}
+                                        id={key}
+                                        value={settings[key] as string}
+                                        options={setting.options as { value: string; label: string }[]}
+                                        onChange={(value) => set(key, value)}
+                                        className="flex flex-col"
+                                    />
+                                    <span className="text-black/80">{setting.helpText}</span>
+                                </div>
+                            );
                         } else if (setting.type === "range") {
                             return (
                                 <div key={key} className="flex flex-col">
@@ -57,10 +73,7 @@ export function SettingsPanel() {
                             return (
                                 <div key={key} className="flex flex-col">
                                     <label>{setting.label}</label>
-                                    <ColorInput
-                                        value={settings[key] as string}
-                                        onChange={(value) => set(key, value)}
-                                    />
+                                    <ColorInput value={settings[key] as string} onChange={(value) => set(key, value)} />
                                     <span className="text-black/80">{setting.helpText}</span>
                                 </div>
                             );

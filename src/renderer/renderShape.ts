@@ -104,7 +104,7 @@ export function renderShape(map: L.Map, g: d3.Selection<SVGGElement, unknown, nu
         .style("fill-opacity", shape.opacity ?? 0.5)
 
     const area = approximatePathArea(map, p.toString(), 500);
-    console.log(`Approximated area: ${m2ToHectares(area)}, ${area} m²`);
+    // console.log(`Approximated area: ${m2ToHectares(area)}, ${area} m²`);
 
     if (texture === "gradient") {
         group.append("defs").append("linearGradient")

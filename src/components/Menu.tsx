@@ -1,4 +1,4 @@
-import { useMap } from "react-leaflet";
+import { useMap } from "../context/MapContext";
 import { SegmentInfo } from "./SegmentInfo";
 import { WaypointInfo } from "./WaypointInfo";
 import L from "leaflet";

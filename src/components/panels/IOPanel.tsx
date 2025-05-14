@@ -5,6 +5,7 @@ import { usePathStore } from "../../stores/usePaths";
 import { useShapeStore } from "../../stores/useShapes";
 import { useSettingsStore } from "../../stores/useSettings";
 import { useWaypointGroupStore } from "../../stores/useGroups";
+import { downloadFile, exportAndDownloadWMAPFile, parseWMAPFile } from "../../utils/persistence";
 
 export function IOPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
@@ -23,30 +24,16 @@ export function IOPanel() {
     const hideOriginalPathsInExport = useSettingsStore((state) => state.settings.hideOriginalPathsInExport);
     const hideHiddenWaypointsInExport = useSettingsStore((state) => state.settings.hideHiddenWaypointsInExport);
 
-    const downloadFile = (content: string, fileName: string, mimeType: string) => {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
+    
 
     const exportJson = useCallback(() => {
-        const data = {
+        exportAndDownloadWMAPFile({
             waypoints,
             waypointTypes: types,
             segments,
             shapes,
             groups,
-        };
-
-        const json = JSON.stringify(data, null, 2);
-        const name = `export-${new Date().toISOString()}.wmap`;
-        downloadFile(json, name, "application/json");
+        });
     }, [waypoints, segments, types, shapes, groups]);
 
     const exportSvg = useCallback(() => {
@@ -123,35 +110,12 @@ export function IOPanel() {
         reader.onload = (e) => {
             const content = e.target?.result;
             if (typeof content === "string") {
-                try {
-                    const data = JSON.parse(content);
-                    if (data.waypointTypes) {
-                        if (Array.isArray(data.waypointTypes)) {
-                            // convert array to object where the id is the key
-                            const waypointTypes = data.waypointTypes.reduce((acc: Record<number, any>, type: any) => {
-                                acc[type.id] = type;
-                                return acc;
-                            }, {});
-                            setTypes(waypointTypes);
-                        } else {
-                            setTypes(data.waypointTypes);
-                        }
-                    }
-                    if (data.waypoints) {
-                        setWaypoints(data.waypoints);
-                    }
-                    if (data.segments) {
-                        setSegments(data.segments);
-                    }
-                    if (data.shapes) {
-                        setShapes(data.shapes);
-                    }
-                    if (data.waypointGroups) {
-                        setGroups(data.waypointGroups);
-                    }
-                } catch (error) {
-                    alert("Error parsing JSON file");
-                }
+                const parsed = parseWMAPFile(content);
+                setTypes(parsed.waypointTypes);
+                setWaypoints(parsed.waypoints);
+                setSegments(parsed.segments);
+                setShapes(parsed.shapes);
+                setGroups(parsed.groups);
             }
         };
     }, []);

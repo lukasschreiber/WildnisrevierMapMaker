@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
-import { useMap } from "react-leaflet";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { usePathStore } from "../stores/usePaths";
+import { useMap } from "../context/MapContext";
 
 export function MapEventManager() {
     const map = useMap();
