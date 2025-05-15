@@ -75,7 +75,6 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
 
         function handleMove(ev: L.LeafletEvent) {
             layerRef.current?.getEvents?.().moveend?.call(layerRef.current, ev);
-            layerRef.current?.getEvents?.().zoomend?.call(layerRef.current, ev);
         }
 
         map.on("move", handleMove);

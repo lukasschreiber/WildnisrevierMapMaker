@@ -13,6 +13,7 @@ export function WaypointInfo(props: { id: number }) {
     const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const updateWaypointName = useWaypointStore((state) => state.updateWaypointName);
+    const updateWaypointAdditionalText = useWaypointStore((state) => state.updateWaypointAdditionalText);
     const updateWaypointType = useWaypointStore((state) => state.updateWaypointType);
     const updateWaypointGroup = useWaypointStore((state) => state.updateWaypointGroup);
 
@@ -27,9 +28,8 @@ export function WaypointInfo(props: { id: number }) {
     const [bearing, setBearing] = useState(0);
     const [newTypeId, setNewTypeId] = useState(1);
     const [newName, setNewName] = useState<string | null>(null);
-    const waypoint = useWaypointStore(
-        (state) => state.waypoints.find((w) => w.id === props.id)
-      );
+    const waypoint = useWaypointStore((state) => state.waypoints.find((w) => w.id === props.id));
+    const type = useWaypointTypeStore((state) => state.getTypeById(waypoint?.typeId ?? 1));
 
     if (!waypoint) {
         return null;
@@ -47,6 +47,14 @@ export function WaypointInfo(props: { id: number }) {
                 value={waypoint.name || ""}
                 onChange={(value) => updateWaypointName(waypoint.id, value)}
             />
+            {type?.additionalText && (
+                <TextInput
+                    className="w-full"
+                    placeholder="Additional Text"
+                    value={waypoint.additionalText || ""}
+                    onChange={(value) => updateWaypointAdditionalText(waypoint.id, value)}
+                />
+            )}
             <Select
                 className="w-full"
                 value={waypoint.typeId}

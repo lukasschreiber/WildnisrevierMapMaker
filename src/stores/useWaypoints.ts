@@ -14,6 +14,7 @@ export type Waypoint = {
   baseId?: number;
   typeId: number;
   groupId?: number;
+  additionalText?: string;
 };
 
 export interface WaypointState {
@@ -51,6 +52,7 @@ export interface WaypointState {
   getWaypointById: (id: number) => Waypoint | undefined;
   updateWaypointPosition: (id: number, lat: number, lng: number) => void;
   updateWaypointName: (id: number, name: string) => void;
+  updateWaypointAdditionalText: (id: number, text: string) => void;
   updateWaypointType: (id: number, typeId: number) => void;
   updateWaypointGroup: (id: number, groupId?: number) => void;
   isDeletable: (id: number) => boolean;
@@ -130,6 +132,13 @@ export const useWaypointStore = create<WaypointState>()(
         set((s) => ({
           waypoints: s.waypoints.map((wp) =>
             wp.id === id ? { ...wp, typeId } : wp
+          )
+        })),
+
+      updateWaypointAdditionalText: (id, text) =>
+        set((s) => ({
+          waypoints: s.waypoints.map((wp) =>
+            wp.id === id ? { ...wp, additionalText: text } : wp
           )
         })),
 

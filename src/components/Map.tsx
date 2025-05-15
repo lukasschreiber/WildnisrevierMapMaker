@@ -68,9 +68,9 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
         const attribution = layerConfig.attributions
             ?.map((a) => {
                 if (a.name.match(/{(.*?)}/g)) {
-                    return a.name.replace(/{(.*?)}/g, (_, p1) => `<a href="${a.url}" target="_blank">${p1}</a>`);
+                    return a.name.replace(/{(.*?)}/g, (_, p1) => `<a href="${a.url}" target="_blank">${p1}</Link>`);
                 } else {
-                    return `<a href="${a.url}" target="_blank">${a.name}</a>`;
+                    return `<a href="${a.url}" target="_blank">${a.name}</Link>`;
                 }
             })
             .join(", ");

@@ -15,14 +15,16 @@ type ShapeProps = {
     order?: number;
     shapeLabelColor?: string;
     showSolidBlockBehindLabels?: boolean;
+    debugging?: boolean;
 };
 
 export const Shape = React.memo(({ g, shapeId, order, ...props }: ShapeProps) => {
     const map = useMap();
+    const debugging = props.debugging ?? false;
 
-    const showOriginalShapeEdges = useSettingsStore((state) => state.settings.showOriginalShapeEdges);
-    const showOriginalShapeVertices = useSettingsStore((state) => state.settings.showOriginalShapeVertices);
-    const showShapeControlPointEdges = useSettingsStore((state) => state.settings.showShapeControlPointEdges);
+    const showOriginalShapeEdges = useSettingsStore((state) => debugging && state.settings.showOriginalShapeEdges);
+    const showOriginalShapeVertices = useSettingsStore((state) => debugging && state.settings.showOriginalShapeVertices);
+    const showShapeControlPointEdges = useSettingsStore((state) => debugging && state.settings.showShapeControlPointEdges);
     const shapeLabelColor = props.shapeLabelColor ?? useSettingsStore((state) => state.settings.shapeLabelColor);
     const showSolidBlockBehindLabels = props.showSolidBlockBehindLabels ?? useSettingsStore((state) => state.settings.showSolidBlockBehindLabels);
 
@@ -95,11 +97,9 @@ export const Shape = React.memo(({ g, shapeId, order, ...props }: ShapeProps) =>
     }, [draw]);
 
     useEffect(() => {
-        map.on("zoomend", updatePosition);
-        map.on("moveend", updatePosition);
+        map.on("move zoom zoomanim", updatePosition);
         return () => {
-            map.off("zoomend", updatePosition);
-            map.off("moveend", updatePosition);
+            map.off("move zoom zoomanim", updatePosition);
         };
     }, [map, updatePosition]);
 

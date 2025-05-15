@@ -45,66 +45,158 @@ export function WaypointTypeListItem({ type, isOnlyOne }: { type: WaypointType; 
 
     return (
         <div className="flex flex-row gap-2 items-center">
-            <TextInput
-                value={type.name}
-                onChange={(value) => updateType(type.id, { name: value })}
-            />
-            <Select
-                value={type.icon}
-                onChange={(value) => updateType(type.id, { icon: value })}
-                options={[
-                    { label: "Circle", value: "circle" },
-                    { label: "Square", value: "square" },
-                    { label: "Triangle", value: "triangle" },
-                    { label: "Star", value: "star" },
-                    { label: "Cross", value: "cross" },
-                    { label: "Diamond", value: "diamond" },
-                    { label: "Apple", value: "apple" },
-                    { label: "Cherry", value: "cherry" },
-                ]}
-            />
-            <NumberInput
-                value={type.radiusOverride ?? "" as unknown as number}
-                min={-1}
-                max={100}
-                onChange={(value) =>
-                    updateType(type.id, {
-                        radiusOverride: value < 0 ? undefined : value,
-                    })
-                }
-                className="bg-black/50 p-1 rounded-md max-w-12"
-                placeholder="size"
-            />
-            <NumberInput
-                value={type.rotation ?? "" as unknown as number}
-                min={0}
-                max={360}
-                onChange={(value) => updateType(type.id, {
-                    rotation: value < 0 ? undefined : value,
-                })}
-                className="bg-black/50 p-1 rounded-md max-w-12"
-                placeholder="rotation"
-            />
-            <ColorInput
-                value={type.color}
-                onChange={(value) => updateType(type.id, { color: value })}
-                className="bg-black/50 p-1 rounded-md"
-            />
-            <ColorInput
-                value={type.color2 || "#000000"}
-                onChange={(value) => updateType(type.id, { color2: value })}
-                disabled={!type.hasTwoColors}
-            />
-            <Checkbox
-                label="Hidden"
-                value={type.hidden}
-                onChange={(value) => updateType(type.id, { hidden: value })}
-            />
-            <Checkbox
-                label="Two Colors"
-                value={type.hasTwoColors}
-                onChange={(value) => updateType(type.id, { hasTwoColors: value })}
-            />
+            <div className="flex flex-col gap-1">
+                <div className="flex flex-row gap-2 items-center">
+                    <TextInput value={type.name} onChange={(value) => updateType(type.id, { name: value })} />
+                    <Select
+                        value={type.icon}
+                        onChange={(value) => updateType(type.id, { icon: value })}
+                        options={[
+                            { label: "Circle", value: "circle" },
+                            { label: "Square", value: "square" },
+                            { label: "Triangle", value: "triangle" },
+                            { label: "Star", value: "star" },
+                            { label: "Cross", value: "cross" },
+                            { label: "Diamond", value: "diamond" },
+                            { label: "Apple", value: "apple" },
+                            { label: "Cherry", value: "cherry" },
+                            { label: "Tree Stump", value: "treestump" },
+                        ]}
+                    />
+                    <NumberInput
+                        value={type.radiusOverride ?? ("" as unknown as number)}
+                        min={-1}
+                        max={100}
+                        onChange={(value) =>
+                            updateType(type.id, {
+                                radiusOverride: value < 0 ? undefined : value,
+                            })
+                        }
+                        className="bg-black/50 p-1 rounded-md max-w-12"
+                        placeholder="size"
+                    />
+                    <NumberInput
+                        value={type.rotation ?? ("" as unknown as number)}
+                        min={0}
+                        max={360}
+                        onChange={(value) =>
+                            updateType(type.id, {
+                                rotation: value < 0 ? undefined : value,
+                            })
+                        }
+                        className="bg-black/50 p-1 rounded-md max-w-12"
+                        placeholder="rotation"
+                    />
+                    <ColorInput
+                        value={type.color}
+                        onChange={(value) => updateType(type.id, { color: value })}
+                        className="bg-black/50 p-1 rounded-md"
+                    />
+                    <ColorInput
+                        value={type.color2 || "#000000"}
+                        onChange={(value) => updateType(type.id, { color2: value })}
+                        disabled={!type.hasTwoColors}
+                    />
+                    <Checkbox
+                        label="Hidden"
+                        value={type.hidden}
+                        onChange={(value) => updateType(type.id, { hidden: value })}
+                    />
+                    <Checkbox
+                        label="Two Colors"
+                        value={type.hasTwoColors}
+                        onChange={(value) => updateType(type.id, { hasTwoColors: value })}
+                    />
+                    <Checkbox
+                        label="Add. Text"
+                        value={!!type.additionalText}
+                        onChange={(value) => {
+                            if (value) {
+                                updateType(type.id, {
+                                    additionalText: {
+                                        color: "#000000",
+                                        fontSize: 12,
+                                        fontFamily: "Arial",
+                                        fontWeight: "normal",
+                                    },
+                                });
+                            } else {
+                                updateType(type.id, { additionalText: undefined });
+                            }
+                        }}
+                    />
+                </div>
+                {type.additionalText && (
+                    <div className="flex flex-row gap-2 items-center">
+                        <div>Additional Text Properties:</div>
+                        <ColorInput
+                            value={type.additionalText.color || "#000000"}
+                            onChange={(value) =>
+                                updateType(type.id, {
+                                    additionalText: {
+                                        ...type.additionalText,
+                                        color: value,
+                                    },
+                                })
+                            }
+                            className="bg-black/50 p-1 rounded-md"
+                        />
+                        <Select
+                            value={type.additionalText.fontFamily || "Arial"}
+                            onChange={(value) =>
+                                updateType(type.id, {
+                                    additionalText: {
+                                        ...type.additionalText,
+                                        fontFamily: value,
+                                    },
+                                })
+                            }
+                            options={[
+                                { label: "Arial", value: "Arial" },
+                                { label: "Courier New", value: "Courier New" },
+                                { label: "Georgia", value: "Georgia" },
+                                { label: "Times New Roman", value: "Times New Roman" },
+                                { label: "Verdana", value: "Verdana" },
+                            ]}
+                            className="bg-black/50 p-1 rounded-md"
+                        />
+                        <NumberInput
+                            value={type.additionalText.fontSize || 12}
+                            min={1}
+                            max={100}
+                            onChange={(value) =>
+                                updateType(type.id, {
+                                    additionalText: {
+                                        ...type.additionalText,
+                                        fontSize: value,
+                                    },
+                                })
+                            }
+                            className="bg-black/50 p-1 rounded-md max-w-12"
+                            placeholder="Font Size"
+                        />
+                        <Select
+                            value={type.additionalText.fontWeight || "normal"}
+                            onChange={(value) =>
+                                updateType(type.id, {
+                                    additionalText: {
+                                        ...type.additionalText,
+                                        fontWeight: value,
+                                    },
+                                })
+                            }
+                            options={[
+                                { label: "Normal", value: "normal" },
+                                { label: "Bold", value: "bold" },
+                                { label: "Bolder", value: "bolder" },
+                                { label: "Lighter", value: "lighter" },
+                            ]}
+                            className="bg-black/50 p-1 rounded-md"
+                        />
+                    </div>
+                )}
+            </div>
+
             <button
                 onClick={() => removeType(type.id)}
                 disabled={isOnlyOne || type.id === 1 || !isDeletable(type.id)}

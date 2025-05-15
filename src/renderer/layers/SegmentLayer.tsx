@@ -15,8 +15,10 @@ export function SegmentLayer(props: {
     pathOutlineColor?: string;
     pathOutlineWidth?: number;
     pathTension?: number;
+    debugging?: boolean;
 }) {
     const g = useLayer(10);
+    const debugging = props.debugging ?? false;
     const segments = props.segments ?? usePathStore((state) => state.segments);
     const storeGetWaypointById = useWaypointStore((state) => state.getWaypointById);
     const getWaypointById = useCallback(
@@ -26,8 +28,8 @@ export function SegmentLayer(props: {
         [props.waypoints, storeGetWaypointById]
     );
     const selectSegment = usePathStore((state) => state.selectSegment);
-    const showSinglePaths = useSettingsStore((state) => state.settings.showSinglePaths);
-    const hideOriginalPaths = useSettingsStore((state) => state.settings.hideOriginalPaths);
+    const showSinglePaths = useSettingsStore((state) => debugging && state.settings.showSinglePaths);
+    const hideOriginalPaths = useSettingsStore((state) => debugging ? state.settings.hideOriginalPaths : true);
     const hideFancyPaths = useSettingsStore((state) => state.settings.hideFancyPaths);
     const pathWidth = props.pathWidth ?? useSettingsStore((state) => state.settings.pathWidth);
     const pathColor = props.pathColor ?? useSettingsStore((state) => state.settings.pathColor);
@@ -86,12 +88,10 @@ export function SegmentLayer(props: {
     }, [g, draw]);
 
     useEffect(() => {
-        map.on("zoomend", updatePosition);
-        map.on("moveend", updatePosition);
+        map.on("move zoom zoomanim", updatePosition);
 
         return () => {
-            map.off("zoomend", updatePosition);
-            map.off("moveend", updatePosition);
+            map.off("move zoom zoomanim", updatePosition);
         };
     }, [map, updatePosition]);
 

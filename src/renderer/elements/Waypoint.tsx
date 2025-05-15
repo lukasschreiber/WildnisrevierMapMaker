@@ -25,7 +25,10 @@ type WaypointProps = {
 };
 
 export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) => {
-    const waypoint = props.waypoint ?? useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+    const waypoint = useWaypointStore((state) => props.waypoint ?? state.waypoints.find((wp) => wp.id === waypointId));
+    const additionalText = useWaypointStore(
+        (state) => state.waypoints.find((wp) => wp.id === waypointId)?.additionalText
+    );
     const selectedId = useWaypointStore((state) => state.selectedId);
     const isSelected = selectedId === waypoint?.id;
 
@@ -61,6 +64,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         const renderedMarker = renderMarker(
             g,
             point,
+            additionalText,
             selectedId === waypoint.id,
             type.radiusOverride ? type.radiusOverride : waypointRadius,
             type,
@@ -68,7 +72,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             waypointBorderWidth,
             waypointBorderColor,
             showWaypointBorder,
-            props.visualizeHiddenItems ?? true,
+            props.visualizeHiddenItems ?? true
         );
 
         if (!props.disableSelection) {
@@ -101,6 +105,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         };
     }, [
         waypoint,
+        additionalText,
         type,
         group,
         g,
@@ -124,17 +129,32 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
     const updatePosition = useCallback(() => {
         if (!g || !waypoint) return;
+
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
-        g.select(`#waypoint-${waypoint.id}`).attr("transform", `translate(${point.x}, ${point.y})`);
+        const group = g.select(`#waypoint-${waypoint.id}`);
+
+        let xOffset = 0;
+        let yOffset = 0;
+
+        // Check all children for offset attributes
+        group.selectAll("*").each(function () {
+            const el = d3.select(this);
+            const x = Number(el.attr("icon-offset-x")) || 0;
+            const y = Number(el.attr("icon-offset-y")) || 0;
+            if (x !== 0 || y !== 0) {
+                xOffset = x;
+                yOffset = y;
+            }
+        });
+
+        group.attr("transform", `translate(${point.x - xOffset}, ${point.y - yOffset})`);
     }, [g, waypoint]);
 
     useEffect(() => {
-        map.on("zoomend", updatePosition);
-        map.on("moveend", updatePosition);
+        map.on("move zoom zoomanim", updatePosition);
 
         return () => {
-            map.off("zoomend", updatePosition);
-            map.off("moveend", updatePosition);
+            map.off("move zoom zoomanim", updatePosition);
         };
     }, [map, g, waypoint]);
 

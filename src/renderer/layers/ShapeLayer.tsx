@@ -9,6 +9,7 @@ export function ShapeLayer(props: {
     waypoints?: Waypoint[];
     shapeLabelColor?: string;
     showSolidBlockBehindLabels?: boolean;
+    debugging?: boolean;
 }) {
     const g = useLayer(0);
     const shapes = props.shapes ?? useShapeStore((state) => state.shapes.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));

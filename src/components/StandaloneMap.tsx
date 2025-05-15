@@ -28,12 +28,14 @@ type StandaloneMapProps = {
     pathOutlineColor?: string;
     pathOutlineWidth?: number;
     pathTension?: number;
+    debugging?: boolean;
 };
 
 const x = 50.17085202469079;
 const y = 8.631960603439982;
 
 export function StandaloneMap(props: StandaloneMapProps) {
+    const debugging = props.debugging ?? false;
     return (
         <Map
             center={{ lat: x, lng: y }}
@@ -49,6 +51,7 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     waypoints={props.file?.waypoints}
                     shapeLabelColor={props.shapeLabelColor}
                     showSolidBlockBehindLabels={props.showSolidBlockBehindLabels}
+                    debugging={debugging}
                 />
                 <SegmentLayer
                     segments={props.file?.segments}

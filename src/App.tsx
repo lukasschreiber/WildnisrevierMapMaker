@@ -21,10 +21,10 @@ export default function App() {
             <FileLaunchHandler />
             <Map>
                 <LayerProvider>
-                    <ShapeLayer />
-                    <SegmentLayer />
-                    <WaypointLayer />
-                    <WaypointArrowLayer />
+                    <ShapeLayer debugging />
+                    <SegmentLayer debugging />
+                    <WaypointLayer debugging />
+                    <WaypointArrowLayer debugging />
                     {/* <LocationMarker /> */}
                 </LayerProvider>
                 <MapEventManager />

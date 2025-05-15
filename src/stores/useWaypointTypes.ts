@@ -6,13 +6,19 @@ import { useWaypointStore } from "./useWaypoints";
 export type WaypointType = {
     id: number;
     name: string;
-    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry";
+    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry" | "treestump";
     color: string;
     hasTwoColors: boolean;
     radiusOverride?: number;
     color2?: string;
     hidden: boolean;
     rotation?: number;
+    additionalText?: {
+        color?: string;
+        fontSize?: number;
+        fontFamily?: string;
+        fontWeight?: string;
+    }
 };
 
 interface WaypointTypeState {

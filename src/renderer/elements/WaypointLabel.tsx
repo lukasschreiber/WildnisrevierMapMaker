@@ -79,12 +79,10 @@ export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLa
     }, [g, waypoint]);
 
     useEffect(() => {
-        map.on("zoomend", updatePosition);
-        map.on("moveend", updatePosition);
+        map.on("move zoom zoomanim", updatePosition);
 
         return () => {
-            map.off("zoomend", updatePosition);
-            map.off("moveend", updatePosition);
+            map.off("move zoom zoomanim", updatePosition);
         };
     }, [map, g, waypoint]);
 

@@ -213,13 +213,15 @@ function WaypointListItem({
             renderMarker(
                 g,
                 { x: 11, y: 11 },
+                undefined,
                 false,
                 10,
                 waypointType,
                 waypointGroup,
                 waypointBorderWidth,
                 waypointBorderColor,
-                showWaypointBorder
+                showWaypointBorder,
+                true
             );
         }
     }, [containerRef, waypointType, waypointGroup, waypointBorderWidth, waypointBorderColor, showWaypointBorder]);

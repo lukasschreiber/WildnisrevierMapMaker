@@ -7,6 +7,7 @@ const icons = import.meta.glob('../assets/*.svg', { eager: true, query: '?raw', 
 export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, undefined>>(
     g: E,
     point: { x: number; y: number },
+    additionalText: string | undefined,
     isSelected: boolean,
     radius: number,
     type: WaypointType,
@@ -22,11 +23,13 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     const stroke = showBorder ? borderColor : "none";
     const outlineWidth = 2;
 
+    const shapeG = g.append("g").attr("class", "marker-group");
+
     function applyCommonAttrs<T extends SVGElement>(
         shape: d3.Selection<T, unknown, null, undefined>
     ): E {
         if (isHidden) {
-            shape.attr("data-kind", "hidden-marker");
+            shapeG.attr("data-kind", "hidden-marker");
         }
 
         applyMarkerFill(g, shape, type.color, type.color2, type.hasTwoColors);
@@ -36,22 +39,37 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
             shape.attr("visibility", "hidden");
         }
 
-        return shape
+        if (additionalText && type.additionalText) {
+            shapeG.append("text")
+                .attr("x", 0)
+                .attr("y", 1)
+                .style("font-size", type.additionalText.fontSize ?? 12)
+                .style("font-family", type.additionalText.fontFamily ?? "Arial")
+                .style("font-weight", type.additionalText.fontWeight ?? "normal")
+                .style("fill", type.additionalText.color ?? "#000000")
+                .style("pointer-events", "none")
+                .style("text-anchor", "middle")
+                .style("dominant-baseline", "middle")
+                .style("stroke", "none")
+                .text(additionalText);
+        }
+
+        return shapeG
             .attr("transform", `translate(${point.x}, ${point.y}) rotate(${type.rotation ?? 0})`)
             .style("stroke", stroke)
             .style("stroke-width", isSelected ? outlineWidth : borderWidth)
             .style("cursor", "pointer") as unknown as E;
-            
+
     }
 
     switch (type.icon) {
         case "circle":
-            return applyCommonAttrs(g.append("circle").attr("r", r));
+            return applyCommonAttrs(shapeG.append("circle").attr("r", r));
 
         case "square":
             const side = r * Math.SQRT2;
             return applyCommonAttrs(
-                g.append("rect")
+                shapeG.append("rect")
                     .attr("x", -side / 2)
                     .attr("y", -side / 2)
                     .attr("width", side)
@@ -66,7 +84,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
             ]
                 .map(p => p.join(","))
                 .join(" ");
-            return applyCommonAttrs(g.append("polygon").attr("points", triPath));
+            return applyCommonAttrs(shapeG.append("polygon").attr("points", triPath));
 
         case "star":
             const starPoints = 5;
@@ -82,7 +100,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                     return `${x},${y}`;
                 })
                 .join(" ");
-            return applyCommonAttrs(g.append("polygon").attr("points", starPath));
+            return applyCommonAttrs(shapeG.append("polygon").attr("points", starPath));
 
         case "cross":
             const crossSize = r * 1.5; // overall size of cross arms
@@ -102,7 +120,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                     L ${-armWidth / 2} ${-armWidth / 2}
                     Z
                 `;
-            return applyCommonAttrs(g.append("path").attr("d", crossPath).style("pointer-events", "all"));
+            return applyCommonAttrs(shapeG.append("path").attr("d", crossPath).style("pointer-events", "all"));
 
         case "diamond":
             const diamondPath = [
@@ -113,7 +131,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
             ]
                 .map(p => p.join(","))
                 .join(" ");
-            return applyCommonAttrs(g.append("polygon").attr("points", diamondPath));
+            return applyCommonAttrs(shapeG.append("polygon").attr("points", diamondPath));
         default:
             const iconName = type.icon;
             const iconSvg = Object.entries(icons).find(([path]) => path.includes(`${iconName}.svg`))?.[1];
@@ -132,7 +150,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 }
 
                 const child = svgChildren[0];
-                const container = g.append(child.tagName);
+                const container = shapeG.append(child.tagName);
                 const attributes = Array.from(child.attributes);
                 attributes.forEach(attr => {
                     if (attr.name !== "xmlns" && attr.name !== "viewBox") {
@@ -142,9 +160,11 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
 
                 container.style("pointer-events", "all")
                 container.attr("data-icon", iconName)
+                container.attr("icon-offset-x", `${width / 2}`)
+                container.attr("icon-offset-y", `${height / 2}`)
 
                 return applyCommonAttrs(container as unknown as d3.Selection<SVGGElement, unknown, null, undefined>)
-                .attr("transform", `translate(${point.x - width / 2}, ${point.y - height / 2})`)
+                    .attr("transform", `translate(${point.x - width / 2}, ${point.y - height / 2})`)
             } else {
                 console.warn("Unknown icon type and no matching SVG found:", type.icon, type.id, type.name);
                 return g;
