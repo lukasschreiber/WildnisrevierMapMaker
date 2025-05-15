@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "@maplibre/maplibre-gl-leaflet";
-import L, { map } from "leaflet";
+import L from "leaflet";
 import { MapProvider } from "../context/MapContext";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { useSettingsStore } from "../stores/useSettings";
