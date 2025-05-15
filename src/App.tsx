@@ -1,7 +1,5 @@
-import { MapContainer, ScaleControl } from "react-leaflet";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { Menu } from "./components/Menu";
-import { LocationMarker } from "./components/LocationMarker";
 import { FileLaunchHandler } from "./FileLaunchHandler";
 import { SidePanel } from "./components/SidePanel";
 import { WaypointLayer } from "./renderer/layers/WaypointLayer";
@@ -23,8 +21,8 @@ export default function App() {
                 <LayerProvider>
                     <ShapeLayer debugging />
                     <SegmentLayer debugging />
-                    <WaypointLayer debugging />
-                    <WaypointArrowLayer debugging />
+                    <WaypointLayer />
+                    <WaypointArrowLayer />
                     {/* <LocationMarker /> */}
                 </LayerProvider>
                 <MapEventManager />
