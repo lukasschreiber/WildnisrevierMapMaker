@@ -1,8 +1,6 @@
 import { Shape } from "../stores/useShapes";
 import * as d3 from "d3";
 import { Vector } from "../utils/vector";
-import { approximatePathArea } from "../utils/area";
-import { m2ToHectares } from "../utils/units";
 
 interface Point {
     x: number;
@@ -10,7 +8,7 @@ interface Point {
     notsmooth?: boolean;
 }
 
-export function renderShape(map: L.Map, g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
+export function renderShape(_map: L.Map, g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
     const { color, name, shapeType, texture, hasOutline, alpha } = shape;
 
     // create a group and put everything in the group
@@ -103,7 +101,7 @@ export function renderShape(map: L.Map, g: d3.Selection<SVGGElement, unknown, nu
         .style("stroke-width", 1.5)
         .style("fill-opacity", shape.opacity ?? 0.5)
 
-    const area = approximatePathArea(map, p.toString(), 500);
+    // const area = approximatePathArea(map, p.toString(), 500);
     // console.log(`Approximated area: ${m2ToHectares(area)}, ${area} m²`);
 
     if (texture === "gradient") {
