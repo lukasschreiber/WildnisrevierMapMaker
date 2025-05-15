@@ -4,12 +4,15 @@ import { TileLayerVersion } from "../utils/tiles";
 import { WaypointLayer } from "../renderer/layers/WaypointLayer";
 import { WMAPFormatContent } from "../utils/persistence";
 import { ShapeLayer } from "../renderer/layers/ShapeLayer";
+import { SegmentLayer } from "../renderer/layers/SegmentLayer";
 
 type StandaloneMapProps = {
     name?: string;
     scaleControl?: boolean;
     zoomControl?: boolean;
     maxZoom?: number;
+    minZoom?: number;
+    maxPanDistanceFromCenter?: number;
     tiles?: TileLayerVersion;
     file?: WMAPFormatContent;
     borderWidth?: number;
@@ -20,6 +23,11 @@ type StandaloneMapProps = {
     labelColor?: string;
     shapeLabelColor?: string;
     showSolidBlockBehindLabels?: boolean;
+    pathWidth?: number;
+    pathColor?: string;
+    pathOutlineColor?: string;
+    pathOutlineWidth?: number;
+    pathTension?: number;
 };
 
 const x = 50.17085202469079;
@@ -30,7 +38,9 @@ export function StandaloneMap(props: StandaloneMapProps) {
         <Map
             center={{ lat: x, lng: y }}
             zoom={19}
+            maxPanDistanceFromCenter={props.maxPanDistanceFromCenter ?? 0.003}
             maxZoom={props.maxZoom ?? 24}
+            minZoom={props.minZoom ?? 1}
             tiles={props.tiles ?? TileLayerVersion.Liberty}
         >
             <LayerProvider>
@@ -40,7 +50,15 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     shapeLabelColor={props.shapeLabelColor}
                     showSolidBlockBehindLabels={props.showSolidBlockBehindLabels}
                 />
-                {/* <SegmentLayer /> */}
+                <SegmentLayer
+                    segments={props.file?.segments}
+                    waypoints={props.file?.waypoints}
+                    pathWidth={props.pathWidth}
+                    pathColor={props.pathColor}
+                    pathOutlineColor={props.pathOutlineColor}
+                    pathOutlineWidth={props.pathOutlineWidth}
+                    pathTension={props.pathTension}
+                />
                 <WaypointLayer
                     waypoints={props.file?.waypoints}
                     types={props.file?.waypointTypes}

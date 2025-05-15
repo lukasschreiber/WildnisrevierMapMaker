@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "@maplibre/maplibre-gl-leaflet";
-import L, { map } from "leaflet";
+import L from "leaflet";
 import { MapProvider } from "../context/MapContext";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { useSettingsStore } from "../stores/useSettings";
@@ -8,6 +8,8 @@ import { TileLayerConfigs, TileLayerVersion } from "../utils/tiles";
 
 export interface MapProps {
     maxZoom?: number;
+    minZoom?: number;
+    maxPanDistanceFromCenter?: number;
     tiles?: TileLayerVersion;
     center?: {
         lat: number;
@@ -24,6 +26,7 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
 
     const [initialized, setInitialized] = useState(false);
     const maxZoom = props.maxZoom ?? useSettingsStore((state) => state.settings.maxZoom);
+    const minZoom = props.minZoom ?? 1;
     const mapVersion = props.tiles ?? useSettingsStore((state) => state.settings.mapVersion);
     const [view, setView] = useLocalStorage("view", {
         lat: props.center?.lng ?? 52.52,
@@ -87,7 +90,7 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
                 style: layerConfig.url,
                 maxZoom: maxZoom,
             }) as unknown as L.Layer;
-            if(attribution) {
+            if (attribution) {
                 mapRef.current.attributionControl.addAttribution(attribution);
                 existingMaplibreAttribution.current = attribution;
             }
@@ -95,6 +98,23 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
 
         tileLayerRef.current?.addTo(mapRef.current);
     }, [mapVersion, maxZoom]);
+
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        mapRef.current.setMaxZoom(maxZoom);
+        mapRef.current.setMinZoom(minZoom);
+    }, [mapRef.current, maxZoom, minZoom]);
+
+    useEffect(() => {
+        if (!mapRef.current || !props.maxPanDistanceFromCenter) return;
+        const maxPanDistance = props.maxPanDistanceFromCenter;
+        const center = props.center || mapRef.current.getCenter();
+        mapRef.current.setMaxBounds([
+            [center.lat - maxPanDistance, center.lng - maxPanDistance],
+            [center.lat + maxPanDistance, center.lng + maxPanDistance],
+        ])
+    }, [mapRef.current, props.maxPanDistanceFromCenter, props.center]);
 
     // Handle container resizing
     useEffect(() => {

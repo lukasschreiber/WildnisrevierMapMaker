@@ -1,25 +1,39 @@
 import { useCallback, useEffect } from "react";
 import { useLayer } from "../../context/LayerContext";
-import { useWaypointStore } from "../../stores/useWaypoints";
-import { usePathStore } from "../../stores/usePaths";
+import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
+import { usePathStore, PathSegment } from "../../stores/usePaths";
 import { renderSegments } from "../renderSegments";
 import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import L from "leaflet";
 
-export function SegmentLayer() {
+export function SegmentLayer(props: {
+    segments?: PathSegment[];
+    waypoints?: Waypoint[];
+    pathWidth?: number;
+    pathColor?: string;
+    pathOutlineColor?: string;
+    pathOutlineWidth?: number;
+    pathTension?: number;
+}) {
     const g = useLayer(10);
-    const segments = usePathStore((state) => state.segments);
-    const getWaypointById = useWaypointStore((state) => state.getWaypointById);
+    const segments = props.segments ?? usePathStore((state) => state.segments);
+    const storeGetWaypointById = useWaypointStore((state) => state.getWaypointById);
+    const getWaypointById = useCallback(
+        (id: number) => {
+            return props.waypoints?.find((waypoint) => waypoint.id === id) ?? storeGetWaypointById(id);
+        },
+        [props.waypoints, storeGetWaypointById]
+    );
     const selectSegment = usePathStore((state) => state.selectSegment);
     const showSinglePaths = useSettingsStore((state) => state.settings.showSinglePaths);
     const hideOriginalPaths = useSettingsStore((state) => state.settings.hideOriginalPaths);
     const hideFancyPaths = useSettingsStore((state) => state.settings.hideFancyPaths);
-    const pathWidth = useSettingsStore((state) => state.settings.pathWidth);
-    const pathColor = useSettingsStore((state) => state.settings.pathColor);
-    const pathOutlineColor = useSettingsStore((state) => state.settings.pathOutlineColor);
-    const pathOutlineWidth = useSettingsStore((state) => state.settings.pathOutlineWidth);
-    const pathTension = useSettingsStore((state) => state.settings.pathTension);
+    const pathWidth = props.pathWidth ?? useSettingsStore((state) => state.settings.pathWidth);
+    const pathColor = props.pathColor ?? useSettingsStore((state) => state.settings.pathColor);
+    const pathOutlineColor = props.pathOutlineColor ?? useSettingsStore((state) => state.settings.pathOutlineColor);
+    const pathOutlineWidth = props.pathOutlineWidth ?? useSettingsStore((state) => state.settings.pathOutlineWidth);
+    const pathTension = props.pathTension ?? useSettingsStore((state) => state.settings.pathTension);
 
     const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
     const segmentConnectionStartedWaypointId = usePathStore((state) => state.connectionStartedWaypointId);
