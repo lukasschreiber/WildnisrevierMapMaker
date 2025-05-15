@@ -5,6 +5,11 @@ import { WaypointLayer } from "../renderer/layers/WaypointLayer";
 import { WMAPFormatContent } from "../utils/persistence";
 import { ShapeLayer } from "../renderer/layers/ShapeLayer";
 import { SegmentLayer } from "../renderer/layers/SegmentLayer";
+import { StandaloneMapEventManager } from "./StandaloneMapEventManager";
+import { useMap, useMapContext } from "../context/MapContext";
+import { WaypointType } from "../stores/useWaypointTypes";
+import L from "leaflet";
+import { useCallback, useEffect } from "react";
 
 type StandaloneMapProps = {
     name?: string;
@@ -36,6 +41,12 @@ const y = 8.631960603439982;
 
 export function StandaloneMap(props: StandaloneMapProps) {
     const debugging = props.debugging ?? false;
+    if (!props.file) {
+        console.error("StandaloneMap: No file provided");
+        return null;
+    }
+
+    
     return (
         <Map
             center={{ lat: x, lng: y }}
@@ -74,8 +85,11 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     showBorder={props.showBorder}
                     showLabels={props.showLabels}
                     labelColor={props.labelColor}
+                    highlightType={true}
                 />
             </LayerProvider>
+            <SelectedWaypointLabel types={props.file?.waypointTypes || {}} radius={props.radius} />
+            <StandaloneMapEventManager />
         </Map>
     );
 }
@@ -84,3 +98,41 @@ StandaloneMap.defaultProps = {
     scaleControl: true,
     zoomControl: false,
 };
+
+function SelectedWaypointLabel(props: { types: Record<number, WaypointType>; radius?: number }) {
+    const { selectedWaypoint } = useMapContext();
+    const map = useMap();
+
+    const type = selectedWaypoint ? props.types[selectedWaypoint.typeId] : undefined;
+
+    const updatePosition = useCallback(() => {
+        if (!selectedWaypoint) return;
+        const point = map.latLngToContainerPoint(new L.LatLng(selectedWaypoint.lat, selectedWaypoint.lng));
+        const offset = type?.radiusOverride ?? props.radius ?? 10;
+        const label = document.getElementById("standalone-label");
+        if (label) {
+            label.style.transform = `translate(${point.x + offset + 5}px, ${point.y - 15}px)`;
+        }
+    }, [map, selectedWaypoint]);
+
+    useEffect(() => {
+        map.on("move zoom zoomanim", updatePosition);
+
+        return () => {
+            map.off("move zoom zoomanim", updatePosition);
+        };
+    }, [map, selectedWaypoint]);
+
+    useEffect(() => {
+        updatePosition();
+    }, [updatePosition]);
+
+    if (!selectedWaypoint) return null;
+
+    return (
+        <div className="absolute top-0 left-0 bg-white p-1 rounded shadow z-[10000]" id="standalone-label">
+            <h2 className="text-sm font-bold">{type?.name}</h2>
+            <p className="text-xs text-gray-500">{selectedWaypoint.name}</p>
+        </div>
+    );
+}

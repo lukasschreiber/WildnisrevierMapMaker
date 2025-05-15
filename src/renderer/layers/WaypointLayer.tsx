@@ -18,6 +18,7 @@ export function WaypointLayer(props: {
     disableSelection?: boolean;
     showLabels?: boolean;
     labelColor?: string;
+    highlightType?: boolean;
 }) {
     const g = useLayer(12);
     const waypoints = props.waypoints ?? useWaypointStore((state) => state.waypoints);
@@ -25,8 +26,8 @@ export function WaypointLayer(props: {
     if (!g) return null; // Ensure g is defined before proceeding
 
     return waypoints.map((waypoint) => {
-        const group = props.groups?.find((g) => waypoint.groupId === g.id);
-        const type = Object.values(props.types ?? []).find((t) => waypoint.typeId === t.id);
+        const group = props.groups?.find((g) => Number(waypoint.groupId) === Number(g.id));
+        const type = Object.values(props.types ?? []).find((t) => Number(waypoint.typeId) === Number(t.id));
         return (
             <React.Fragment key={waypoint.id}>
                 <Waypoint
@@ -41,6 +42,7 @@ export function WaypointLayer(props: {
                     showBorder={props.showBorder}
                     visualizeHiddenItems={props.visualizeHiddenItems}
                     disableSelection={props.disableSelection}
+                    highlightType={props.highlightType}
                 />
                 <WaypointLabel
                     g={g}

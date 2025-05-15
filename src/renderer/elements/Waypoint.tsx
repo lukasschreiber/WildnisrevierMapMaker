@@ -5,7 +5,7 @@ import { useWaypointGroupStore, WaypointGroup } from "../../stores/useGroups";
 import { renderMarker } from "../renderMarkers";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap } from "../../context/MapContext";
+import { useMap, useMapContext } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { usePathStore } from "../../stores/usePaths";
 import { useShapeStore } from "../../stores/useShapes";
@@ -22,10 +22,12 @@ type WaypointProps = {
     showBorder?: boolean;
     visualizeHiddenItems?: boolean;
     disableSelection?: boolean;
+    highlightType?: boolean;
 };
 
 export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) => {
-    const waypoint = useWaypointStore((state) => props.waypoint ?? state.waypoints.find((wp) => wp.id === waypointId));
+    const waypoint = props.waypoint ?? useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+    const { selectedWaypoint, setSelectedWaypoint } = useMapContext();
     const additionalText = useWaypointStore(
         (state) => state.waypoints.find((wp) => wp.id === waypointId)?.additionalText
     );
@@ -34,13 +36,12 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
     const map = useMap();
 
-    const type =
-        props.type ?? useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
-    const group =
-        props.group ??
-        useWaypointGroupStore((state) =>
-            waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
-        );
+    const type = useWaypointTypeStore(
+        (state) => props.type ?? (waypoint ? state.getTypeById(waypoint.typeId) : undefined)
+    );
+    const group = useWaypointGroupStore(
+        (state) => props.group ?? (waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined)
+    );
 
     const waypointRadius = props.radius ?? useSettingsStore((state) => state.settings.waypointRadius);
     const waypointBorderColor = props.borderColor ?? useSettingsStore((state) => state.settings.waypointBorderColor);
@@ -58,13 +59,13 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
 
     useEffect(() => {
+        console.log("waypoint", waypoint?.additionalText, type?.name, props.type?.name);
         if (!g || !waypoint || !type) return;
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
-
         const renderedMarker = renderMarker(
             g,
             point,
-            additionalText,
+            props.waypoint?.additionalText ?? additionalText,
             selectedId === waypoint.id,
             type.radiusOverride ? type.radiusOverride : waypointRadius,
             type,
@@ -74,6 +75,17 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             showWaypointBorder,
             props.visualizeHiddenItems ?? true
         );
+
+        if (props.highlightType) {
+            renderedMarker.on("click", (e) => {
+                e.stopPropagation(); // This will stop the second click event from firing TODO: not clean
+                setSelectedWaypoint(waypoint);
+            });
+
+            if (selectedWaypoint && selectedWaypoint.typeId !== waypoint.typeId) {
+                renderedMarker.attr("opacity", 0.25);
+            }
+        }
 
         if (!props.disableSelection) {
             renderedMarker.on("click", (event: MouseEvent) => {
@@ -123,8 +135,10 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         selectWaypoint,
         addModeReferenceShapeId,
         addShapeNode,
+        selectedWaypoint,
         props.disableSelection,
         props.visualizeHiddenItems,
+        props.highlightType,
     ]);
 
     const updatePosition = useCallback(() => {
