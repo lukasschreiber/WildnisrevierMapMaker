@@ -8,7 +8,7 @@ interface Point {
     notsmooth?: boolean;
 }
 
-export function renderShape(map: L.Map, g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
+export function renderShape(_map: L.Map, g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
     const { color, name, shapeType, texture, hasOutline, alpha } = shape;
 
     // create a group and put everything in the group
