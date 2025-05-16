@@ -74,7 +74,7 @@ export function MapEventManager() {
                 paths.forEach((path) => {
                     path.segments.forEach((segment) => {
                         if (segment.from.waypointId === selectedId || segment.to.waypointId === selectedId) {
-                            deleteSegment(path.id, segment.id);
+                            deleteSegment(segment.id);
                         }
                     });
                 });

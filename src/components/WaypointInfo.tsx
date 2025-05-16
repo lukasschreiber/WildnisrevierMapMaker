@@ -83,7 +83,7 @@ export function WaypointInfo(props: { id: number }) {
                         paths.forEach((path) => {
                             path.segments.forEach((segment) => {
                                 if (segment.from.waypointId === waypoint.id || segment.to.waypointId === waypoint.id) {
-                                    deleteSegment(path.id, segment.id);
+                                    deleteSegment(segment.id);
                                 }
                             });
                         });
