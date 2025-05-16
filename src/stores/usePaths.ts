@@ -45,12 +45,11 @@ interface PathState {
   addSegment: (pathId: number, from: PathNode, to: PathNode) => void;
   selectSegment: (id: number) => void;
   deselectSegment: () => void;
-  deleteSegment: (pathId: number, id: number) => void;
+  deleteSegment: (id: number) => void;
   getSegmentById: (id: number) => PathSegment | undefined;
   startSegmentConnection: (waypointId: number) => void;
   endSegmentConnection: (waypointId: number) => void;
   cancelSegmentConnection: () => void;
-  setSegments: (pathId: number, segments: PathSegment[]) => void;
   setPaths: (paths: Path[]) => void;
   getPathById: (id: number) => Path | undefined;
 }
@@ -85,14 +84,6 @@ export const usePathStore = create<PathState>()(
       setPaths: (paths) => set({ paths }),
       getPathById: (id) => get().paths.find((p) => p.id === id),
       getSegmentById: (id) => get().paths.flatMap(p => p.segments).find((s) => s.id === id),
-      setSegments: (pathId, segments) => {
-        set((state) => ({
-          paths: state.paths.map((p) =>
-            p.id === pathId ? { ...p, segments } : p,
-          ),
-          selectedSegmentId: null,
-        }));
-      },
       addSegment: (pathId, from, to) => {
         const nextId = get().paths
           .find((p) => p.id === pathId)
@@ -108,18 +99,14 @@ export const usePathStore = create<PathState>()(
       },
       selectSegment: (id) => set({ selectedSegmentId: id }),
       deselectSegment: () => set({ selectedSegmentId: null }),
-      deleteSegment: (pathId, id) =>
+      deleteSegment: (id) => {
         set((state) => ({
-          paths: state.paths.map((p) =>
-            p.id === pathId
-              ? {
-                ...p,
-                segments: p.segments.filter((seg) => seg.id !== id),
-              }
-              : p
-          ),
-          selectedSegmentId: (state.selectedSegmentId === id) ? null : state.selectedSegmentId,
-        })),
+          paths: state.paths.map((p) => ({
+            ...p,
+            segments: p.segments.filter((s) => s.id !== id),
+          })),
+        }));
+      },
       startSegmentConnection: (waypointId) => {
         set({ connectionStartedWaypointId: waypointId, segmentConnectionStarted: true });
       },

@@ -9,7 +9,7 @@ import { useShapeStore } from "./stores/useShapes";
 export function FileLaunchHandler() {
     const setTypes = useWaypointTypeStore((state) => state.setTypes);
     const setWaypoints = useWaypointStore((state) => state.setWaypoints);
-    const setSegments = usePathStore((state) => state.setSegments);
+    const setPaths = usePathStore((state) => state.setPaths);
     const setGroups = useWaypointGroupStore((state) => state.setWaypointGroups);
     const setShapes = useShapeStore((state) => state.setShapes);
 
@@ -46,7 +46,7 @@ export function FileLaunchHandler() {
                             const parsed = parseWMAPFile(text);
                             setWaypoints(parsed.waypoints);
                             setTypes(parsed.waypointTypes);
-                            setSegments(parsed.segments);
+                            setPaths(parsed.paths);
                             setGroups(parsed.groups);
                             setShapes(parsed.shapes);
 
