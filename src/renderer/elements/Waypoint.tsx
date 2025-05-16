@@ -9,6 +9,7 @@ import { useMap, useMapContext } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { usePathStore } from "../../stores/usePaths";
 import { useShapeStore } from "../../stores/useShapes";
+import { evaluationEventEmitter } from "../../utils/evaluation";
 
 type WaypointProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -82,6 +83,15 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             renderedMarker.on("click", (e) => {
                 e.stopPropagation(); // This will stop the second click event from firing TODO: not clean
                 setSelectedWaypoint(waypoint);
+                evaluationEventEmitter.emit({
+                    name: "labelSelect",
+                    timestamp: new Date(),
+                    url: window.location.href,
+                    details: {
+                        waypointId: waypoint.id,
+                        action: "labelSelect",
+                    },
+                })
             });
 
             if (selectedWaypoint && selectedWaypoint.typeId !== waypoint.typeId) {

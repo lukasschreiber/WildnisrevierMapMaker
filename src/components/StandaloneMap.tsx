@@ -8,8 +8,9 @@ import { StandaloneMapEventManager } from "./StandaloneMapEventManager";
 import { useMap, useMapContext } from "../context/MapContext";
 import { WaypointType } from "../stores/useWaypointTypes";
 import L from "leaflet";
-import { useCallback, useEffect } from "react";
+import { ReactNode, useCallback, useEffect } from "react";
 import { PathLayer } from "../renderer/layers/PathsLayer";
+import { Waypoint } from "../stores/useWaypoints";
 
 type StandaloneMapProps = {
     name?: string;
@@ -29,6 +30,7 @@ type StandaloneMapProps = {
     shapeLabelColor?: string;
     showSolidBlockBehindLabels?: boolean;
     debugging?: boolean;
+    labelRenderer?: Record<number, (waypoint: Waypoint, type: WaypointType) => ReactNode>;
 };
 
 const x = 50.17073552662087;
@@ -58,11 +60,7 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     showSolidBlockBehindLabels={props.showSolidBlockBehindLabels}
                     debugging={debugging}
                 />
-                <PathLayer
-                    paths={props.file?.paths}
-                    waypoints={props.file?.waypoints}
-                    debugging={debugging}
-                />
+                <PathLayer paths={props.file?.paths} waypoints={props.file?.waypoints} debugging={debugging} />
                 <WaypointLayer
                     waypoints={props.file?.waypoints}
                     types={props.file?.waypointTypes}
@@ -78,7 +76,11 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     highlightType={true}
                 />
             </LayerProvider>
-            <SelectedWaypointLabel types={props.file?.waypointTypes || {}} radius={props.radius} />
+            <SelectedWaypointLabel
+                types={props.file?.waypointTypes || {}}
+                radius={props.radius}
+                labelRenderer={props.labelRenderer}
+            />
             <StandaloneMapEventManager />
         </Map>
     );
@@ -89,7 +91,11 @@ StandaloneMap.defaultProps = {
     zoomControl: false,
 };
 
-function SelectedWaypointLabel(props: { types: Record<number, WaypointType>; radius?: number }) {
+function SelectedWaypointLabel(props: {
+    types: Record<number, WaypointType>;
+    radius?: number;
+    labelRenderer?: Record<number, (waypoint: Waypoint, type: WaypointType) => ReactNode>;
+}) {
     const { selectedWaypoint } = useMapContext();
     const map = useMap();
 
@@ -117,12 +123,18 @@ function SelectedWaypointLabel(props: { types: Record<number, WaypointType>; rad
         updatePosition();
     }, [updatePosition]);
 
-    if (!selectedWaypoint) return null;
+    if (!selectedWaypoint || !type) return null;
 
     return (
-        <div className="absolute top-0 left-0 bg-white p-1 rounded shadow z-[10000]" id="standalone-label">
-            <h2 className="text-sm font-bold">{type?.name}</h2>
-            <p className="text-xs text-gray-500">{selectedWaypoint.name}</p>
+        <div className="absolute top-0 left-0 bg-white p-1 rounded shadow z-[10000] pointer-events-auto" id="standalone-label">
+            {props.labelRenderer && props.labelRenderer[Number(selectedWaypoint.typeId)] ? (
+                props.labelRenderer[Number(selectedWaypoint.typeId)](selectedWaypoint, type)
+            ) : (
+                <>
+                    <h2 className="text-sm font-bold">{type.name}</h2>
+                    <p className="text-xs text-gray-500">{selectedWaypoint.name}</p>
+                </>
+            )}
         </div>
     );
 }

@@ -20,6 +20,7 @@
     "@maplibre/maplibre-gl-leaflet": "^0.1.0",
     "@tailwindcss/vite": "^4.1.4",
     "d3": "^7.9.0",
+    "events": "^3.3.0",
     "leaflet": "^1.9.4",
     "maplibre-gl": "4.7.1",
     "react": "^19.0.0",

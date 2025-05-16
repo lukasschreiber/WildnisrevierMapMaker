@@ -13,7 +13,7 @@ export function ShapeLayer(props: {
 }) {
     const g = useLayer(0);
     const shapesFromStore = useShapeStore((state) => state.shapes.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-    const shapes = props.shapes ?? shapesFromStore;
+    const shapes = props.shapes?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) ?? shapesFromStore;
 
     if (!g) return null; // Ensure g is defined before proceeding
 
