@@ -36,8 +36,8 @@ type StandaloneMapProps = {
     debugging?: boolean;
 };
 
-const x = 50.17085202469079;
-const y = 8.631960603439982;
+const x = 50.17073552662087;
+const y = 8.63193034819791;
 
 export function StandaloneMap(props: StandaloneMapProps) {
     const debugging = props.debugging ?? false;
@@ -45,8 +45,7 @@ export function StandaloneMap(props: StandaloneMapProps) {
         console.error("StandaloneMap: No file provided");
         return null;
     }
-
-    
+ 
     return (
         <Map
             center={{ lat: x, lng: y }}

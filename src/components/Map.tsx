@@ -29,8 +29,8 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
     const minZoom = props.minZoom ?? 1;
     const mapVersion = props.tiles ?? useSettingsStore((state) => state.settings.mapVersion);
     const [view, setView] = useLocalStorage("view", {
-        lat: props.center?.lng ?? 52.52,
-        lng: props.center?.lat ?? 13.405,
+        lat: props.center?.lat ?? 52.52,
+        lng: props.center?.lng ?? 13.405,
         zoom: props.zoom ?? 13,
     });
 
@@ -49,6 +49,7 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
         mapRef.current.on("moveend zoomend", () => {
             const center = mapRef.current!.getCenter();
             const zoom = mapRef.current!.getZoom();
+            console.log("Saving view:", { lat: center.lat, lng: center.lng, zoom });
             setView({ lat: center.lat, lng: center.lng, zoom });
         });
     }, [view.lat, view.lng, view.zoom, setView]);
