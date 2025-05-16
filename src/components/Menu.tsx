@@ -27,7 +27,7 @@ export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: b
 
     const addPathMode = usePathStore((state) => state.addMode);
     const setAddPathMode = usePathStore((state) => state.setAddMode);
-    const selectedSegmentId = usePathStore((state) => state.selectedId);
+    const selectedSegmentId = usePathStore((state) => state.selectedSegmentId);
 
     const addShapeMode = useShapeStore((state) => state.addMode);
     const setAddShapeMode = useShapeStore((state) => state.setAddMode);
@@ -59,7 +59,7 @@ export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: b
                 <div className="text-xs mb-1">Mode:</div>
                 <Select
                     className="w-full"
-                    value={addMode ? "add" : addPathMode ? "paths" : "normal"}
+                    value={addMode ? "add" : "normal"}
                     onChange={(value) => {
                         if (value === "add") {
                             setAddMode(true);
@@ -68,16 +68,8 @@ export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: b
                         } else {
                             setAddMode(false);
                         }
-
-                        if (value === "paths") {
-                            setAddPathMode(true);
-                            setAddMode(false);
-                            setAddShapeMode(false);
-                        } else {
-                            setAddPathMode(false);
-                        }
                     }}
-                    options={[{ label: "Normal", value: "normal" }, { label: "Add Waypoint", value: "add" }, { label: "Add Path", value: "paths" }]}
+                    options={[{ label: "Normal", value: "normal" }, { label: "Add Waypoint", value: "add" }]}
                 />
             </div>
             {addMode && (

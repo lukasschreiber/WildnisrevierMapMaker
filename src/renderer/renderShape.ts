@@ -9,14 +9,15 @@ interface Point {
 }
 
 export function renderShape(_map: L.Map, g: d3.Selection<SVGGElement, unknown, null, undefined>, shape: Shape, points: { x: number; y: number }[], showOriginalShapeEdges: boolean, showOriginalShapeVertices: boolean, showShapeControlPointEdges: boolean, labelColor: string, showSolidBlockBehindLabel: boolean) {
-    const { color, name, shapeType, texture, hasOutline, alpha } = shape;
+    const { color, name, shapeType, texture, hasOutline, alpha, labelColor: labelColorOverride } = shape;
+
+    labelColor = labelColorOverride ?? labelColor;
 
     // create a group and put everything in the group
     const group = g.append("g")
         .attr("id", `shape-${shape.id}`)
 
     const patternId = `pattern-${Math.random().toString(36).substring(2, 15)}`;
-
     const dedupedPoints = Array.from(new Set(points.map(p => `${p.x},${p.y}`))).map(p => {
         const [x, y] = p.split(",").map(Number);
         return { x, y };

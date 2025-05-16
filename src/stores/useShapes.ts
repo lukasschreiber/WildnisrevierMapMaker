@@ -19,6 +19,7 @@ export type Shape = {
     order?: number;
     labelHidden?: boolean;
     opacity?: number;
+    labelColor?: string;
 };
 
 type ShapeState = {

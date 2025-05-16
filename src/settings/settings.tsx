@@ -169,42 +169,6 @@ export function getSettingsDefinition() {
         {
             name: "Path Settings",
             settings: {
-                showSinglePaths: {
-                    type: "checkbox",
-                    default: true,
-                    label: "Use a unique color for each path",
-                    helpText: "Show paths between waypoints.",
-                },
-                pathWidth: {
-                    type: "range",
-                    default: 5,
-                    min: 1,
-                    max: 20,
-                    stepSize: 1,
-                    label: "Path Width",
-                    helpText: "Width of the paths.",
-                },
-                pathColor: {
-                    type: "color",
-                    default: "#00FF00",
-                    label: "Path Color",
-                    helpText: "Color of the paths.",
-                },
-                pathOutlineWidth:{
-                    type: "range",
-                    default: 1,
-                    min: 0,
-                    max: 10,
-                    stepSize: 1,
-                    label: "Path Outline Width",
-                    helpText: "Width of the path outline.",
-                },
-                pathOutlineColor: {
-                    type: "color",
-                    default: "#000000",
-                    label: "Path Outline Color",
-                    helpText: "Color of the path outline.",
-                },
                 hideOriginalPaths: {
                     type: "checkbox",
                     default: false,
@@ -216,15 +180,6 @@ export function getSettingsDefinition() {
                     default: false,
                     label: "Hide Fancy Paths",
                     helpText: "Hide the fancy paths.",
-                },
-                pathTension: {
-                    type: "range",
-                    default: 0.5,
-                    min: 0,
-                    max: 1,
-                    stepSize: 0.05,
-                    label: "Path Tension",
-                    helpText: "Tension of the paths.",
                 },
             },
         },

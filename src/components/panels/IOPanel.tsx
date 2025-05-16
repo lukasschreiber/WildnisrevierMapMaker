@@ -12,8 +12,8 @@ export function IOPanel() {
     const setWaypoints = useWaypointStore((state) => state.setWaypoints);
     const types = useWaypointTypeStore((state) => state.types);
     const setTypes = useWaypointTypeStore((state) => state.setTypes);
-    const segments = usePathStore((state) => state.segments);
-    const setSegments = usePathStore((state) => state.setSegments);
+    const paths = usePathStore((state) => state.paths);
+    const setPaths = usePathStore((state) => state.setPaths);
     const shapes = useShapeStore((state) => state.shapes);
     const setShapes = useShapeStore((state) => state.setShapes);
     const groups = useWaypointGroupStore((state) => state.waypointGroups);
@@ -30,11 +30,11 @@ export function IOPanel() {
         exportAndDownloadWMAPFile({
             waypoints,
             waypointTypes: types,
-            segments,
+            paths,
             shapes,
             groups,
         });
-    }, [waypoints, segments, types, shapes, groups]);
+    }, [waypoints, paths, types, shapes, groups]);
 
     const exportSvg = useCallback(() => {
         const svgContentGroups = document.querySelectorAll<SVGGElement>(".waypoint-overlay");
@@ -113,7 +113,7 @@ export function IOPanel() {
                 const parsed = parseWMAPFile(content);
                 setTypes(parsed.waypointTypes);
                 setWaypoints(parsed.waypoints);
-                setSegments(parsed.segments);
+                setPaths(parsed.paths);
                 setShapes(parsed.shapes);
                 setGroups(parsed.groups);
             }
@@ -147,7 +147,7 @@ export function IOPanel() {
                 onClick={() => {
                     if (confirm("Are you sure you want to reset all data?")) {
                         setWaypoints([]);
-                        setSegments([]);
+                        setPaths([]);
                         setShapes([]);
                         setTypes({
                             1: {

@@ -18,7 +18,7 @@ export function WaypointInfo(props: { id: number }) {
     const updateWaypointGroup = useWaypointStore((state) => state.updateWaypointGroup);
 
     const deleteSegment = usePathStore((state) => state.deleteSegment);
-    const segments = usePathStore((state) => state.segments);
+    const paths = usePathStore((state) => state.paths);
 
     const types = useWaypointTypeStore((state) => state.types);
 
@@ -80,10 +80,12 @@ export function WaypointInfo(props: { id: number }) {
                 onClick={() => {
                     if (confirm("Are you sure you want to delete this waypoint?")) {
                         // Delete all segments connected to this waypoint
-                        segments.forEach((segment) => {
-                            if (segment.from.waypointId === waypoint.id || segment.to.waypointId === waypoint.id) {
-                                deleteSegment(segment.id);
-                            }
+                        paths.forEach((path) => {
+                            path.segments.forEach((segment) => {
+                                if (segment.from.waypointId === waypoint.id || segment.to.waypointId === waypoint.id) {
+                                    deleteSegment(path.id, segment.id);
+                                }
+                            });
                         });
                         deleteWaypoint(waypoint.id);
 

@@ -72,7 +72,7 @@ export function renderSegments(g: d3.Selection<SVGGElement, unknown, null, undef
     return renderedElements;
 }
 
-function getPaths(segments: PathSegment[]): number[][] {
+export function getPaths(segments: PathSegment[]): number[][] {
     // Create a map to store connections between points
     const connections: Record<number, number[]> = {};
     segments.forEach((segment) => {

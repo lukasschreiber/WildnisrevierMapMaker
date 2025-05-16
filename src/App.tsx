@@ -6,9 +6,9 @@ import { WaypointLayer } from "./renderer/layers/WaypointLayer";
 import { LayerProvider } from "./context/LayerContext";
 import { MapEventManager } from "./components/MapEventManager";
 import { WaypointArrowLayer } from "./renderer/layers/WaypointArrowLayer";
-import { SegmentLayer } from "./renderer/layers/SegmentLayer";
 import { ShapeLayer } from "./renderer/layers/ShapeLayer";
 import { Map } from "./components/Map";
+import { PathLayer } from "./renderer/layers/PathsLayer";
 
 export default function App() {
     const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
@@ -20,7 +20,8 @@ export default function App() {
             <Map>
                 <LayerProvider>
                     <ShapeLayer debugging />
-                    <SegmentLayer debugging />
+                    {/* <SegmentLayer debugging /> */}
+                    <PathLayer />
                     <WaypointLayer />
                     <WaypointArrowLayer />
                     {/* <LocationMarker /> */}

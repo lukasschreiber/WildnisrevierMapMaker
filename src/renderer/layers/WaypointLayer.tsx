@@ -21,7 +21,8 @@ export function WaypointLayer(props: {
     highlightType?: boolean;
 }) {
     const g = useLayer(12);
-    const waypoints = props.waypoints ?? useWaypointStore((state) => state.waypoints);
+    const waypointsFromStore = useWaypointStore((state) => state.waypoints);
+    const waypoints = props.waypoints ?? waypointsFromStore;
 
     if (!g) return null; // Ensure g is defined before proceeding
 
@@ -33,7 +34,7 @@ export function WaypointLayer(props: {
                 <Waypoint
                     g={g}
                     waypointId={waypoint.id}
-                    waypoint={waypoint}
+                    waypoint={props.waypoints && waypoint}
                     type={type}
                     group={group}
                     borderWidth={props.borderWidth}
@@ -47,7 +48,7 @@ export function WaypointLayer(props: {
                 <WaypointLabel
                     g={g}
                     waypointId={waypoint.id}
-                    waypoint={waypoint}
+                    waypoint={props.waypoints && waypoint}
                     type={type}
                     group={group}
                     radius={props.radius}

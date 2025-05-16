@@ -63,7 +63,7 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     showSolidBlockBehindLabels={props.showSolidBlockBehindLabels}
                     debugging={debugging}
                 />
-                <SegmentLayer
+                {/* <SegmentLayer
                     segments={props.file?.segments}
                     waypoints={props.file?.waypoints}
                     pathWidth={props.pathWidth}
@@ -71,7 +71,7 @@ export function StandaloneMap(props: StandaloneMapProps) {
                     pathOutlineColor={props.pathOutlineColor}
                     pathOutlineWidth={props.pathOutlineWidth}
                     pathTension={props.pathTension}
-                />
+                /> */}
                 <WaypointLayer
                     waypoints={props.file?.waypoints}
                     types={props.file?.waypointTypes}

@@ -139,6 +139,10 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                     ]}
                 />
                 <ColorInput value={shape.color} onChange={(value) => updateShape(shape.id, { color: value })} />
+                <ColorInput
+                    value={shape.labelColor}
+                    onChange={(value) => updateShape(shape.id, { labelColor: value })}
+                />
                 <Checkbox
                     id={shape.id.toString()}
                     label="Has Outline"

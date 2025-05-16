@@ -151,13 +151,13 @@ export const useWaypointStore = create<WaypointState>()(
 
       isDeletable: (id) => {
         const { waypoints } = get();
-        const { segments } = usePathStore.getState();
+        const { paths } = usePathStore.getState();
         const { shapes } = useShapeStore.getState();
         const waypoint = waypoints.find((wp) => wp.id === id);
         if (!waypoint) return false;
-        const usedInSegments = segments.some(
+        const usedInSegments = paths.some(path => path.segments.some(
           (s) => s.from.waypointId === id || s.to.waypointId === id
-        );
+        ));
         const usedInShapes = shapes.some((s) =>
           s.nodes.some((n) => n.waypointId === id)
         );

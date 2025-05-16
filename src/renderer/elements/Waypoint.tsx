@@ -26,27 +26,30 @@ type WaypointProps = {
 };
 
 export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) => {
-    const waypoint = props.waypoint ?? useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+    const storeWaypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+    const waypoint = props.waypoint ?? storeWaypoint;
+
     const { selectedWaypoint, setSelectedWaypoint } = useMapContext();
-    const additionalText = useWaypointStore(
-        (state) => state.waypoints.find((wp) => wp.id === waypointId)?.additionalText
-    );
     const selectedId = useWaypointStore((state) => state.selectedId);
     const isSelected = selectedId === waypoint?.id;
 
     const map = useMap();
 
-    const type = useWaypointTypeStore(
-        (state) => props.type ?? (waypoint ? state.getTypeById(waypoint.typeId) : undefined)
+    const storeType = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
+    const type = props.type ?? storeType;
+    const storeGroup = useWaypointGroupStore((state) =>
+        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
     );
-    const group = useWaypointGroupStore(
-        (state) => props.group ?? (waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined)
-    );
+    const group = props.group ?? storeGroup;
 
-    const waypointRadius = props.radius ?? useSettingsStore((state) => state.settings.waypointRadius);
-    const waypointBorderColor = props.borderColor ?? useSettingsStore((state) => state.settings.waypointBorderColor);
-    const showWaypointBorder = props.showBorder ?? useSettingsStore((state) => state.settings.showWaypointBorder);
-    const waypointBorderWidth = props.borderWidth ?? useSettingsStore((state) => state.settings.waypointBorderWidth);
+    const storeWaypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
+    const waypointRadius = props.radius ?? storeWaypointRadius;
+    const storeWaypointBorderColor = useSettingsStore((state) => state.settings.waypointBorderColor);
+    const waypointBorderColor = props.borderColor ?? storeWaypointBorderColor;
+    const storeShowWaypointBorder = useSettingsStore((state) => state.settings.showWaypointBorder);
+    const showWaypointBorder = props.showBorder ?? storeShowWaypointBorder;
+    const storeWaypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
+    const waypointBorderWidth = props.borderWidth ?? storeWaypointBorderWidth;
 
     const addPathMode = usePathStore((state) => state.addMode);
     const addShapeMode = useShapeStore((state) => state.addMode);
@@ -59,13 +62,12 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
 
     useEffect(() => {
-        console.log("waypoint", waypoint?.additionalText, type?.name, props.type?.name);
         if (!g || !waypoint || !type) return;
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
         const renderedMarker = renderMarker(
             g,
             point,
-            props.waypoint?.additionalText ?? additionalText,
+            waypoint?.additionalText,
             selectedId === waypoint.id,
             type.radiusOverride ? type.radiusOverride : waypointRadius,
             type,
@@ -117,7 +119,6 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         };
     }, [
         waypoint,
-        additionalText,
         type,
         group,
         g,

@@ -12,76 +12,130 @@ export type PathSegment = {
   to: PathNode;
 };
 
-interface PathState {
+export type Path = {
+  id: number;
+  name: string;
+  color: string;
+  outlineWidth: number;
+  outlineColor: string;
+  width: number;
+  tension: number;
   segments: PathSegment[];
+  hidden?: boolean;
+  order?: number;
+  opacity?: number;
+  linecap?: "round" | "butt" | "square";
+  style?: "solid" | "dashed" | "dotted";
+}
+
+interface PathState {
+  paths: Path[];
   addMode: boolean;
-  selectedId: number | null;
+  addModeReferencePathId: number | null;
+  selectedSegmentId: number | null;
   connectionStartedWaypointId: number | null;
   segmentConnectionStarted: boolean;
 
   // Actions
   setAddMode: (addMode: boolean) => void;
-  addSegment: (from: PathNode, to: PathNode) => void;
+  setAddModeReferencePathId: (id: number | null) => void;
+  addPath: (name: string, color: string) => void;
+  updatePath: (id: number, path: Partial<Path>) => void;
+  deletePath: (id: number) => void;
+  addSegment: (pathId: number, from: PathNode, to: PathNode) => void;
   selectSegment: (id: number) => void;
   deselectSegment: () => void;
-  deleteSegment: (id: number) => void;
+  deleteSegment: (pathId: number, id: number) => void;
   getSegmentById: (id: number) => PathSegment | undefined;
   startSegmentConnection: (waypointId: number) => void;
   endSegmentConnection: (waypointId: number) => void;
   cancelSegmentConnection: () => void;
-  setSegments: (segments: PathSegment[]) => void;
+  setSegments: (pathId: number, segments: PathSegment[]) => void;
+  setPaths: (paths: Path[]) => void;
+  getPathById: (id: number) => Path | undefined;
 }
 
 export const usePathStore = create<PathState>()(
   persist(
     (set, get) => ({
-      segments: [],
+      paths: [],
+      addModeReferencePathId: null,
+      selectedSegmentId: null,
       addMode: false,
-      selectedId: null,
       connectionStartedWaypointId: null,
       segmentConnectionStarted: false,
 
-      setAddMode: (addMode) => set({ addMode }),
-
-      getSegmentById: (id) => get().segments.find((s) => s.id === id),
-
-      setSegments: (segments) => set({ segments }),
-
-      addSegment: (from, to) => {
-        const nextId = get().segments.length > 0
-          ? Math.max(...get().segments.map((s) => s.id)) + 1
-          : 1;
-        const newSegment: PathSegment = { id: nextId, from, to };
-        set((state) => ({ segments: [...state.segments, newSegment] }));
+      addPath: (name, color) => {
+        const nextId = get().paths.reduce((max, path) => Math.max(max, path.id), 0) + 1;
+        const newPath: Path = { id: nextId, name, color, segments: [], outlineWidth: 1, outlineColor: color, tension: 0.5, hidden: false, width: 5};
+        set((state) => ({ paths: [...state.paths, newPath] }));
       },
-
-      selectSegment: (id) => set({ selectedId: id }),
-      deselectSegment: () => set({ selectedId: null }),
-
-      deleteSegment: (id) =>
+      updatePath: (id, updated) => {
         set((state) => ({
-          segments: state.segments.filter((seg) => seg.id !== id),
-          selectedId: state.selectedId === id ? null : state.selectedId,
-        })),
+          paths: state.paths.map((p) => (p.id === id ? { ...p, ...updated } : p)),
+        }));
+      },
+      deletePath: (id) => {
+        set((state) => ({
+          paths: state.paths.filter((p) => p.id !== id),
+        }));
+      },
+      setAddMode: (addMode) => set({ addMode }),
+      setAddModeReferencePathId: (id) => set({ addModeReferencePathId: id }),
+      setPaths: (paths) => set({ paths }),
+      getPathById: (id) => get().paths.find((p) => p.id === id),
+      getSegmentById: (id) => get().paths.flatMap(p => p.segments).find((s) => s.id === id),
+      setSegments: (pathId, segments) => {
+        set((state) => ({
+          paths: state.paths.map((p) =>
+            p.id === pathId ? { ...p, segments } : p,
+          ),
+          selectedSegmentId: null,
+        }));
+      },
+      addSegment: (pathId, from, to) => {
+        const nextId = get().paths
+          .find((p) => p.id === pathId)
+          ?.segments.reduce((max, seg) => Math.max(max, seg.id), 0) ?? 0 + 1;
 
+        const newSegment: PathSegment = { id: nextId, from, to };
+
+        set((state) => ({
+          paths: state.paths.map((p) =>
+            p.id === pathId ? { ...p, segments: [...p.segments, newSegment] } : p
+          ),
+        }));
+      },
+      selectSegment: (id) => set({ selectedSegmentId: id }),
+      deselectSegment: () => set({ selectedSegmentId: null }),
+      deleteSegment: (pathId, id) =>
+        set((state) => ({
+          paths: state.paths.map((p) =>
+            p.id === pathId
+              ? {
+                ...p,
+                segments: p.segments.filter((seg) => seg.id !== id),
+              }
+              : p
+          ),
+          selectedSegmentId: (state.selectedSegmentId === id) ? null : state.selectedSegmentId,
+        })),
       startSegmentConnection: (waypointId) => {
         set({ connectionStartedWaypointId: waypointId, segmentConnectionStarted: true });
       },
-
       endSegmentConnection: (waypointId) => {
         const fromId = get().connectionStartedWaypointId;
         if (fromId !== null && fromId !== waypointId) {
-          get().addSegment({ waypointId: fromId }, { waypointId });
+          get().addSegment(get().addModeReferencePathId!, { waypointId: fromId }, { waypointId });
         }
         set({ connectionStartedWaypointId: null, segmentConnectionStarted: false });
       },
-
       cancelSegmentConnection: () => set({ connectionStartedWaypointId: null, segmentConnectionStarted: false }),
     }),
     {
       name: getLocalStorageKey("paths"),
       partialize: (state) => ({
-        segments: state.segments,
+        paths: state.paths,
         addMode: state.addMode,
       }),
     }

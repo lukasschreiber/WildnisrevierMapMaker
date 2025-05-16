@@ -15,7 +15,7 @@ export function MapEventManager() {
     const waypoints = useWaypointStore((state) => state.waypoints);
     const addWaypoint = useWaypointStore((state) => state.addWaypoint);
     const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
-    const segments = usePathStore((state) => state.segments);
+    const paths = usePathStore((state) => state.paths);
     const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
 
     const onMapClick = useCallback(
@@ -71,10 +71,12 @@ export function MapEventManager() {
                 if (!isDeletable(selectedId)) return;
                 const confirmed = window.confirm("Are you sure you want to delete this waypoint?");
                 if (!confirmed) return;
-                segments.forEach((segment) => {
-                    if (segment.from.waypointId === selectedId || segment.to.waypointId === selectedId) {
-                        deleteSegment(segment.id);
-                    }
+                paths.forEach((path) => {
+                    path.segments.forEach((segment) => {
+                        if (segment.from.waypointId === selectedId || segment.to.waypointId === selectedId) {
+                            deleteSegment(path.id, segment.id);
+                        }
+                    });
                 });
                 deleteWaypoint(selectedId); // Delete the waypoint from the context
                 deselectWaypoint();

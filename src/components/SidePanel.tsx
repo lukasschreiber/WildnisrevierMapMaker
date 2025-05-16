@@ -6,6 +6,7 @@ import { IOPanel } from "./panels/IOPanel";
 import { WaypointsPanel } from "./panels/WaypointsPanel";
 import { WaypointGroupsPanel } from "./panels/WaypointGroupsPanel";
 import { ShapesPanel } from "./panels/ShapesPanel";
+import { PathsPanel } from "./panels/PathsPanel";
 
 export function SidePanel({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -51,6 +52,12 @@ export function SidePanel({ activeTab, setActiveTab }: { activeTab: string; setA
                         Shapes
                     </button>
                     <button
+                        className={`p-2 rounded-md ${activeTab === "paths" ? "bg-blue-500" : ""}`}
+                        onClick={() => setActiveTab("paths")}
+                    >
+                        Paths
+                    </button>
+                    <button
                         className={`p-2 rounded-md ${activeTab === "settings" ? "bg-blue-500" : ""}`}
                         onClick={() => setActiveTab("settings")}
                     >
@@ -71,6 +78,7 @@ export function SidePanel({ activeTab, setActiveTab }: { activeTab: string; setA
                 {activeTab === "waypoints" && <WaypointsPanel />}
                 {activeTab === "groups" && <WaypointGroupsPanel />}
                 {activeTab === "shapes" && <ShapesPanel />}
+                {activeTab === "paths" && <PathsPanel />}
             </div>
         </div>
     );

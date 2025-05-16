@@ -20,18 +20,24 @@ type WaypointLabelProps = {
 };
 
 export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLabelProps) => {
-    const waypoint = props.waypoint ?? useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+    const storeWaypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
+    const waypoint = props.waypoint ?? storeWaypoint;
 
     const map = useMap();
 
-    const type = props.type ?? useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
-    const group = props.group ?? useWaypointGroupStore((state) =>
+    const storeType = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
+    const type = props.type ?? storeType;
+    const storeGroup = useWaypointGroupStore((state) =>
         waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
     );
+    const group = props.group ?? storeGroup;
 
-    const showLabels = props.showLabels ?? useSettingsStore((state) => state.settings.showLabels);
-    const waypointRadius = props.radius ?? useSettingsStore((state) => state.settings.waypointRadius);
-    const labelColor = props.labelColor ?? useSettingsStore((state) => state.settings.labelColor);
+    const storeShowLabels = useSettingsStore((state) => state.settings.showLabels);
+    const storeWaypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
+    const storeLabelColor = useSettingsStore((state) => state.settings.labelColor);
+    const waypointRadius = props.radius ?? storeWaypointRadius;
+    const labelColor = props.labelColor ?? storeLabelColor;
+    const showLabels = props.showLabels ?? storeShowLabels;
 
     useEffect(() => {
         if (!g || !waypoint || !type) return;

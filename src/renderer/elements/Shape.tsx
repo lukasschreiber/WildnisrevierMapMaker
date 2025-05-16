@@ -22,14 +22,22 @@ export const Shape = React.memo(({ g, shapeId, order, ...props }: ShapeProps) =>
     const map = useMap();
     const debugging = props.debugging ?? false;
 
-    const showOriginalShapeEdges = useSettingsStore((state) => debugging && state.settings.showOriginalShapeEdges);
-    const showOriginalShapeVertices = useSettingsStore((state) => debugging && state.settings.showOriginalShapeVertices);
-    const showShapeControlPointEdges = useSettingsStore((state) => debugging && state.settings.showShapeControlPointEdges);
-    const shapeLabelColor = props.shapeLabelColor ?? useSettingsStore((state) => state.settings.shapeLabelColor);
-    const showSolidBlockBehindLabels = props.showSolidBlockBehindLabels ?? useSettingsStore((state) => state.settings.showSolidBlockBehindLabels);
+    const storeShowOriginalShapeEdges = useSettingsStore((state) => state.settings.showOriginalShapeEdges);
+    const showOriginalShapeEdges = debugging && storeShowOriginalShapeEdges;
+    const storeShowOriginalShapeVertices = useSettingsStore((state) => state.settings.showOriginalShapeVertices);
+    const showOriginalShapeVertices = debugging && storeShowOriginalShapeVertices;
+    const storeShowShapeControlPointEdges = useSettingsStore((state) => state.settings.showShapeControlPointEdges);
+    const showShapeControlPointEdges = debugging && storeShowShapeControlPointEdges;
+    const storeShapeLabelColor = useSettingsStore((state) => state.settings.shapeLabelColor);
+    const shapeLabelColor = props.shapeLabelColor ?? storeShapeLabelColor;
+    const storeShowSolidBlockBehindLabels = useSettingsStore((state) => state.settings.showSolidBlockBehindLabels);
+    const showSolidBlockBehindLabels = props.showSolidBlockBehindLabels ?? storeShowSolidBlockBehindLabels;
 
-    const shape = props.shape ?? useShapeStore((state) => state.shapes.find((s) => s.id === shapeId));
-    const allWaypoints = props.waypoints ?? useWaypointStore((state) => state.waypoints);
+    const shapeFromStore = useShapeStore((state) => state.shapes.find((s) => s.id === shapeId));
+    const shape = props.shape ?? shapeFromStore;
+
+    const storeAllWaypoints = useWaypointStore((state) => state.waypoints);
+    const allWaypoints = props.waypoints ?? storeAllWaypoints;
     const renderedOrder = useRef(order);
 
     const waypoints = useMemo(() => {

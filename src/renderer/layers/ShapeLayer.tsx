@@ -12,7 +12,8 @@ export function ShapeLayer(props: {
     debugging?: boolean;
 }) {
     const g = useLayer(0);
-    const shapes = props.shapes ?? useShapeStore((state) => state.shapes.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+    const shapesFromStore = useShapeStore((state) => state.shapes.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+    const shapes = props.shapes ?? shapesFromStore;
 
     if (!g) return null; // Ensure g is defined before proceeding
 
@@ -23,7 +24,7 @@ export function ShapeLayer(props: {
                 g={g}
                 shapeId={shape.id}
                 order={index}
-                shape={shape}
+                shape={props.shapes && shape}
                 waypoints={props.waypoints}
                 shapeLabelColor={props.shapeLabelColor}
                 showSolidBlockBehindLabels={props.showSolidBlockBehindLabels}
