@@ -8,8 +8,8 @@ import L from "leaflet";
 
 export function PathLayer(props: { paths?: TPath[]; waypoints?: Waypoint[]; debugging?: boolean }) {
     const g = useLayer(10);
-    const pathsFromStore = usePathStore((state) => state.paths);
-    const paths = props.paths ?? pathsFromStore;
+    const pathsFromStore = usePathStore((state) => state.paths.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+    const paths = props.paths?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) ?? pathsFromStore;
 
     const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
     const segmentConnectionStartedWaypointId = usePathStore((state) => state.connectionStartedWaypointId);
