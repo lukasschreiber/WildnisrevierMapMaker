@@ -20,8 +20,7 @@ export default function App() {
             <Map>
                 <LayerProvider>
                     <ShapeLayer debugging />
-                    {/* <SegmentLayer debugging /> */}
-                    <PathLayer />
+                    <PathLayer debugging />
                     <WaypointLayer />
                     <WaypointArrowLayer />
                     {/* <LocationMarker /> */}

@@ -4,6 +4,7 @@ import { useMap } from "../../context/MapContext";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import L from "leaflet";
 import { renderPath } from "../renderPath";
+import { useSettingsStore } from "../../stores/useSettings";
 
 type PathProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -11,6 +12,7 @@ type PathProps = {
     order?: number;
     path?: TPath;
     waypoints?: Waypoint[];
+    debugging?: boolean;
 };
 
 export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
@@ -36,6 +38,12 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
         return waypoints;
     }, [allWaypoints, path]);
 
+    const storeHideFancyPaths = useSettingsStore((state) => state.settings.hideFancyPaths);
+    const hideFancyPaths = !props.debugging ? false : storeHideFancyPaths;
+
+    const storeHideOriginalPaths = useSettingsStore((state) => state.settings.hideOriginalPaths);
+    const hideOriginalPaths = !props.debugging ? true : storeHideOriginalPaths;
+
     const draw = useCallback(() => {
         if (!g || !path) return;
 
@@ -57,11 +65,10 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
             map,
             path,
             points,
-            // TODO: use settings
-            false,
-            false,
+            hideOriginalPaths,
+            hideFancyPaths,
             getWaypointById,
-            selectSegment,
+            selectSegment
         );
 
         if (rendered) {
@@ -72,7 +79,7 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
                 g.node()?.appendChild(rendered.node()!);
             }
         }
-    }, [g, path, waypoints, map, getWaypointById, selectSegment, order]);
+    }, [g, path, waypoints, map, getWaypointById, selectSegment, order, hideFancyPaths, hideOriginalPaths]);
 
     React.useEffect(() => {
         draw();

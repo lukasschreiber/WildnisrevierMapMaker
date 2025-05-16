@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useLayer } from "../../context/LayerContext";
 import { Path as TPath, usePathStore } from "../../stores/usePaths";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
@@ -6,23 +6,24 @@ import { Path } from "../elements/Path";
 import { useMap } from "../../context/MapContext";
 import L from "leaflet";
 
-export function PathLayer(props: {
-    paths?: TPath[];
-    waypoints?: Waypoint[];
-    pathWidth?: number;
-    pathColor?: string;
-    pathOutlineColor?: string;
-    pathOutlineWidth?: number;
-    pathTension?: number;
-    debugging?: boolean;
-}) {
+export function PathLayer(props: { paths?: TPath[]; waypoints?: Waypoint[]; debugging?: boolean }) {
     const g = useLayer(10);
     const pathsFromStore = usePathStore((state) => state.paths);
     const paths = props.paths ?? pathsFromStore;
 
     const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
     const segmentConnectionStartedWaypointId = usePathStore((state) => state.connectionStartedWaypointId);
-    const getWaypointById = useWaypointStore((state) => state.getWaypointById);
+    const storeGetWaypointById = useWaypointStore((state) => state.getWaypointById);
+    const getWaypointById = useCallback(
+        (id: number) => {
+            if (props.waypoints) {
+                return props.waypoints.find((waypoint) => waypoint.id === id);
+            }
+            return storeGetWaypointById(id);
+        },
+        [storeGetWaypointById, props.waypoints]
+    );
+
     const map = useMap();
 
     useEffect(() => {
@@ -79,12 +80,7 @@ export function PathLayer(props: {
     return paths.map((path, index) => {
         return (
             <React.Fragment key={path.id}>
-                <Path
-                    g={g}
-                    pathId={path.id}
-                    order={path.order ?? index}
-                    path={props.paths && path}
-                />
+                <Path g={g} pathId={path.id} order={path.order ?? index} path={props.paths && path} debugging={props.debugging} />
             </React.Fragment>
         );
     });
