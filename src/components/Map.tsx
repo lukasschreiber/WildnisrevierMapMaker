@@ -49,7 +49,6 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
         mapRef.current.on("moveend zoomend", () => {
             const center = mapRef.current!.getCenter();
             const zoom = mapRef.current!.getZoom();
-            console.log("Saving view:", { lat: center.lat, lng: center.lng, zoom });
             setView({ lat: center.lat, lng: center.lng, zoom });
         });
     }, [view.lat, view.lng, view.zoom, setView]);

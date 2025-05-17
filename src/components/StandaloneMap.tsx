@@ -11,6 +11,7 @@ import L from "leaflet";
 import { ReactNode, useCallback, useEffect } from "react";
 import { PathLayer } from "../renderer/layers/PathsLayer";
 import { Waypoint } from "../stores/useWaypoints";
+import { createPortal } from "react-dom";
 
 type StandaloneMapProps = {
     name?: string;
@@ -125,8 +126,15 @@ function SelectedWaypointLabel(props: {
 
     if (!selectedWaypoint || !type) return null;
 
-    return (
-        <div className="absolute top-0 left-0 bg-white p-1 rounded shadow z-[10000] pointer-events-auto" id="standalone-label">
+    return createPortal(
+        <div
+            className="absolute top-0 left-0 bg-white p-1 rounded shadow z-[10000] pointer-events-auto"
+            id="standalone-label"
+            onClick={() => {
+                console.log("Label clicked:", selectedWaypoint);
+                // You can also invoke a prop callback here
+            }}
+        >
             {props.labelRenderer && props.labelRenderer[Number(selectedWaypoint.typeId)] ? (
                 props.labelRenderer[Number(selectedWaypoint.typeId)](selectedWaypoint, type)
             ) : (
@@ -135,6 +143,7 @@ function SelectedWaypointLabel(props: {
                     <p className="text-xs text-gray-500">{selectedWaypoint.name}</p>
                 </>
             )}
-        </div>
+        </div>,
+        document.body
     );
 }

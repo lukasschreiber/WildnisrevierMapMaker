@@ -74,18 +74,6 @@ export function parseWMAPFile(content: string): WMAPFormatContent {
                     data.paths.push(path);
                 }
             })
-
-            // const newPath: Path = {
-            //     id: 9999999,
-            //     name: "All Segments",
-            //     color: "#000000",
-            //     segments: segments,
-            // };
-            // if (!data.paths || data.paths.length === 0) {
-            //     data.paths = [newPath];
-            // } else {
-            //     data.paths.push(newPath);
-            // }
         }
 
         if (Array.isArray(data.waypointTypes)) {

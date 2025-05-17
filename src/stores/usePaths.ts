@@ -77,6 +77,8 @@ export const usePathStore = create<PathState>()(
       deletePath: (id) => {
         set((state) => ({
           paths: state.paths.filter((p) => p.id !== id),
+          addMode: false,
+          addModeReferencePathId: null,
         }));
       },
       setAddMode: (addMode) => set({ addMode }),
@@ -85,10 +87,7 @@ export const usePathStore = create<PathState>()(
       getPathById: (id) => get().paths.find((p) => p.id === id),
       getSegmentById: (id) => get().paths.flatMap(p => p.segments).find((s) => s.id === id),
       addSegment: (pathId, from, to) => {
-        const nextId = get().paths
-          .find((p) => p.id === pathId)
-          ?.segments.reduce((max, seg) => Math.max(max, seg.id), 0) ?? 0 + 1;
-
+        const nextId = get().paths.flatMap((p) => p.segments).reduce((max, seg) => Math.max(max, seg.id), 0) + 1
         const newSegment: PathSegment = { id: nextId, from, to };
 
         set((state) => ({
