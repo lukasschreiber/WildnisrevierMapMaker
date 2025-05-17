@@ -90,9 +90,9 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
     }, [draw]);
 
     React.useEffect(() => {
-        map.on("zoomend", updatePosition);
+        map.on("move zoom zoomanim", updatePosition);
         return () => {
-            map.off("zoomend", updatePosition);
+            map.off("move zoom zoomanim", updatePosition);
         };
     }, [map, updatePosition]);
 
