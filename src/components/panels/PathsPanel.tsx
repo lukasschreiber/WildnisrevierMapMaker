@@ -166,6 +166,11 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
                     label="Hidden"
                     value={path.hidden}
                 />
+                <TextInput
+                    value={path.dasharray}
+                    onChange={(value) => updatePath(path.id, { dasharray: value })}
+                    placeholder="Dasharray"
+                />
                 <div>{path.segments?.length?.toFixed(0).padStart(2, "0")} seg</div>
                 <button
                     onClick={() => {

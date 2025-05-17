@@ -33,9 +33,9 @@ export function renderPath(g: d3.Selection<SVGGElement, unknown, null, undefined
             .style("stroke-width", path.width);
 
         if (path.style === "dashed") {
-            fill.style("stroke-dasharray", "5, 11");
+            fill.style("stroke-dasharray", path.dasharray ?? "5, 11");
         } else if (path.style === "dotted") {
-            fill.style("stroke-dasharray", "1, 11");
+            fill.style("stroke-dasharray", path.dasharray ?? "1, 11");
         }
     }
 

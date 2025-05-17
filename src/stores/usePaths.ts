@@ -26,6 +26,7 @@ export type Path = {
   opacity?: number;
   linecap?: "round" | "butt" | "square";
   style?: "solid" | "dashed" | "dotted";
+  dasharray?: string;
 }
 
 interface PathState {
