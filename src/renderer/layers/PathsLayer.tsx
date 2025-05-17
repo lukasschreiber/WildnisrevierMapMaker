@@ -80,7 +80,7 @@ export function PathLayer(props: { paths?: TPath[]; waypoints?: Waypoint[]; debu
     return paths.map((path, index) => {
         return (
             <React.Fragment key={path.id}>
-                <Path g={g} pathId={path.id} order={path.order ?? index} path={props.paths && path} debugging={props.debugging} />
+                <Path g={g} pathId={path.id} order={path.order ?? index} path={props.paths && path} debugging={props.debugging} waypoints={props.waypoints} />
             </React.Fragment>
         );
     });
