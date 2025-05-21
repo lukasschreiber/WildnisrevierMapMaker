@@ -128,7 +128,7 @@ function SelectedWaypointLabel(props: {
 
     return createPortal(
         <div
-            className="absolute top-0 left-0 bg-white p-1 rounded shadow z-[10000] pointer-events-auto"
+            className="absolute top-0 left-0 bg-white dark:bg-gray-700 dark:text-gray-50 p-1 rounded shadow z-[10000] pointer-events-auto"
             id="standalone-label"
             onClick={() => {
                 console.log("Label clicked:", selectedWaypoint);

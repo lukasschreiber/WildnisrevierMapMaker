@@ -4,6 +4,7 @@ export enum TileLayerVersion {
     LightAll = "carto-light",
     DarkAll = "carto-dark",
     Liberty = "liberty",
+    DarkMatter = "dark",
 }
 
 type TileLayerConfig = {
@@ -59,4 +60,14 @@ export const TileLayerConfigs: Record<TileLayerVersion, TileLayerConfig> = {
             { name: "&copy; {OpenMapTiles}", url: "https://openmaptiles.org/" },
         ],
     },
+    dark: {
+        url: "https://tiles.openfreemap.org/styles/dark",
+        maxZoom: 24,
+        type: "maplibre-gl",
+        attributions: [
+            { name: "OpenFreeMap", url: "https://openfreemap.org" },
+            { name: "&copy; {OpenStreetMap} contributors", url: "https://www.openstreetmap.org/copyright" },
+            { name: "&copy; {OpenMapTiles}", url: "https://openmaptiles.org/" },
+        ],
+    }
 };
