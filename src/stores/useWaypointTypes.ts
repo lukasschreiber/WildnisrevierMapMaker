@@ -6,7 +6,7 @@ import { useWaypointStore } from "./useWaypoints";
 export type WaypointType = {
     id: number;
     name: string;
-    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry" | "treestump";
+    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry" | "treestump" | "camera";
     color: string;
     hasTwoColors: boolean;
     radiusOverride?: number;

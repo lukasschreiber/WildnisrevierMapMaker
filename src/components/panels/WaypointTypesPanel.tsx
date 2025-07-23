@@ -61,6 +61,7 @@ export function WaypointTypeListItem({ type, isOnlyOne }: { type: WaypointType; 
                             { label: "Apple", value: "apple" },
                             { label: "Cherry", value: "cherry" },
                             { label: "Tree Stump", value: "treestump" },
+                            { label: "Camera", value: "camera" },
                         ]}
                     />
                     <NumberInput
