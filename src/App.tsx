@@ -9,13 +9,15 @@ import { WaypointArrowLayer } from "./renderer/layers/WaypointArrowLayer";
 import { ShapeLayer } from "./renderer/layers/ShapeLayer";
 import { Map } from "./components/Map";
 import { PathLayer } from "./renderer/layers/PathsLayer";
+import { Sidebar } from "./componentsV2/Sidebar";
+import { MapSwitcher } from "./componentsV2/MapSwitcher";
 
 export default function App() {
-    const [showSidePanel, setShowSidePanel] = useLocalStorage("show-side-panel", false);
-    const [activeTab, setActiveTab] = useLocalStorage("active-tab", "waypoints");
+    // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
 
     return (
-        <>
+        <div className="flex h-screen w-screen flex-row">
+            <Sidebar />
             <FileLaunchHandler />
             <Map>
                 <LayerProvider>
@@ -26,9 +28,10 @@ export default function App() {
                     {/* <LocationMarker /> */}
                 </LayerProvider>
                 <MapEventManager />
-                <Menu showSidePanel={showSidePanel} setShowSidePanel={setShowSidePanel} />
-                {showSidePanel && <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} />}
+                <MapSwitcher />
+                {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
+                {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}
             </Map>
-        </>
+        </div>
     );
 }

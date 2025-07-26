@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import "@maplibre/maplibre-gl-leaflet";
 import L from "leaflet";
 import { MapProvider } from "../context/MapContext";
-import useLocalStorage from "../hooks/useLocalStorage";
 import { useSettingsStore } from "../stores/useSettings";
 import { TileLayerConfigs, TileLayerVersion } from "../utils/tiles";
+import { useLayoutStore } from "../stores/useLayout";
 
 export interface MapProps {
     maxZoom?: number;
@@ -28,11 +28,9 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
     const maxZoom = props.maxZoom ?? useSettingsStore((state) => state.settings.maxZoom);
     const minZoom = props.minZoom ?? 1;
     const mapVersion = props.tiles ?? useSettingsStore((state) => state.settings.mapVersion);
-    const [view, setView] = useLocalStorage("view", {
-        lat: props.center?.lat ?? 52.52,
-        lng: props.center?.lng ?? 13.405,
-        zoom: props.zoom ?? 13,
-    });
+    const center = useLayoutStore((state) => state.mapView.center);
+    const zoom = useLayoutStore((state) => state.mapView.zoom);
+    const setView = useLayoutStore((state) => state.setMapView);
 
     // Initialize map ONCE after container mounts
     useEffect(() => {
@@ -40,8 +38,8 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
 
         mapRef.current = L.map(mapContainerRef.current, {
             zoomControl: false,
-            center: [view.lat, view.lng],
-            zoom: view.zoom,
+            center,
+            zoom,
         });
         setInitialized(true);
 
@@ -49,9 +47,9 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
         mapRef.current.on("moveend zoomend", () => {
             const center = mapRef.current!.getCenter();
             const zoom = mapRef.current!.getZoom();
-            setView({ lat: center.lat, lng: center.lng, zoom });
+            setView([center.lat, center.lng], zoom);
         });
-    }, [view.lat, view.lng, view.zoom, setView]);
+    }, [center, zoom, setView]);
 
     // Update tile layer when mapVersion or maxZoom changes
     useEffect(() => {
@@ -113,7 +111,7 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
         mapRef.current.setMaxBounds([
             [center.lat - maxPanDistance, center.lng - maxPanDistance],
             [center.lat + maxPanDistance, center.lng + maxPanDistance],
-        ])
+        ]);
     }, [mapRef.current, props.maxPanDistanceFromCenter, props.center]);
 
     // Handle container resizing
