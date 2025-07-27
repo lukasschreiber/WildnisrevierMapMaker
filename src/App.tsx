@@ -31,14 +31,13 @@ export default function App() {
                 <div className="relative">
                     <Outlet />
                 </div>
+                <TopIsle />
                 <Map>
-                    <TopIsle />
                     <LayerProvider>
                         <ShapeLayer debugging />
                         <PathLayer debugging />
                         <WaypointLayer />
                         <WaypointArrowLayer />
-                        {/* <LocationMarker /> */}
                     </LayerProvider>
                     <MapEventManager />
                     <MapSwitcher />

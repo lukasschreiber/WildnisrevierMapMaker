@@ -10,9 +10,9 @@ type LayoutStore = {
         center: [number, number];
         zoom: number;
     },
-    pinnedSidebarItems?: string[];
-    pinSidebarItem?: (item: string) => void;
-    unpinSidebarItem?: (item: string) => void;
+    pinnedSidebarItems: string[];
+    pinSidebarItem: (item: string) => void;
+    unpinSidebarItem: (item: string) => void;
     toggleMenu: () => void;
     setShowMenu: (show: boolean) => void;
     setMapView: (center: [number, number], zoom: number) => void;
