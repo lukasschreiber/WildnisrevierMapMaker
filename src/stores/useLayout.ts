@@ -4,6 +4,8 @@ import { getLocalStorageKey } from "../utils/keys";
 
 type LayoutStore = {
     menuOpen: boolean;
+    showSidebar: boolean;
+    setShowSidebar: (show: boolean) => void;
     mapView: {
         center: [number, number];
         zoom: number;
@@ -21,6 +23,8 @@ export const useLayoutStore = create<LayoutStore>()(
                 zoom: 13, // Default zoom level
             },
             menuOpen: false,
+            showSidebar: true,
+            setShowSidebar: (show) => set({ showSidebar: show }),
             toggleMenu: () => set((state) => ({ menuOpen: !state.menuOpen })),
             setShowMenu: (show) => set({ menuOpen: show }),
             setMapView: (center: [number, number], zoom: number) => set({

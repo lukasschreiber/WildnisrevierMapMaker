@@ -14,17 +14,21 @@ import { MapSwitcher } from "./componentsV2/MapSwitcher";
 import { ZoomOverlay } from "./componentsV2/ZoomOverlay";
 import MenuDrawer from "./componentsV2/MenuDrawer";
 import { Footer } from "./componentsV2/Footer";
+import { useLayoutStore } from "./stores/useLayout";
+import { TopIsle } from "./componentsV2/TopIsle";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
+    const showSidebar = useLayoutStore((state) => state.showSidebar);
 
     return (
         <div className="flex flex-col h-screen">
             <div className="flex w-screen flex-row flex-1 relative">
-                <Sidebar />
+                {showSidebar && <Sidebar />}
                 <MenuDrawer />
                 <FileLaunchHandler />
                 <Map>
+                    <TopIsle />
                     <LayerProvider>
                         <ShapeLayer debugging />
                         <PathLayer debugging />

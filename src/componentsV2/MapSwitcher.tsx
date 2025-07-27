@@ -4,14 +4,15 @@ import { TileLayerConfigs, TileLayerVersion } from "../utils/tiles";
 import { MapTypePreview } from "./common/MapTypePreview";
 import StarIcon from "../assets/icons/star.svg?react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DisablePropagation } from "./common/DisablePropagation";
 
 export function MapSwitcher() {
     const mapVersion = useSettingsStore((state) => state.settings.mapVersion);
     const [openDrawer, setOpenDrawer] = useState(false);
 
     return (
-        <div
-            className="absolute bottom-2 left-2 z-1000 flex items-end justify-center gap-4"
+        <DisablePropagation
+            className="absolute bottom-2 left-4 z-1000 flex items-end justify-center gap-4"
             onMouseEnter={() => setOpenDrawer(true)}
             onMouseLeave={() => setOpenDrawer(false)}
         >
@@ -47,7 +48,7 @@ export function MapSwitcher() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </DisablePropagation>
     );
 }
 

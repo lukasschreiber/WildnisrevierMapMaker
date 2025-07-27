@@ -7,6 +7,8 @@ import SidebarIcon from "../assets/icons/sidebar.svg?react";
 function MenuDrawer() {
     const menuOpen = useLayoutStore((state) => state.menuOpen);
     const setShowMenu = useLayoutStore((state) => state.setShowMenu);
+    const showSidebar = useLayoutStore((state) => state.showSidebar);
+    const setShowSidebar = useLayoutStore((state) => state.setShowSidebar);
 
     return (
         <AnimatePresence>
@@ -28,8 +30,8 @@ function MenuDrawer() {
                     >
                         <XMarkIcon className="w-6 h-6" />
                     </button>
-                    <label className="flex items-center mb-4 cursor-pointer text-gray-600">
-                        <SidebarIcon className="w-6 h-6 mr-4" />
+                    <label className="flex items-center text-sm mb-4 cursor-pointer text-gray-600">
+                        <SidebarIcon className="w-5 h-5 mr-4" />
                         Show Sidebar
                         <div className="inline-flex items-center ml-auto">
                             <label className="flex items-center cursor-pointer relative">
@@ -37,6 +39,8 @@ function MenuDrawer() {
                                     type="checkbox"
                                     className="peer h-4.5 w-4.5 cursor-pointer transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-slate-800 checked:border-slate-800"
                                     id="check"
+                                    checked={showSidebar}
+                                    onChange={(e) => setShowSidebar(e.target.checked)}
                                 />
                                 <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                                     <svg
