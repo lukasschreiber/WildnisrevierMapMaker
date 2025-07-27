@@ -13,29 +13,33 @@ import { Sidebar } from "./componentsV2/Sidebar";
 import { MapSwitcher } from "./componentsV2/MapSwitcher";
 import { ZoomOverlay } from "./componentsV2/ZoomOverlay";
 import MenuDrawer from "./componentsV2/MenuDrawer";
+import { Footer } from "./componentsV2/Footer";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
 
     return (
-        <div className="flex h-screen w-screen flex-row">
-            <Sidebar />
-            <MenuDrawer />
-            <FileLaunchHandler />
-            <Map>
-                <LayerProvider>
-                    <ShapeLayer debugging />
-                    <PathLayer debugging />
-                    <WaypointLayer />
-                    <WaypointArrowLayer />
-                    {/* <LocationMarker /> */}
-                </LayerProvider>
-                <MapEventManager />
-                <MapSwitcher />
-                <ZoomOverlay />
-                {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
-                {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}
-            </Map>
+        <div className="flex flex-col h-screen">
+            <div className="flex w-screen flex-row flex-1 relative">
+                <Sidebar />
+                <MenuDrawer />
+                <FileLaunchHandler />
+                <Map>
+                    <LayerProvider>
+                        <ShapeLayer debugging />
+                        <PathLayer debugging />
+                        <WaypointLayer />
+                        <WaypointArrowLayer />
+                        {/* <LocationMarker /> */}
+                    </LayerProvider>
+                    <MapEventManager />
+                    <MapSwitcher />
+                    <ZoomOverlay />
+                    {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
+                    {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}
+                </Map>
+            </div>
+            <Footer />
         </div>
     );
 }

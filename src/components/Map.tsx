@@ -130,7 +130,7 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
     }, []);
 
     return (
-        <div ref={mapContainerRef} style={{ height: "100vh", width: "100%" }}>
+        <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }}>
             {initialized && <MapProvider map={mapRef.current!}>{children}</MapProvider>}
         </div>
     );
