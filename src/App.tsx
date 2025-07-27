@@ -16,6 +16,7 @@ import MenuDrawer from "./componentsV2/MenuDrawer";
 import { Footer } from "./componentsV2/Footer";
 import { useLayoutStore } from "./stores/useLayout";
 import { TopIsle } from "./componentsV2/TopIsle";
+import { Outlet } from "react-router";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
@@ -27,6 +28,9 @@ export default function App() {
                 {showSidebar && <Sidebar />}
                 <MenuDrawer />
                 <FileLaunchHandler />
+                <div className="relative">
+                    <Outlet />
+                </div>
                 <Map>
                     <TopIsle />
                     <LayerProvider>

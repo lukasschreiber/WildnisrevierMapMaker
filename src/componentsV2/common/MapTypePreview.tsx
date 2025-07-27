@@ -8,6 +8,12 @@ interface MapTypePreviewProps {
     className?: string;
 }
 
+function getZoomForPreview(zoom: number): number {
+    if (zoom <= 1) return 1;
+    if (zoom > 10) return Math.max(zoom - 3, 1);
+    return zoom
+}
+
 export function MapTypePreview({ map }: MapTypePreviewProps) {
     const mapRef = useRef<L.Map | null>(null);
     const tileLayerRef = useRef<L.Layer | null>(null); // track current tile layer
@@ -22,7 +28,7 @@ export function MapTypePreview({ map }: MapTypePreviewProps) {
         mapRef.current = L.map(mapContainerRef.current, {
             zoomControl: false,
             center,
-            zoom,
+            zoom: getZoomForPreview(zoom),
             attributionControl: false,
             dragging: false,
             touchZoom: false,
@@ -35,7 +41,7 @@ export function MapTypePreview({ map }: MapTypePreviewProps) {
 
     useEffect(() => {
         if (!mapRef.current) return;
-        mapRef.current.setView(center, zoom);
+        mapRef.current.setView(center, getZoomForPreview(zoom));
     }, [center, zoom]);
 
     useEffect(() => {

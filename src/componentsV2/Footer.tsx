@@ -4,10 +4,10 @@ import SyncIcon from "../assets/icons/refresh-cw-alt.svg?react";
 
 export function Footer() {
     return (
-        <footer className="bg-white text-xs p-1 flex flex-row justify-between items-center border-t border-gray-200 text-gray-900">
+        <footer className="bg-white text-xs p-1 flex flex-row justify-between items-center border-t border-gray-200 text-gray-900 z-[1009]">
             <div className="flex flex-row gap-1 items-center cursor-pointer">
                 <BranchIcon className="w-3.5 h-3.5" />
-                <span className="text-gray-600">main*</span>
+                <span className="text-gray-600">MyRepo {">"} main*</span>
                 <SyncIcon className="w-3.5 h-3.5 hover:animate-spin" />
             </div>
             <div className="flex gap-2">
