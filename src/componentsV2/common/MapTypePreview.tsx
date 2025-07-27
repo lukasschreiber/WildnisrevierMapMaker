@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { TileLayerConfigs, TileLayerVersion } from "../../utils/tiles";
 import L from "leaflet";
 import { useLayoutStore } from "../../stores/useLayout";

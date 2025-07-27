@@ -13,6 +13,7 @@ type TileLayerConfig = {
     attributions?: { name: string; url: string }[];
     type: "raster" | "maplibre-gl";
     maxZoom?: number;
+    highlight?: boolean;
 };
 
 export const TileLayerConfigs: Record<TileLayerVersion, TileLayerConfig> = {
@@ -58,6 +59,7 @@ export const TileLayerConfigs: Record<TileLayerVersion, TileLayerConfig> = {
         url: "https://tiles.openfreemap.org/styles/liberty",
         maxZoom: 24,
         type: "maplibre-gl",
+        highlight: true,
         attributions: [
             { name: "OpenFreeMap", url: "https://openfreemap.org" },
             { name: "&copy; {OpenStreetMap} contributors", url: "https://www.openstreetmap.org/copyright" },

@@ -11,6 +11,8 @@ import { Map } from "./components/Map";
 import { PathLayer } from "./renderer/layers/PathsLayer";
 import { Sidebar } from "./componentsV2/Sidebar";
 import { MapSwitcher } from "./componentsV2/MapSwitcher";
+import { ZoomOverlay } from "./componentsV2/ZoomOverlay";
+import MenuDrawer from "./componentsV2/MenuDrawer";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
@@ -18,6 +20,7 @@ export default function App() {
     return (
         <div className="flex h-screen w-screen flex-row">
             <Sidebar />
+            <MenuDrawer />
             <FileLaunchHandler />
             <Map>
                 <LayerProvider>
@@ -29,6 +32,7 @@ export default function App() {
                 </LayerProvider>
                 <MapEventManager />
                 <MapSwitcher />
+                <ZoomOverlay />
                 {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
                 {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}
             </Map>
