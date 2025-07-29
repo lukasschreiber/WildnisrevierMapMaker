@@ -33,11 +33,11 @@ export function Footer() {
                 {hasPersistentStorage !== null && (
                     <>
                         {hasPersistentStorage ? (
-                            <div className="text-green-800 bg-green-300 flex items-center justify-center self-stretch aspect-square w-6">
+                            <div className="text-white bg-green-500 flex items-center justify-center self-stretch aspect-square w-6">
                                 <SuccessIcon className="w-4 h-4" />
                             </div>
                         ) : (
-                            <div className="text-red-800 bg-red-300 flex items-center justify-center self-stretch aspect-square w-6">
+                            <div className="text-white bg-red-500 flex items-center justify-center self-stretch aspect-square w-6">
                                 <ErrorIcon className="w-4 h-4" />
                             </div>
                         )}

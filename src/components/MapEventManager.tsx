@@ -1,7 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { usePathStore } from "../stores/usePaths";
 import { useMap } from "../context/MapContext";
+import { useLocation, useNavigate } from "react-router";
 
 export function MapEventManager() {
     const map = useMap();
@@ -17,6 +18,10 @@ export function MapEventManager() {
     const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
     const paths = usePathStore((state) => state.paths);
     const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
+    const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const lastSyncedId = useRef<number | null>(null);
 
     const onMapClick = useCallback(
         (e: L.LeafletMouseEvent) => {
@@ -98,6 +103,39 @@ export function MapEventManager() {
             map.off("click", onMapClick);
         };
     }, [map, onMapClick]);
+
+    useEffect(() => {
+        // if the URL has the route /waypoint/:id, extract the id and select the waypoint
+        if (!location.pathname.startsWith("/waypoint/")) {
+            deselectWaypoint();
+            return;
+        }
+        const param = location.pathname.split("/").pop();
+        const id = param ? parseInt(param, 10) : null;
+
+        if (id !== lastSyncedId.current) {
+            if (id !== null && !isNaN(id)) {
+                selectWaypoint(id);
+                const waypoint = waypoints.find((wp) => wp.id === id);
+                if (!waypoint) return;
+                map.flyTo([waypoint.lat, waypoint.lng], 20);
+            } else {
+                deselectWaypoint();
+            }
+            lastSyncedId.current = id;
+        }
+    }, [location.pathname]);
+
+    useEffect(() => {
+        if (selectedId !== lastSyncedId.current) {
+            if (selectedId === null) {
+                navigate("/");
+            } else {
+                navigate(`/waypoint/${selectedId}`);
+            }
+            lastSyncedId.current = selectedId;
+        }
+    }, [selectedId]);
 
     return null;
 }

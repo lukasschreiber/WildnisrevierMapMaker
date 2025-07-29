@@ -112,13 +112,13 @@ function MenuItem({
             {label}
             {pinnable && (
                 <button
-                    className={`ml-auto text-gray-600 hover:text-gray-800 cursor-pointer ${!pinned && "group-hover:block hidden"}`}
+                    className={`ml-auto hover:text-gray-800 cursor-pointer ${!pinned ? "group-hover:block hidden text-gray-600" : "text-gray-800"}`}
                     onClick={(e) => {
                         e.stopPropagation();
                         onPinClick?.();
                     }}
                 >
-                    <PinIcon className={`w-4.5 h-4.5 ${pinned && "fill-gray-600 hover:fill-gray-800"}`} />
+                    <PinIcon className={`w-4.5 h-4.5 ${pinned && "fill-gray-800 hover:fill-gray-900 hover:text-gray-900"}`} />
                 </button>
             )}
         </button>

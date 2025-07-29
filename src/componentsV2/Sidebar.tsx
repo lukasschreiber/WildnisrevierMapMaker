@@ -27,7 +27,7 @@ export function Sidebar(props: SidebarProps) {
                             onClick={() => navigate(panel.path)}
                         >
                             {<panel.icon className="w-6 h-6" />}
-                            <div className="text-xs">{panel.title}</div>
+                            <div className="text-xs max-w-16 text-center">{panel.title}</div>
                         </div>
                     ))}
             </div>

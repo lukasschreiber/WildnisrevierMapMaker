@@ -17,7 +17,7 @@ function getZoomForPreview(zoom: number): number {
 export function MapTypePreview({ map }: MapTypePreviewProps) {
     const mapRef = useRef<L.Map | null>(null);
     const tileLayerRef = useRef<L.Layer | null>(null); // track current tile layer
-    const mapContainerRef = useRef<HTMLDivElement | null>(null);
+    const mapContainerRef = useRef<HTMLDivElement | null>(null)
 
     const center = useLayoutStore((state) => state.mapView.center);
     const zoom = useLayoutStore((state) => state.mapView.zoom);

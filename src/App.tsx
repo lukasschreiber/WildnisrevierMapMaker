@@ -40,8 +40,8 @@ export default function App() {
                         <WaypointArrowLayer />
                     </LayerProvider>
                     <MapEventManager />
-                    <MapSwitcher />
                     <ZoomOverlay />
+                    <MapSwitcher />
                     {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
                     {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}
                 </Map>

@@ -5,14 +5,18 @@ import { MapTypePreview } from "./common/MapTypePreview";
 import StarIcon from "../assets/icons/star.svg?react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DisablePropagation } from "./common/DisablePropagation";
+import { useLocation } from "react-router";
 
 export function MapSwitcher() {
     const mapVersion = useSettingsStore((state) => state.settings.mapVersion);
+    const location = useLocation();
     const [openDrawer, setOpenDrawer] = useState(false);
+
+    const isPanelVisible = location.pathname !== "/";
 
     return (
         <DisablePropagation
-            className="absolute bottom-2 left-4 z-1000 flex items-end justify-center gap-4"
+            className={`absolute bottom-2 z-1000 flex items-end justify-center gap-4 ${isPanelVisible ? "left-76" : "left-4 "}`}
             onMouseEnter={() => setOpenDrawer(true)}
             onMouseLeave={() => setOpenDrawer(false)}
         >
