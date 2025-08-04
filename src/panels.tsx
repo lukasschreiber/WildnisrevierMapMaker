@@ -11,6 +11,7 @@ import { PathsPanel } from "./componentsV2/panels/PathsPanel";
 import { Panel } from "./componentsV2/MainPanel";
 import { SVGProps } from "react";
 import { GitIntegrationPanel } from "./componentsV2/panels/GitIntegrationPanel";
+import { WaypointTypesPanel } from "./componentsV2/panels/WaypointTypesPanel";
 
 export const panels: PanelGroupConfig[] = [
     {
@@ -26,7 +27,7 @@ export const panels: PanelGroupConfig[] = [
             {
                 title: "Waypoint Types",
                 icon: ShapeIcon,
-                component: () => <Panel title="Waypoint Types Panel"></Panel>, // Placeholder for ShapesPanel
+                component: WaypointTypesPanel,
                 path: "/types",
                 pinnable: true,
             },

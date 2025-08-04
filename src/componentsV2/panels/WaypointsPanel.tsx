@@ -15,7 +15,7 @@ export function WaypointsPanel() {
             {waypoints.map((waypoint) => (
                 <div
                     key={waypoint.id}
-                    className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-xs cursor-pointer ${selectedId === waypoint.id ? "bg-gray-200" : ""}`}
+                    className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer ${selectedId === waypoint.id ? "bg-gray-200" : ""}`}
                     onClick={() => {
                         navigate(`/waypoint/${waypoint.id}`);
                     }}
