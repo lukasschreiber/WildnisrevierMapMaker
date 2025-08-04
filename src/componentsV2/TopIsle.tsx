@@ -3,11 +3,12 @@ import MenuIcon from "../assets/icons/menu.svg?react";
 import XMarkIcon from "../assets/icons/xmark.svg?react";
 import { useLayoutStore } from "../stores/useLayout";
 import { DisablePropagation } from "./common/DisablePropagation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWaypointTypeStore } from "../stores/useWaypointTypes";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { LegendWaypointMarker } from "../components/legend/LegendWaypointMarker";
 import { useClickOutside } from "../hooks/useClickOutside";
+import LocationPlusIcon from "../assets/icons/location-plus.svg?react";
 
 interface TopIsleProps {}
 
@@ -26,17 +27,34 @@ export function TopIsle({}: TopIsleProps) {
     const setNewWaypointName = useWaypointStore((state) => state.setNewWaypointName);
     const setNewWaypointType = useWaypointStore((state) => state.setNewWaypointType);
 
+    const [searchValue, setSearchValue] = useState("");
+
     const isPanelVisible = location.pathname !== "/";
     useClickOutside(containerRef, () => {
         setInputFocused(false);
         setAddModeSettingsOpen(false);
     });
 
+    useEffect(() => {
+        if (inputFocussed) {
+            setAddModeSettingsOpen(false);
+        }
+    }, [inputFocussed]);
+
+    const filteredWaypoints = waypoints.filter((waypoint) => {
+        const searchLower = searchValue.toLowerCase();
+        return (
+            waypoint.id.toString().includes(searchLower) ||
+            (waypoint.name && waypoint.name.toLowerCase().includes(searchLower)) ||
+            (waypoint.additionalText && waypoint.additionalText.toLowerCase().includes(searchLower))
+        );
+    });
+
     return (
         <DisablePropagation>
             <div className={`absolute top-0 z-[1003] m-4`}>
                 <div
-                    className={`bg-white min-w-64 flex flex-col items-center py-2 justify-between border ${isPanelVisible && !inputFocussed ? "border-gray-200" : "shadow-lg border-white"} ${inputFocussed ? "rounded-t-2xl !border-gray-200 rounded-b-md" : "rounded-2xl"} transition-all duration-200 ease-in-out`}
+                    className={`bg-white w-64 flex flex-col items-center py-2 justify-between border ${isPanelVisible && !inputFocussed ? "border-gray-200" : "shadow-lg border-white"} ${inputFocussed ? "rounded-t-2xl !border-gray-200 rounded-b-md" : "rounded-2xl"} transition-all duration-200 ease-in-out`}
                     ref={containerRef}
                 >
                     <div className="flex items-center justify-between w-full px-4 ">
@@ -54,6 +72,8 @@ export function TopIsle({}: TopIsleProps) {
                                 className="flex-1 outline-none text-gray-800 text-sm"
                                 placeholder="Search..."
                                 onFocus={() => setInputFocused(true)}
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
                             />
                             {isPanelVisible && (
                                 <div
@@ -78,7 +98,10 @@ export function TopIsle({}: TopIsleProps) {
                             <div className="border-t border-gray-200 w-full" />
 
                             <div className="flex flex-col pt-2">
-                                {waypoints.map((waypoint) => (
+                                {filteredWaypoints.length === 0 && (
+                                    <div className="px-2 mx-2 text-gray-500 text-xs">No waypoints found</div>
+                                )}
+                                {filteredWaypoints.map((waypoint) => (
                                     <div
                                         key={waypoint.id}
                                         className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-xs cursor-pointer`}
@@ -104,7 +127,7 @@ export function TopIsle({}: TopIsleProps) {
                     {addModeSettingsOpen && !isPanelVisible && (
                         <div className="flex flex-col pt-2 w-full gap-2">
                             <div className="border-t border-gray-200 w-full" />
-                            <div className="flex items-center gap-2 px-2 ">
+                            <div className="flex flex-col gap-2 px-2 ">
                                 <input
                                     value={newWaypointName}
                                     onChange={(e) => setNewWaypointName(e.target.value)}
@@ -129,9 +152,10 @@ export function TopIsle({}: TopIsleProps) {
                 </div>
                 {!inputFocussed && !addModeSettingsOpen && !isPanelVisible && (
                     <div
-                        className="ml-4 bg-blue-500 text-white text-xs w-fit px-1 rounded-b-sm cursor-pointer"
+                        className="ml-4 pb-0.5 bg-blue-500 text-white text-xs w-fit px-1 rounded-b-sm cursor-pointer"
                         onClick={() => setAddModeSettingsOpen(!addModeSettingsOpen)}
                     >
+                        <LocationPlusIcon className="w-4 h-4 inline-block" />
                         {newWaypointName !== "" && <>Name: {newWaypointName} -</>} Type:{" "}
                         {types[newWaypointType]?.name || "Unknown"}
                     </div>
