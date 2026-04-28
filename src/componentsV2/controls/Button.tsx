@@ -8,7 +8,7 @@ interface ButtonProps {
 }
 
 export function Button({ icon, onClick, children, className = "", disabled = false, color = "gray" }: ButtonProps) {
-    const baseClasses = "flex items-center gap-2 rounded-lg p-2 transition-colors cursor-pointer";
+    const baseClasses = "flex items-center gap-2 rounded-lg px-2 py-1 transition-colors cursor-pointer";
     const colorClasses = {
         red: "bg-red-200 hover:bg-red-300 text-red-900",
         blue: "bg-blue-200 hover:bg-blue-300 text-blue-900",

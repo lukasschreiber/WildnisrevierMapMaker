@@ -215,6 +215,7 @@ function WaypointListItem({
                 { x: 11, y: 11 },
                 undefined,
                 false,
+                false,
                 10,
                 waypointType,
                 waypointGroup,

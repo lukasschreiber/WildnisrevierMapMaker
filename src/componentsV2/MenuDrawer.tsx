@@ -4,7 +4,7 @@ import XMarkIcon from "../assets/icons/xmark.svg?react";
 import BadgerIcon from "../assets/icons/badger.svg?react";
 import SidebarIcon from "../assets/icons/sidebar.svg?react";
 import PinIcon from "../assets/icons/thumbtack.svg?react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { panels } from "../panels";
 import { Checkbox } from "./controls/Checkbox";
 
@@ -17,6 +17,8 @@ function MenuDrawer() {
     const pinPanel = useLayoutStore((state) => state.pinSidebarItem);
     const unpinPanel = useLayoutStore((state) => state.unpinSidebarItem);
     const navigate = useNavigate();
+    const location = useLocation();
+    const keepDrawerOpenOnNavigate = location.pathname.startsWith("/waypoint/") || location.pathname.startsWith("/type/");
 
     return (
         <AnimatePresence>
@@ -51,7 +53,7 @@ function MenuDrawer() {
                             <SidebarIcon className="w-5 h-5 mr-4" />
                             Show Sidebar
                             <div className="inline-flex items-center ml-auto">
-                                <Checkbox checked={showSidebar} onChange={(e) => setShowSidebar((e.target as HTMLInputElement).checked)} />
+                                <Checkbox value={showSidebar} onChange={(value) => setShowSidebar(value)} />
                             </div>
                         </label>
                         <div className="border-t border-gray-300" />
@@ -64,7 +66,9 @@ function MenuDrawer() {
                                         label={panel.title}
                                         onClick={() => {
                                             navigate(panel.path);
-                                            setShowMenu(false);
+                                            if (!keepDrawerOpenOnNavigate) {
+                                                setShowMenu(false);
+                                            }
                                         }}
                                         pinnable={panel.pinnable}
                                         icon={<panel.icon className="w-5 h-5" />}

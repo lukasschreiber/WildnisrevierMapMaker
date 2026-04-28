@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { LegendWaypointMarker } from "../../components/legend/LegendWaypointMarker";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
@@ -11,7 +11,7 @@ export function WaypointsPanel() {
     const navigate = useNavigate();
 
     return (
-        <Panel title="Waypoints">
+        <Panel title={<>Waypoints · {waypoints.length}</>}>
             {waypoints.map((waypoint) => (
                 <div
                     key={waypoint.id}

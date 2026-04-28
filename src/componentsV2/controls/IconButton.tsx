@@ -17,7 +17,7 @@ export function IconButton({
     disabled = false,
     color = "gray",
 }: IconButtonProps) {
-    const baseClasses = "flex items-center justify-center rounded-full w-10 h-10 transition-colors cursor-pointer";
+    const baseClasses = "flex items-center justify-center rounded-full w-10 h-10 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none";
     const colorClasses = {
         red: "bg-red-200 hover:bg-red-300 text-red-900",
         blue: "bg-blue-200 hover:bg-blue-300 text-blue-900",

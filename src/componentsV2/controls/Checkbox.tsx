@@ -1,10 +1,12 @@
 import { useId } from "react";
 
-interface CheckboxProps extends React.HTMLProps<HTMLInputElement> {
+interface CheckboxProps extends Omit<React.HTMLProps<HTMLInputElement>, "type" | "checked" | "onChange" | "value"> {
     label?: string;
+    value: boolean;
+    onChange: (value: boolean) => void;
 }
 
-export function Checkbox({ label, id, className, ...rest }: CheckboxProps) {
+export function Checkbox({ label, id, className, onChange, value, ...rest }: CheckboxProps) {
     const generatedId = useId();
     const inputId = id || generatedId;
 
@@ -13,6 +15,8 @@ export function Checkbox({ label, id, className, ...rest }: CheckboxProps) {
             <div className="relative inline-flex items-center">
                 <input
                     type="checkbox"
+                    onChange={(e) => onChange(e.target.checked)}
+                    checked={value}
                     id={inputId}
                     className={`peer h-4.5 w-4.5 cursor-pointer transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-slate-800 checked:border-slate-800 ${className ?? ""}`}
                     {...rest}

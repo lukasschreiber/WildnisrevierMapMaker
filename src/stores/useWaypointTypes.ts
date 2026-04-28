@@ -18,7 +18,7 @@ export type WaypointType = {
         fontSize?: number;
         fontFamily?: string;
         fontWeight?: string;
-    }
+    };
 };
 
 interface WaypointTypeState {
@@ -46,21 +46,31 @@ export const useWaypointTypeStore = create<WaypointTypeState>()(
                         [id]: { ...state.types[id], ...partial },
                     },
                 })),
-            removeType: (id) =>
+            removeType: (id) => {
+                if (!get().isDeletable(id)) {
+                    alert("Cannot delete this type because there are waypoints using it or it is the only type left.");
+                    return;
+                }
                 set((state) => {
                     const updated = { ...state.types };
                     delete updated[id];
                     return { types: updated };
-                }),
+                });
+            },
             getTypeById: (id: number) => get().types[id],
             isDeletable: (id: number) => {
+                // A type is deletable if no waypoints are using it and if it is not the only one left (to prevent having zero types) and if the id is not 1 (to prevent deleting the default type)
                 const waypoints = useWaypointStore.getState().waypoints;
-                return !waypoints.some((waypoint) => waypoint.typeId === id)
+                return (
+                    !waypoints.some((waypoint) => waypoint.typeId === id) &&
+                    Object.keys(get().types).length > 1 &&
+                    id !== 1
+                );
             },
             setTypes: (types) => set({ types }),
         }),
         {
             name: getLocalStorageKey("waypoint_types"),
-        }
-    )
+        },
+    ),
 );

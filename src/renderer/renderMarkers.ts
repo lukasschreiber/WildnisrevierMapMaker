@@ -11,6 +11,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     g: E,
     point: { x: number; y: number },
     additionalText: string | undefined,
+    hidden: boolean,
     isSelected: boolean,
     radius: number,
     type: WaypointType,
@@ -18,10 +19,10 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
     borderWidth: number,
     borderColor: string,
     showBorder: boolean,
-    visualizeHiddenItems: boolean
+    visualizeHiddenItems: boolean,
 ): E {
     const r = radius;
-    const isHidden = group?.hidden || type.hidden;
+    const isHidden = group?.hidden || type.hidden || hidden;
     const isIcon = type.icon && Object.keys(icons).some((path) => path.includes(`${type.icon}.svg`));
 
     const stroke = showBorder ? borderColor : "none";
@@ -35,7 +36,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
         }
 
         applyMarkerFill(g, shape, type.color, type.color2, type.hasTwoColors);
-        applyMarkerOpacity(shape, isSelected, group?.hidden || false, type.hidden);
+        applyMarkerOpacity(shape, isSelected, isHidden);
 
         if (isHidden && !visualizeHiddenItems) {
             shape.attr("visibility", "hidden");
@@ -75,7 +76,7 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
         case "circle":
             return applyCommonAttrs(shapeG.append("circle").attr("r", r));
 
-        case "square":
+        case "square": {
             const side = r * Math.SQRT2;
             return applyCommonAttrs(
                 shapeG
@@ -83,10 +84,11 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                     .attr("x", -side / 2)
                     .attr("y", -side / 2)
                     .attr("width", side)
-                    .attr("height", side)
+                    .attr("height", side),
             );
+        }
 
-        case "triangle":
+        case "triangle": {
             const triPath = [
                 [0, -r],
                 [r * Math.sin(Math.PI / 3), r / 2],
@@ -95,8 +97,9 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 .map((p) => p.join(","))
                 .join(" ");
             return applyCommonAttrs(shapeG.append("polygon").attr("points", triPath));
+        }
 
-        case "star":
+        case "star": {
             const starPoints = 5;
             const outerR = r;
             const innerR = r * 0.5;
@@ -112,8 +115,9 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 })
                 .join(" ");
             return applyCommonAttrs(shapeG.append("polygon").attr("points", starPath));
+        }
 
-        case "cross":
+        case "cross": {
             const crossSize = r * 1.5; // overall size of cross arms
             const armWidth = r * 0.6; // width of each arm
             const crossPath = `
@@ -132,8 +136,9 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                     Z
                 `;
             return applyCommonAttrs(shapeG.append("path").attr("d", crossPath).style("pointer-events", "all"));
+        }
 
-        case "diamond":
+        case "diamond": {
             const diamondPath = [
                 [0, -r],
                 [(r * Math.SQRT2) / 2, 0],
@@ -143,7 +148,8 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 .map((p) => p.join(","))
                 .join(" ");
             return applyCommonAttrs(shapeG.append("polygon").attr("points", diamondPath));
-        default:
+        }
+        default: {
             const iconName = type.icon;
             const iconSvg = Object.entries(icons).find(([path]) => path.includes(`${iconName}.svg`))?.[1];
 
@@ -166,12 +172,16 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 container.attr("icon-offset-y", `${targetHeight / 2}`);
 
                 return applyCommonAttrs(
-                    containerSvg.selectChild() as unknown as d3.Selection<SVGGElement, unknown, null, undefined>
-                ).attr("transform", `translate(${point.x - targetWidth / 2}, ${point.y - targetHeight / 2})`);
+                    containerSvg.selectChild() as unknown as d3.Selection<SVGGElement, unknown, null, undefined>,
+                ).attr(
+                    "transform",
+                    `translate(${point.x}, ${point.y}) rotate(${type.rotation ?? 0}) translate(${-targetWidth / 2}, ${-targetHeight / 2})`,
+                );
             } else {
                 console.warn("Unknown icon type and no matching SVG found:", type.icon, type.id, type.name);
                 return g;
             }
+        }
     }
 }
 
@@ -180,7 +190,7 @@ export function applyMarkerFill<T extends SVGElement | d3.BaseType>(
     waypoint: d3.Selection<T, unknown, null, undefined>,
     color: string,
     color2?: string,
-    hasTwoColors?: boolean
+    hasTwoColors?: boolean,
 ) {
     const fillTop = color;
     const fillBottom = hasTwoColors ? color2 || color : color;
@@ -207,10 +217,8 @@ export function applyMarkerFill<T extends SVGElement | d3.BaseType>(
 export function applyMarkerOpacity<T extends SVGElement | d3.BaseType>(
     waypoint: d3.Selection<T, unknown, null, undefined>,
     isSelected: boolean,
-    groupHidden: boolean,
-    typeHidden: boolean
+    isHidden: boolean,
 ) {
-    const isHidden = groupHidden || typeHidden;
     const opacity = isHidden ? 0.1 : isSelected ? 0.5 : 1;
     waypoint.style("opacity", opacity);
 }

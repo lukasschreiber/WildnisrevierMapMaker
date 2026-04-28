@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import { panels } from "./panels.tsx";
 import { SingleWaypointPanelWrapper } from "./componentsV2/panels/SingleWaypointPanel.tsx";
 import { SingleWaypointTypePanelWrapper } from "./componentsV2/panels/SingleWaypointTypePanel.tsx";
+import { SinglePathPanelWrapper } from "./componentsV2/panels/SinglePathPanel.tsx";
 
 const router = createBrowserRouter([
     {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
             {
                 path: "/type/:id",
                 element: <SingleWaypointTypePanelWrapper />,
+            },
+            {
+                path: "/path/:id",
+                element: <SinglePathPanelWrapper />,
             }
         ],
     },

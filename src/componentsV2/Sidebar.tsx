@@ -1,13 +1,10 @@
 import MenuIcon from "../assets/icons/menu.svg?react";
-import WaypointIcon from "../assets/icons/location-pin.svg?react";
 import { useLayoutStore } from "../stores/useLayout";
 import { DisablePropagation } from "./common/DisablePropagation";
 import { useNavigate } from "react-router";
 import { panels } from "../panels";
 
-export interface SidebarProps {}
-
-export function Sidebar(props: SidebarProps) {
+export function Sidebar() {
     const toggleMenu = useLayoutStore((state) => state.toggleMenu);
     const navigate = useNavigate();
     const pinnedPanels = useLayoutStore((state) => state.pinnedSidebarItems);
@@ -24,7 +21,10 @@ export function Sidebar(props: SidebarProps) {
                     .map((panel) => (
                         <div
                             className="flex flex-col items-center justify-center cursor-pointer text-gray-600 hover:text-blue-500 w-full"
-                            onClick={() => navigate(panel.path)}
+                            onClick={() => {
+                                console.log("Navigating to", panel.path);
+                                navigate(panel.path)
+                            }}
                         >
                             {<panel.icon className="w-6 h-6" />}
                             <div className="text-xs max-w-16 text-center">{panel.title}</div>

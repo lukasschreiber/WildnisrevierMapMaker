@@ -28,14 +28,14 @@ export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLa
     const storeType = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
     const type = props.type ?? storeType;
     const storeGroup = useWaypointGroupStore((state) =>
-        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId) ?? -1) : undefined
+        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId ?? -1)) : undefined
     );
     const group = props.group ?? storeGroup;
 
     const storeShowLabels = useSettingsStore((state) => state.settings.showLabels);
     const storeWaypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
     const storeLabelColor = useSettingsStore((state) => state.settings.labelColor);
-    const waypointRadius = props.radius ?? storeWaypointRadius;
+    const waypointRadius = props.radius ?? type?.radiusOverride ?? storeWaypointRadius;
     const labelColor = props.labelColor ?? storeLabelColor;
     const showLabels = props.showLabels ?? storeShowLabels;
 

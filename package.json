@@ -17,6 +17,7 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@lukasschreiber/icons": "github:lukasschreiber/icons#v0.1.1",
     "@maplibre/maplibre-gl-leaflet": "^0.1.0",
     "@tailwindcss/vite": "^4.1.4",
     "d3": "^7.9.0",

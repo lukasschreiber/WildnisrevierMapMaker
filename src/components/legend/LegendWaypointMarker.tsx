@@ -24,13 +24,14 @@ export function LegendWaypointMarker(props: {
                 },
                 type.additionalText ? "1" : undefined,
                 false,
+                false,
                 radius ?? defaultRadius,
                 type,
                 undefined,
                 borderWidth ?? 0,
                 borderColor ?? "black",
                 borderWidth ? true : false,
-                false
+                true
             );
         }
     }, [containerRef, type, radius, borderWidth, borderColor]);

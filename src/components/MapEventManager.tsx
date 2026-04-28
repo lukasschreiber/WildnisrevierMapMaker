@@ -129,13 +129,16 @@ export function MapEventManager() {
     useEffect(() => {
         if (selectedId !== lastSyncedId.current) {
             if (selectedId === null) {
-                navigate("/");
+                // Only navigate to "/" if we're currently viewing a waypoint detail
+                if (location.pathname.startsWith("/waypoint/")) {
+                    navigate("/");
+                }
             } else {
                 navigate(`/waypoint/${selectedId}`);
             }
             lastSyncedId.current = selectedId;
         }
-    }, [selectedId]);
+    }, [selectedId, location.pathname]);
 
     return null;
 }
