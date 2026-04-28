@@ -193,7 +193,7 @@ export function TopIsle() {
                     {(randomChips.length > 0 || bubbleItems.length > 0) && (
                         <TopChipList
                             items={[...randomChips, ...bubbleItems]}
-                            className={`order-2 w-64 mt-0 md:order-none md:mt-1.5 md:flex-1 md:min-w-0 md:w-[calc(100vw-30rem)] md:max-w-[calc(100vw-30rem)] ${isPanelVisible ? "ml-4 hidden md:block" : ""}`}
+                            className={`order-2 w-64 mt-0 md:order-none md:flex-1 md:min-w-0 md:w-[calc(100vw-30rem)] md:max-w-[calc(100vw-30rem)] ${isPanelVisible ? "ml-4 hidden md:block" : ""}`}
                         />
                     )}
                 </div>

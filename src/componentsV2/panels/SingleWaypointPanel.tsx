@@ -35,6 +35,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
     const updateWaypointType = useWaypointStore((state) => state.updateWaypointType);
     const updateWaypointGroup = useWaypointStore((state) => state.updateWaypointGroup);
     const toggleWaypointHidden = useWaypointStore((state) => state.toggleWaypointHidden);
+    const isDeletable = useWaypointStore((state) => state.isDeletable);
     const navigate = useNavigate();
 
     if (!waypoint) {
@@ -48,9 +49,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
         : type.color;
 
     return (
-        <Panel
-            topComponent={<div className="h-full w-full opacity-30" style={{ background: topBackground }} />}
-        >
+        <Panel topComponent={<div className="h-full w-full opacity-30" style={{ background: topBackground }} />}>
             <div className="flex items-center gap-2 p-4">
                 <LegendWaypointMarker type={types[waypoint.typeId]} radius={14} borderWidth={1} borderColor="black" />
                 <div className="flex flex-col">
@@ -84,7 +83,13 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     label={waypoint.hidden ? "Show" : "Hide"}
                 />
                 <IconButton icon={<CloneIcon className="w-5 h-5" />} onClick={() => {}} label="Duplicate" />
-                <IconButton icon={<TrashIcon className="w-5 h-5" />} onClick={() => {}} color="red" label="Delete" />
+                <IconButton
+                    icon={<TrashIcon className="w-5 h-5" />}
+                    disabled={isDeletable(Number(waypointId))}
+                    onClick={() => {}}
+                    color="red"
+                    label="Delete"
+                />
             </div>
             <Divider />
             <div className="px-4 pt-2 pb-4 flex flex-col gap-2">
