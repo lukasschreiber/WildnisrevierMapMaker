@@ -48,7 +48,9 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
         : type.color;
 
     return (
-        <Panel topComponent={<div className="h-full w-full opacity-30" style={{ background: topBackground }} />}>
+        <Panel
+            topComponent={<div className="h-full w-full opacity-30" style={{ background: topBackground }} />}
+        >
             <div className="flex items-center gap-2 p-4">
                 <LegendWaypointMarker type={types[waypoint.typeId]} radius={14} borderWidth={1} borderColor="black" />
                 <div className="flex flex-col">
@@ -132,28 +134,57 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 </div>
                 <div className="py-2 flex gap-2 items-center">
                     <IconButton
-                        icon={<img src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Google_Maps_icon_%282026%29.svg" className="w-5 h-5" />}
+                        icon={
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Google_Maps_icon_%282026%29.svg"
+                                className="h-5"
+                            />
+                        }
                         onClick={() => {
-                            window.open(`https://www.google.com/maps/search/?api=1&query=${waypoint.lat},${waypoint.lng}`, "_blank");
+                            window.open(
+                                `https://www.google.com/maps/search/?api=1&query=${waypoint.lat},${waypoint.lng}`,
+                                "_blank",
+                            );
                         }}
                         label="Google Maps"
                     />
                     <IconButton
-                        icon={<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/OpenStreetMap_icon_simple.svg" className="w-5 h-5" />}
+                        icon={
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/1/15/OpenStreetMap_icon_simple.svg"
+                                className=" h-5"
+                            />
+                        }
                         onClick={() => {
-                            window.open(`https://www.openstreetmap.org/?mlat=${waypoint.lat}&mlon=${waypoint.lng}#map=18/${waypoint.lat}/${waypoint.lng}`, "_blank");
+                            window.open(
+                                `https://www.openstreetmap.org/?mlat=${waypoint.lat}&mlon=${waypoint.lng}#map=18/${waypoint.lat}/${waypoint.lng}`,
+                                "_blank",
+                            );
                         }}
                         label="OpenStreetMap"
                     />
                     <IconButton
-                        icon={<img src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Mapy_icon.svg" className="w-5 h-5" />}
+                        icon={
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Mapy_icon.svg"
+                                className="h-5"
+                            />
+                        }
                         label="Mapy.cz"
                         onClick={() => {
-                            window.open(`https://mapy.com/fnc/v1/showmap?mapset=base&center=${waypoint.lng},${waypoint.lat}&zoom=18&marker=true`, "_blank");
+                            window.open(
+                                `https://mapy.com/fnc/v1/showmap?mapset=base&center=${waypoint.lng},${waypoint.lat}&zoom=18&marker=true`,
+                                "_blank",
+                            );
                         }}
                     />
                     <IconButton
-                        icon={<img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" className="w-5 h-5" />}
+                        icon={
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+                                className="h-5"
+                            />
+                        }
                         label="Apple Maps"
                         onClick={() => {
                             window.open(`https://maps.apple.com/?q=${waypoint.lat},${waypoint.lng}&z=18`, "_blank");
@@ -161,7 +192,6 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     />
                 </div>
             </div>
-
         </Panel>
     );
 }

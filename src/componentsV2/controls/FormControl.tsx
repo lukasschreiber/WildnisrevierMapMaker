@@ -38,7 +38,7 @@ export function FormControl({ id, label, helpText, children }: FormControlProps)
             })}
 
             {helpText && (
-                <div id={helpId} className="text-xs text-gray-500 flex gap-1 items-center">
+                <div id={helpId} className="text-xs text-gray-500 flex gap-1 items-start">
                     <div className="shrink-0">
                         <CircleInformationLinear size={16} />
                     </div>

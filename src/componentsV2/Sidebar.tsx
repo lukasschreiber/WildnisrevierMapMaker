@@ -22,7 +22,6 @@ export function Sidebar() {
                         <div
                             className="flex flex-col items-center justify-center cursor-pointer text-gray-600 hover:text-blue-500 w-full"
                             onClick={() => {
-                                console.log("Navigating to", panel.path);
                                 navigate(panel.path)
                             }}
                         >

@@ -25,12 +25,15 @@ export function Map({ children, ...props }: React.PropsWithChildren<MapProps>) {
     const existingMaplibreAttribution = useRef<string | null>(null);
 
     const [initialized, setInitialized] = useState(false);
-    const maxZoom = props.maxZoom ?? useSettingsStore((state) => state.settings.maxZoom);
-    const minZoom = props.minZoom ?? 1;
-    const mapVersion = props.tiles ?? useSettingsStore((state) => state.settings.mapVersion);
+    const settingsMaxZoom = useSettingsStore((state) => state.settings.maxZoom);
+    const settingsMapVersion = useSettingsStore((state) => state.settings.mapVersion);
     const center = useLayoutStore((state) => state.mapView.center);
     const zoom = useLayoutStore((state) => state.mapView.zoom);
     const setView = useLayoutStore((state) => state.setMapView);
+
+    const maxZoom = props.maxZoom ?? settingsMaxZoom;
+    const minZoom = props.minZoom ?? 1;
+    const mapVersion = props.tiles ?? settingsMapVersion;
 
     // Initialize map ONCE after container mounts
     useEffect(() => {

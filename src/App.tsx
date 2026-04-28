@@ -1,7 +1,4 @@
-import useLocalStorage from "./hooks/useLocalStorage";
-import { Menu } from "./components/Menu";
 import { FileLaunchHandler } from "./FileLaunchHandler";
-import { SidePanel } from "./components/SidePanel";
 import { WaypointLayer } from "./renderer/layers/WaypointLayer";
 import { LayerProvider } from "./context/LayerContext";
 import { MapEventManager } from "./components/MapEventManager";
