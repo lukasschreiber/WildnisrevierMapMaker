@@ -37,9 +37,9 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
     const navigate = useNavigate();
 
     return (
-        <Panel topColor="pink">
+        <Panel topComponent={<div className="h-full w-full opacity-30" style={{ background: path.color }} />}>
             <div className="p-4 flex items-center flex-col">
-                <ScribbleLinear className="text-pink-500" size={64} />
+                <ScribbleLinear style={{ color: path.color, filter: `drop-shadow(1px 1px ${path.outlineColor}) drop-shadow(1px -1px ${path.outlineColor}) drop-shadow(-1px 1px ${path.outlineColor}) drop-shadow(-1px -1px ${path.outlineColor})`}} size={64} />
                 <div className="text-lg text-gray-800 font-medium flex items-center gap-2 mt-2">
                     {path.name}
                     <PenLineSolid className="text-blue-500" size={18} />

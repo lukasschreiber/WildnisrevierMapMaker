@@ -52,8 +52,12 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
         return `${baseName} (Copy ${nextCopyNumber})`;
     };
 
+    const topBackground = type.hasTwoColors
+        ? `linear-gradient(${type.rotation ?? 0}deg, ${type.color2} 0 50%, ${type.color || "#000000"} 50% 100%)`
+        : type.color;
+
     return (
-        <Panel topColor="#d1d5dc">
+        <Panel topComponent={<div className="h-full w-full opacity-30" style={{ background: topBackground }} />}>
             <div className="p-4 flex items-center flex-col">
                 <LegendWaypointMarker type={type} radius={32} borderWidth={2} borderColor="black" />
                 <div className="text-lg text-gray-800 font-medium flex items-center gap-2 mt-2">
