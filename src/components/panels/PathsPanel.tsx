@@ -9,13 +9,11 @@ import { NumberInput } from "../inputs/NumberInput";
 import { ColorInput } from "../inputs/ColorInput";
 import { Checkbox } from "../inputs/Checkbox";
 import { Select } from "../inputs/Select";
-import { useShapeStore } from "../../stores/useShapes";
-import { useWaypointStore } from "../../stores/useWaypoints";
+import { pathActions } from "../../domain/actions/paths";
+import { useInteractionModeStore } from "../../stores/useInteractionMode";
 
 export function PathsPanel() {
     const paths = usePathStore((state) => state.paths);
-    const addPath = usePathStore((state) => state.addPath);
-    const updatePath = usePathStore((state) => state.updatePath);
 
     const sensors = useSensors(useSensor(PointerSensor));
 
@@ -42,7 +40,7 @@ export function PathsPanel() {
         if (oldIndex !== newIndex) {
             const reordered = arrayMove(sortedPaths, oldIndex, newIndex);
             reordered.forEach((path, index) => {
-                updatePath(path.id, { order: index });
+                pathActions.updatePath(path.id, { order: index });
             });
         }
     };
@@ -63,7 +61,7 @@ export function PathsPanel() {
                 </SortableContext>
             </DndContext>
             <button
-                onClick={() => addPath("New Path", "#000000")}
+                onClick={() => pathActions.addPath("New Path", "#000000")}
                 className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded"
             >
                 Add Path
@@ -74,14 +72,9 @@ export function PathsPanel() {
 
 const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
     const path = usePathStore((state) => state.paths.find((p) => p.id === pathId))!;
-    const updatePath = usePathStore((state) => state.updatePath);
-    const deletePath = usePathStore((state) => state.deletePath);
-    const setAddMode = usePathStore((state) => state.setAddMode);
-    const setAddShapeMode = useShapeStore((state) => state.setAddMode);
-    const setAddWaypointMode = useWaypointStore((state) => state.setAddMode);
-    const setAddModeReferencePathId = usePathStore((state) => state.setAddModeReferencePathId);
-    const addMode = usePathStore((state) => state.addMode);
-    const addModeReferencePathId = usePathStore((state) => state.addModeReferencePathId);
+    const mode = useInteractionModeStore((state) => state.mode);
+    const activePathId = useInteractionModeStore((state) => state.activePathId);
+    const togglePathEdit = useInteractionModeStore((state) => state.togglePathEdit);
 
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: path.id });
 
@@ -96,10 +89,10 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
                 <div {...attributes} {...listeners} className="cursor-grab p-1 select-none">
                     ⋮⋮
                 </div>
-                <TextInput value={path.name} onChange={(value) => updatePath(path.id, { name: value })} />
+                <TextInput value={path.name} onChange={(value) => pathActions.updatePath(path.id, { name: value })} />
                 <Select
                     value={path.style}
-                    onChange={(value) => updatePath(path.id, { style: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { style: value })}
                     options={[
                         { label: "Solid", value: "solid" },
                         { label: "Dashed", value: "dashed" },
@@ -109,7 +102,7 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
                 />
                 <NumberInput
                     value={path.tension}
-                    onChange={(value) => updatePath(path.id, { tension: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { tension: value })}
                     placeholder="Tension"
                     min={0}
                     max={1}
@@ -118,33 +111,33 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
                 />
                 <NumberInput
                     value={path.width}
-                    onChange={(value) => updatePath(path.id, { width: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { width: value })}
                     placeholder="Width"
                     min={0}
                     className="max-w-14"
                 />
                 <ColorInput
                     value={path.color}
-                    onChange={(value) => updatePath(path.id, { color: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { color: value })}
                     placeholder="Color"
                     className="max-w-14"
                 />
                 <NumberInput
                     value={path.outlineWidth}
-                    onChange={(value) => updatePath(path.id, { outlineWidth: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { outlineWidth: value })}
                     placeholder="Outline Width"
                     min={0}
                     className="max-w-14"
                 />
                 <ColorInput
                     value={path.outlineColor}
-                    onChange={(value) => updatePath(path.id, { outlineColor: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { outlineColor: value })}
                     placeholder="Outline Color"
                     className="max-w-14"
                 />
                 <Select
                     value={path.linecap}
-                    onChange={(value) => updatePath(path.id, { linecap: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { linecap: value })}
                     options={[
                         { label: "Round", value: "round" },
                         { label: "Butt", value: "butt" },
@@ -154,7 +147,7 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
                 />
                 <NumberInput
                     value={path.opacity}
-                    onChange={(value) => updatePath(path.id, { opacity: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { opacity: value })}
                     placeholder="Opacity"
                     min={0}
                     max={1}
@@ -162,28 +155,25 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
                     className="max-w-14"
                 />
                 <Checkbox
-                    onChange={(value) => updatePath(path.id, { hidden: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { hidden: value })}
                     label="Hidden"
                     value={path.hidden}
                 />
                 <TextInput
                     value={path.dasharray}
-                    onChange={(value) => updatePath(path.id, { dasharray: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { dasharray: value })}
                     placeholder="Dasharray"
                 />
                 <div>{path.segments?.length?.toFixed(0).padStart(2, "0")} seg</div>
                 <button
                     onClick={() => {
-                        setAddMode(!addMode);
-                        setAddShapeMode(false);
-                        setAddWaypointMode(false);
-                        setAddModeReferencePathId(path.id);
+                        togglePathEdit(path.id);
                     }}
                     className="px-3 py-1 bg-green-500 hover:bg-green-600 rounded"
                 >
-                    {addMode && addModeReferencePathId === path.id ? "Cancel" : "Edit Points"}
+                    {mode === "path-edit" && activePathId === path.id ? "Cancel" : "Edit Points"}
                 </button>
-                <button onClick={() => deletePath(path.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
+                <button onClick={() => pathActions.deletePath(path.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
                     Delete
                 </button>
             </div>

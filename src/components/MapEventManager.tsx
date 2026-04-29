@@ -3,31 +3,45 @@ import { useWaypointStore } from "../stores/useWaypoints";
 import { usePathStore } from "../stores/usePaths";
 import { useMap } from "../context/MapContext";
 import { useLocation, useNavigate } from "react-router";
+import { useInteractionModeStore } from "../stores/useInteractionMode";
+import { waypointActions } from "../domain/actions/waypoints";
+import { useHistoryStore } from "../stores/useHistory";
+
+function isTextInputTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+        return false;
+    }
+
+    if (target.isContentEditable) {
+        return true;
+    }
+
+    const tagName = target.tagName.toLowerCase();
+    return tagName === "input" || tagName === "textarea" || tagName === "select";
+}
 
 export function MapEventManager() {
     const map = useMap();
-    const addMode = useWaypointStore((state) => state.addMode);
+    const mode = useInteractionModeStore((state) => state.mode);
     const addPathMode = usePathStore((state) => state.addMode);
     const selectedId = useWaypointStore((state) => state.selectedId);
-    const updateWaypointPosition = useWaypointStore((state) => state.updateWaypointPosition);
-    const deleteWaypoint = useWaypointStore((state) => state.deleteWaypoint);
-    const deleteSegment = usePathStore((state) => state.deleteSegment);
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const waypoints = useWaypointStore((state) => state.waypoints);
-    const addWaypoint = useWaypointStore((state) => state.addWaypoint);
     const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
-    const paths = usePathStore((state) => state.paths);
     const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
     const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
+    const undo = useHistoryStore((state) => state.undo);
+    const redo = useHistoryStore((state) => state.redo);
     const navigate = useNavigate();
     const location = useLocation();
     const lastSyncedId = useRef<number | null>(null);
+    const addMode = mode === "waypoint-add";
 
     const onMapClick = useCallback(
         (e: L.LeafletMouseEvent) => {
             if ((e.originalEvent.target as HTMLElement)?.closest("#menu")) return; // Ignore clicks on the menu
             if (addMode && selectedId === null) {
-                addWaypoint(e.latlng.lat, e.latlng.lng);
+                waypointActions.addWaypoint(e.latlng.lat, e.latlng.lng);
             } else if (addPathMode) {
                 cancelSegmentConnection();
             } else {
@@ -39,6 +53,22 @@ export function MapEventManager() {
 
     const onKeyDown = useCallback(
         (e: KeyboardEvent) => {
+            const hasModifier = e.ctrlKey || e.metaKey;
+            const key = e.key.toLowerCase();
+            if (hasModifier && !isTextInputTarget(e.target)) {
+                if (key === "z" && !e.shiftKey) {
+                    e.preventDefault();
+                    undo();
+                    return;
+                }
+
+                if (key === "y" || (key === "z" && e.shiftKey)) {
+                    e.preventDefault();
+                    redo();
+                    return;
+                }
+            }
+
             if (selectedId === null) return;
 
             const step = 0.000001;
@@ -66,7 +96,7 @@ export function MapEventManager() {
                             return wp;
                     }
 
-                    updateWaypointPosition(wp.id, lat, lng); // Update the waypoint in the context
+                    waypointActions.updateWaypointPosition(wp.id, lat, lng);
                     break; // Exit the loop after updating the selected waypoint
                 }
             }
@@ -76,18 +106,11 @@ export function MapEventManager() {
                 if (!isDeletable(selectedId)) return;
                 const confirmed = window.confirm("Are you sure you want to delete this waypoint?");
                 if (!confirmed) return;
-                paths.forEach((path) => {
-                    path.segments.forEach((segment) => {
-                        if (segment.from.waypointId === selectedId || segment.to.waypointId === selectedId) {
-                            deleteSegment(segment.id);
-                        }
-                    });
-                });
-                deleteWaypoint(selectedId); // Delete the waypoint from the context
+                waypointActions.deleteWaypointWithDependencies(selectedId);
                 deselectWaypoint();
             }
         },
-        [isDeletable, selectedId, waypoints, deleteWaypoint, updateWaypointPosition, deleteSegment, deselectWaypoint]
+        [isDeletable, selectedId, waypoints, deselectWaypoint, redo, undo]
     );
 
     useEffect(() => {
@@ -105,8 +128,8 @@ export function MapEventManager() {
     }, [map, onMapClick]);
 
     useEffect(() => {
-        // if the URL has the route /waypoint/:id, extract the id and select the waypoint
-        if (!location.pathname.startsWith("/waypoint/")) {
+        // if the URL has the route /waypoints/:id, extract the id and select the waypoint
+        if (!location.pathname.startsWith("/waypoints/")) {
             deselectWaypoint();
             return;
         }
@@ -124,21 +147,21 @@ export function MapEventManager() {
             }
             lastSyncedId.current = id;
         }
-    }, [location.pathname]);
+    }, [deselectWaypoint, location.pathname, map, selectWaypoint, waypoints]);
 
     useEffect(() => {
         if (selectedId !== lastSyncedId.current) {
             if (selectedId === null) {
                 // Only navigate to "/" if we're currently viewing a waypoint detail
-                if (location.pathname.startsWith("/waypoint/")) {
+                if (location.pathname.startsWith("/waypoints/")) {
                     navigate("/");
                 }
             } else {
-                navigate(`/waypoint/${selectedId}`);
+                navigate(`/waypoints/${selectedId}`);
             }
             lastSyncedId.current = selectedId;
         }
-    }, [selectedId, location.pathname]);
+    }, [selectedId, location.pathname, navigate]);
 
     return null;
 }

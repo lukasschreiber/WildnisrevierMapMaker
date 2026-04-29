@@ -23,6 +23,7 @@ export const panels: PanelGroupConfig[] = [
                 component: WaypointsPanel,
                 path: "/waypoints",
                 pinnable: true,
+                count: 22,
             },
             {
                 title: "Waypoint Types",
@@ -30,6 +31,7 @@ export const panels: PanelGroupConfig[] = [
                 component: WaypointTypesPanel,
                 path: "/types",
                 pinnable: true,
+                count: 4,
             },
             {
                 title: "Paths",
@@ -37,6 +39,7 @@ export const panels: PanelGroupConfig[] = [
                 component: PathsPanel,
                 path: "/paths",
                 pinnable: true,
+                count: 5,
             },
             {
                 title: "Shapes",
@@ -44,6 +47,7 @@ export const panels: PanelGroupConfig[] = [
                 component: () => <Panel title="Shapes Panel"></Panel>, // Placeholder for ShapesPanel
                 path: "/shapes",
                 pinnable: true,
+                count: 0
             },
             {
                 title: "Groups",
@@ -51,6 +55,7 @@ export const panels: PanelGroupConfig[] = [
                 component: () => <Panel title="Groups Panel"></Panel>, // Placeholder for ShapesPanel
                 path: "/groups",
                 pinnable: true,
+                count: 3,
             },
             {
                 title: "Layout",
@@ -88,6 +93,7 @@ interface PanelConfig {
     component: React.ComponentType;
     path: string;
     pinnable?: boolean;
+    count?: number;
 }
 
 interface PanelGroupConfig {

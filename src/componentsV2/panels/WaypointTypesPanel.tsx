@@ -28,7 +28,7 @@ export function WaypointTypesPanel() {
                                 hidden: false,
                                 hasTwoColors: false,
                             });
-                            navigate(`/type/${id}`);
+                            navigate(`/types/${id}`);
                         }}
                         className="mb-2 text-xs font-normal"
                         color="blue"
@@ -43,7 +43,7 @@ export function WaypointTypesPanel() {
                     {Object.values(types).map((type) => (
                         <div
                             key={type.id}
-                            onClick={() => navigate(`/type/${type.id}`)}
+                            onClick={() => navigate(`/types/${type.id}`)}
                             className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 group cursor-pointer"
                         >
                             <div className="flex items-center gap-2">

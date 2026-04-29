@@ -8,8 +8,10 @@ import * as d3 from "d3";
 import { useMap, useMapContext } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { usePathStore } from "../../stores/usePaths";
-import { useShapeStore } from "../../stores/useShapes";
 import { evaluationEventEmitter } from "../../utils/evaluation";
+import { useInteractionModeStore } from "../../stores/useInteractionMode";
+import { pathActions } from "../../domain/actions/paths";
+import { shapeActions } from "../../domain/actions/shapes";
 
 type WaypointProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -52,13 +54,13 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const storeWaypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
     const waypointBorderWidth = props.borderWidth ?? storeWaypointBorderWidth;
 
-    const addPathMode = usePathStore((state) => state.addMode);
-    const addShapeMode = useShapeStore((state) => state.addMode);
-    const addShapeNode = useShapeStore((state) => state.addNode);
-    const addModeReferenceShapeId = useShapeStore((state) => state.addModeReferenceShapeId);
+    const mode = useInteractionModeStore((state) => state.mode);
+    const activePathId = useInteractionModeStore((state) => state.activePathId);
+    const activeShapeId = useInteractionModeStore((state) => state.activeShapeId);
     const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
-    const endSegmentConnection = usePathStore((state) => state.endSegmentConnection);
     const startSegmentConnection = usePathStore((state) => state.startSegmentConnection);
+    const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
+    const connectionStartedWaypointId = usePathStore((state) => state.connectionStartedWaypointId);
 
     const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
 
@@ -103,15 +105,26 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         if (!props.disableSelection) {
             renderedMarker.on("click", (event: MouseEvent) => {
                 event.stopPropagation();
-                if (addPathMode) {
+                if (mode === "path-edit") {
+                    if (activePathId === null) {
+                        return;
+                    }
+
                     if (segmentConnectionStarted) {
-                        endSegmentConnection(waypoint.id);
+                        if (connectionStartedWaypointId !== null && connectionStartedWaypointId !== waypoint.id) {
+                            pathActions.addSegment(
+                                activePathId,
+                                { waypointId: connectionStartedWaypointId },
+                                { waypointId: waypoint.id }
+                            );
+                        }
+                        cancelSegmentConnection();
                     } else {
                         startSegmentConnection(waypoint.id);
                     }
-                } else if (addShapeMode) {
-                    if (addModeReferenceShapeId) {
-                        addShapeNode(addModeReferenceShapeId, waypoint.id);
+                } else if (mode === "shape-edit") {
+                    if (activeShapeId !== null) {
+                        shapeActions.addNode(activeShapeId, waypoint.id);
                     }
                 } else {
                     selectWaypoint(waypoint.id);
@@ -128,7 +141,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         return () => {
             renderedMarker.remove();
         };
-    }, [waypoint, type, group, g, isSelected, waypointRadius, waypointBorderWidth, waypointBorderColor, showWaypointBorder, addPathMode, addShapeMode, map, segmentConnectionStarted, endSegmentConnection, startSegmentConnection, selectWaypoint, addModeReferenceShapeId, addShapeNode, selectedWaypoint, props.disableSelection, props.visualizeHiddenItems, props.highlightType, selectedId, setSelectedWaypoint]);
+    }, [waypoint, type, group, g, isSelected, waypointRadius, waypointBorderWidth, waypointBorderColor, showWaypointBorder, mode, map, segmentConnectionStarted, connectionStartedWaypointId, startSegmentConnection, cancelSegmentConnection, activePathId, activeShapeId, selectWaypoint, selectedWaypoint, props.disableSelection, props.visualizeHiddenItems, props.highlightType, selectedId, setSelectedWaypoint]);
 
     const updatePosition = useCallback(() => {
         if (!g || !waypoint) return;

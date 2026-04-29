@@ -1,7 +1,5 @@
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { usePathStore } from "../../stores/usePaths";
 import { useShapeStore } from "../../stores/useShapes";
-import { useWaypointStore } from "../../stores/useWaypoints";
 import { Checkbox } from "../inputs/Checkbox";
 import { ColorInput } from "../inputs/ColorInput";
 import { NumberInput } from "../inputs/NumberInput";
@@ -11,11 +9,11 @@ import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } 
 import React, { useMemo } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { shapeActions } from "../../domain/actions/shapes";
+import { useInteractionModeStore } from "../../stores/useInteractionMode";
 
 export function ShapesPanel() {
     const shapes = useShapeStore((state) => state.shapes);
-    const addShape = useShapeStore((state) => state.addShape);
-    const updateShape = useShapeStore((state) => state.updateShape);
 
     const sensors = useSensors(useSensor(PointerSensor));
 
@@ -42,7 +40,7 @@ export function ShapesPanel() {
         if (oldIndex !== newIndex) {
             const reordered = arrayMove(sortedShapes, oldIndex, newIndex);
             reordered.forEach((shape, index) => {
-                updateShape(shape.id, { order: index });
+                shapeActions.updateShape(shape.id, { order: index });
             });
         }
     };
@@ -63,7 +61,7 @@ export function ShapesPanel() {
                 </SortableContext>
             </DndContext>
             <button
-                onClick={() => addShape("New Shape", "#000000")}
+                onClick={() => shapeActions.addShape("New Shape", "#000000")}
                 className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded"
             >
                 Add Shape
@@ -74,15 +72,9 @@ export function ShapesPanel() {
 
 const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
     const shape = useShapeStore((state) => state.shapes.find((s) => s.id === shapeId))!;
-    const setAddMode = useShapeStore((state) => state.setAddMode);
-    const addMode = useShapeStore((state) => state.addMode);
-    const addModeReferenceShapeId = useShapeStore((state) => state.addModeReferenceShapeId);
-    const setAddModeReferenceShapeId = useShapeStore((state) => state.setAddModeReferenceShapeId);
-    const removeShape = useShapeStore((state) => state.removeShape);
-    const updateShape = useShapeStore((state) => state.updateShape);
-
-    const setAddWaypointMode = useWaypointStore((state) => state.setAddMode);
-    const setAddPathsMode = usePathStore((state) => state.setAddMode);
+    const mode = useInteractionModeStore((state) => state.mode);
+    const activeShapeId = useInteractionModeStore((state) => state.activeShapeId);
+    const toggleShapeEdit = useInteractionModeStore((state) => state.toggleShapeEdit);
 
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: shape.id });
 
@@ -97,10 +89,10 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                 <div {...attributes} {...listeners} className="cursor-grab p-1 select-none">
                     ⋮⋮
                 </div>
-                <TextInput value={shape.name} onChange={(value) => updateShape(shape.id, { name: value })} />
+                <TextInput value={shape.name} onChange={(value) => shapeActions.updateShape(shape.id, { name: value })} />
                 <Select
                     value={shape.shapeType}
-                    onChange={(value) => updateShape(shape.id, { shapeType: value })}
+                    onChange={(value) => shapeActions.updateShape(shape.id, { shapeType: value })}
                     options={[
                         { label: "Smooth", value: "smooth" },
                         { label: "Straight", value: "straight" },
@@ -111,7 +103,7 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                     min={-0.01}
                     max={1}
                     step={0.01}
-                    onChange={(value) => updateShape(shape.id, { alpha: value < 0 ? undefined : value })}
+                    onChange={(value) => shapeActions.updateShape(shape.id, { alpha: value < 0 ? undefined : value })}
                     className="max-w-14"
                     placeholder="Alpha"
                 />
@@ -120,13 +112,13 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                     min={-0.01}
                     max={1}
                     step={0.01}
-                    onChange={(value) => updateShape(shape.id, { opacity: value < 0 ? undefined : value })}
+                    onChange={(value) => shapeActions.updateShape(shape.id, { opacity: value < 0 ? undefined : value })}
                     className="max-w-14"
                     placeholder="Opacity"
                 />
                 <Select
                     value={shape.texture || "solid"}
-                    onChange={(value) => updateShape(shape.id, { texture: value })}
+                    onChange={(value) => shapeActions.updateShape(shape.id, { texture: value })}
                     options={[
                         { label: "None", value: "none" },
                         { label: "Solid", value: "solid" },
@@ -138,42 +130,39 @@ const SortableShapeRow = React.memo(({ shapeId }: { shapeId: number }) => {
                         { label: "Crosses", value: "crosses" },
                     ]}
                 />
-                <ColorInput value={shape.color} onChange={(value) => updateShape(shape.id, { color: value })} />
+                <ColorInput value={shape.color} onChange={(value) => shapeActions.updateShape(shape.id, { color: value })} />
                 <ColorInput
                     value={shape.labelColor}
-                    onChange={(value) => updateShape(shape.id, { labelColor: value })}
+                    onChange={(value) => shapeActions.updateShape(shape.id, { labelColor: value })}
                 />
                 <Checkbox
                     id={shape.id.toString()}
                     label="Has Outline"
                     value={shape.hasOutline}
-                    onChange={(checked) => updateShape(shape.id, { hasOutline: checked })}
+                    onChange={(checked) => shapeActions.updateShape(shape.id, { hasOutline: checked })}
                 />
                 <Checkbox
                     id={`${shape.id}-hidden`}
                     label="Hidden"
                     value={shape.hidden}
-                    onChange={(checked) => updateShape(shape.id, { hidden: checked })}
+                    onChange={(checked) => shapeActions.updateShape(shape.id, { hidden: checked })}
                 />
                 <Checkbox
                     id={`${shape.id}-labelHidden`}
                     label="Label Hidden"
                     value={shape.labelHidden}
-                    onChange={(checked) => updateShape(shape.id, { labelHidden: checked })}
+                    onChange={(checked) => shapeActions.updateShape(shape.id, { labelHidden: checked })}
                 />
                 <div>{shape.nodes?.length?.toFixed(0).padStart(2, "0")} points</div>
                 <button
                     onClick={() => {
-                        setAddMode(!addMode);
-                        setAddPathsMode(false);
-                        setAddWaypointMode(false);
-                        setAddModeReferenceShapeId(shape.id);
+                        toggleShapeEdit(shape.id);
                     }}
                     className="px-3 py-1 bg-green-500 hover:bg-green-600 rounded"
                 >
-                    {addMode && addModeReferenceShapeId === shape.id ? "Cancel" : "Edit Points"}
+                    {mode === "shape-edit" && activeShapeId === shape.id ? "Cancel" : "Edit Points"}
                 </button>
-                <button onClick={() => removeShape(shape.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
+                <button onClick={() => shapeActions.removeShape(shape.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
                     Delete
                 </button>
             </div>

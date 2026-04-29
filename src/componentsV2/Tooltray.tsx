@@ -10,15 +10,20 @@ import {
     WrenchLinear,
     LocationCrosshairsLinear,
     CompassDraftingLinear,
+    RulerLinear,
+    ArrowLeftLinear,
+    ArrowRightLinear,
 } from "@lukasschreiber/icons";
 
 import { DisablePropagation } from "./common/DisablePropagation";
 import { Divider } from "./common/Divider";
 import { useLocation } from "react-router";
-import { useWaypointStore } from "../stores/useWaypoints";
 import { useMap } from "../context/MapContext";
+import { useInteractionModeStore } from "../stores/useInteractionMode";
+import { useWaypointStore } from "../stores/useWaypoints";
+import { useHistoryStore } from "../stores/useHistory";
 
-type ToolId = "select" | "marker" | "path" | "shape" | "delete" | "locate" | "measure";
+type ToolId = "select" | "marker" | "path" | "shape" | "delete" | "locate" | "measure" | "relative-marker" | "undo" | "redo";
 
 type ToolDefinition = {
     id: ToolId;
@@ -31,9 +36,17 @@ type ToolDefinition = {
 
 type ToolGroup = ToolDefinition[];
 
-function getSelectedToolIdFromState(addMode: boolean): ToolId {
-    if (addMode) {
+function getSelectedToolIdFromState(mode: "select" | "waypoint-add" | "path-edit" | "shape-edit"): ToolId {
+    if (mode === "waypoint-add") {
         return "marker";
+    }
+
+    if (mode === "path-edit") {
+        return "path";
+    }
+
+    if (mode === "shape-edit") {
+        return "shape";
     }
 
     return "select";
@@ -42,13 +55,18 @@ function getSelectedToolIdFromState(addMode: boolean): ToolId {
 export function Tooltray() {
     const [isOpen, setIsOpen] = useState(true);
 
+    const mode = useInteractionModeStore((state) => state.mode);
+    const activateSelect = useInteractionModeStore((state) => state.activateSelect);
+    const activateWaypointAdd = useInteractionModeStore((state) => state.activateWaypointAdd);
     const setCurrentPosition = useWaypointStore((state) => state.setCurrentPosition);
-    const addMode = useWaypointStore((state) => state.addMode);
-    const setAddMode = useWaypointStore((state) => state.setAddMode);
+    const canUndo = useHistoryStore((state) => state.canUndo());
+    const canRedo = useHistoryStore((state) => state.canRedo());
+    const undo = useHistoryStore((state) => state.undo);
+    const redo = useHistoryStore((state) => state.redo);
 
     const map = useMap();
 
-    const selectedToolId = getSelectedToolIdFromState(addMode);
+    const selectedToolId = getSelectedToolIdFromState(mode);
 
     const toolGroups: ToolGroup[] = useMemo(() => {
         return [
@@ -59,14 +77,17 @@ export function Tooltray() {
                     icon: CursorLinear,
                     selectable: true,
                     onClick: () => {
-                        setAddMode(false);
+                        activateSelect();
                     },
                 },
                 {
                     id: "measure",
                     label: "Measure",
-                    icon: CompassDraftingLinear,
-                    selectable: false,
+                    icon: RulerLinear,
+                    selectable: true,
+                    onClick: () => {
+                        activateSelect();
+                    },
                 },
                 {
                     id: "marker",
@@ -74,7 +95,7 @@ export function Tooltray() {
                     icon: LocationPlusLinear,
                     selectable: true,
                     onClick: () => {
-                        setAddMode(true);
+                        activateWaypointAdd();
                     },
                 },
                 {
@@ -83,7 +104,7 @@ export function Tooltray() {
                     icon: ScribbleLinear,
                     selectable: true,
                     onClick: () => {
-                        setAddMode(false);
+                        activateSelect();
                     },
                 },
                 {
@@ -92,7 +113,7 @@ export function Tooltray() {
                     icon: DrawSquareLinear,
                     selectable: true,
                     onClick: () => {
-                        setAddMode(false);
+                        activateSelect();
                     },
                 },
             ],
@@ -101,6 +122,13 @@ export function Tooltray() {
                     id: "delete",
                     label: "Delete",
                     icon: TrashLinear,
+                    selectable: false,
+                    disabled: () => true,
+                },
+                {
+                    id: "relative-marker",
+                    label: "Marker+",
+                    icon: CompassDraftingLinear,
                     selectable: false,
                     disabled: () => true,
                 },
@@ -118,8 +146,30 @@ export function Tooltray() {
                     },
                 },
             ],
+            [
+                {
+                    id: "undo",
+                    label: "Undo",
+                    icon: ArrowLeftLinear,
+                    selectable: false,
+                    disabled: () => !canUndo,
+                    onClick: () => {
+                        undo();
+                    }
+                },
+                {
+                    id: "redo",
+                    label: "Redo",
+                    icon: ArrowRightLinear,
+                    selectable: false,
+                    disabled: () => !canRedo,
+                    onClick: () => {
+                        redo();
+                    },
+                }
+            ]
         ];
-    }, [map, setAddMode, setCurrentPosition]);
+    }, [activateSelect, activateWaypointAdd, map, setCurrentPosition, canUndo, canRedo, undo, redo]);
 
     const location = useLocation();
     const isPanelVisible = location.pathname !== "/";

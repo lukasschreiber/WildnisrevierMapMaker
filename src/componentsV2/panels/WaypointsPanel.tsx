@@ -9,6 +9,7 @@ import { Select } from "../controls/Select";
 import { useState, useRef } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import SliderIcon from "../../assets/icons/sliders.svg?react";
+import { ShapesLinear } from "@lukasschreiber/icons";
 
 export function WaypointsPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
@@ -68,7 +69,7 @@ export function WaypointsPanel() {
             key={waypoint.id}
             className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer transition-colors ${selectedId === waypoint.id ? "bg-gray-200" : ""}`}
             onClick={() => {
-                navigate(`/waypoint/${waypoint.id}`);
+                navigate(`/waypoints/${waypoint.id}`);
             }}
         >
             <LegendWaypointMarker type={types[waypoint.typeId]} radius={8} borderWidth={1} borderColor="black" />
@@ -98,7 +99,15 @@ export function WaypointsPanel() {
                                         value={typeFilter}
                                         onChange={(v) => setTypeFilter(v)}
                                         options={[
-                                            { children: <div className="ml-7">All types</div>, value: "all" },
+                                            {
+                                                children: (
+                                                    <div className="flex items-center gap-2">
+                                                        <ShapesLinear className="w-5 h-5 mr-0.5" />
+                                                        All types
+                                                    </div>
+                                                ),
+                                                value: "all",
+                                            },
                                             ...Object.entries(types).map(([id, type]) => ({
                                                 children: (
                                                     <div className="flex items-center gap-2">

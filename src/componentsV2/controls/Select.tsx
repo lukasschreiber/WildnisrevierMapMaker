@@ -60,7 +60,7 @@ export function Select<T extends string | number>({
                     id={id}
                     type="button"
                     onClick={() => setOpen((v) => !v)}
-                    className={`flex w-full items-center gap-2 rounded border border-slate-300 px-3 py-1 text-sm text-gray-800 shadow-sm transition hover:shadow-md focus:border-slate-800 focus:outline-none focus:ring focus:ring-slate-800 ${className ?? ""}`}
+                    className={`flex w-full items-center gap-2 rounded border border-slate-300 px-3 py-1 text-sm text-gray-800 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition ${className ?? ""}`}
                     {...rest}
                 >
                     {adornment}

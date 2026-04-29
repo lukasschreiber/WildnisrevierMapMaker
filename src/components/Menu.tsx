@@ -9,12 +9,10 @@ import { Checkbox } from "./inputs/Checkbox";
 import { useWaypointTypeStore } from "../stores/useWaypointTypes";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { usePathStore } from "../stores/usePaths";
-import { useShapeStore } from "../stores/useShapes";
 import { useWaypointGroupStore } from "../stores/useGroups";
+import { useInteractionModeStore } from "../stores/useInteractionMode";
 
 export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: boolean) => void }) {
-    const addMode = useWaypointStore((state) => state.addMode);
-    const setAddMode = useWaypointStore((state) => state.setAddMode);
     const selectedId = useWaypointStore((state) => state.selectedId);
     const setCurrentPosition = useWaypointStore((state) => state.setCurrentPosition);
     const currentPosition = useWaypointStore((state) => state.currentPosition);
@@ -25,16 +23,14 @@ export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: b
     const setNewWaypointName = useWaypointStore((state) => state.setNewWaypointName);
     const setNewWaypointType = useWaypointStore((state) => state.setNewWaypointType);
 
-    const addPathMode = usePathStore((state) => state.addMode);
-    const setAddPathMode = usePathStore((state) => state.setAddMode);
     const selectedSegmentId = usePathStore((state) => state.selectedSegmentId);
-
-    const addShapeMode = useShapeStore((state) => state.addMode);
-    const setAddShapeMode = useShapeStore((state) => state.setAddMode);
 
     const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
 
     const types = useWaypointTypeStore((state) => state.types);
+    const mode = useInteractionModeStore((state) => state.mode);
+    const activateSelect = useInteractionModeStore((state) => state.activateSelect);
+    const activateWaypointAdd = useInteractionModeStore((state) => state.activateWaypointAdd);
     const containerRef = useRef<HTMLDivElement>(null);
     const map = useMap();
 
@@ -59,20 +55,18 @@ export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: b
                 <div className="text-xs mb-1">Mode:</div>
                 <Select
                     className="w-full"
-                    value={addMode ? "add" : "normal"}
+                    value={mode === "waypoint-add" ? "add" : "normal"}
                     onChange={(value) => {
                         if (value === "add") {
-                            setAddMode(true);
-                            setAddPathMode(false);
-                            setAddShapeMode(false);
+                            activateWaypointAdd();
                         } else {
-                            setAddMode(false);
+                            activateSelect();
                         }
                     }}
                     options={[{ label: "Normal", value: "normal" }, { label: "Add Waypoint", value: "add" }]}
                 />
             </div>
-            {addMode && (
+            {mode === "waypoint-add" && (
                 <div className="flex flex-col gap-1 mt-2">
                     <span className="text-xs">Add Waypoint</span>
                     <TextInput
@@ -104,20 +98,20 @@ export function Menu(props: { showSidePanel: boolean; setShowSidePanel: (show: b
             <div>
                 <div className="flex flex-row justify-between gap-2">
                     <span>Add Waypoint Mode</span>
-                    <span className={`text-xs ${addMode ? "text-green-500" : "text-red-500"}`}>
-                        {addMode ? "ON" : "OFF"}
+                    <span className={`text-xs ${mode === "waypoint-add" ? "text-green-500" : "text-red-500"}`}>
+                        {mode === "waypoint-add" ? "ON" : "OFF"}
                     </span>
                 </div>
                 <div className="flex flex-row justify-between gap-2">
                     <span>Add Path Mode</span>
-                    <span className={`text-xs ${addPathMode ? "text-green-500" : "text-red-500"}`}>
-                        {addPathMode ? "ON" : "OFF"}
+                    <span className={`text-xs ${mode === "path-edit" ? "text-green-500" : "text-red-500"}`}>
+                        {mode === "path-edit" ? "ON" : "OFF"}
                     </span>
                 </div>
                 <div className="flex flex-row justify-between gap-2">
                     <span>Add Shape Mode</span>
-                    <span className={`text-xs ${addShapeMode ? "text-green-500" : "text-red-500"}`}>
-                        {addShapeMode ? "ON" : "OFF"}
+                    <span className={`text-xs ${mode === "shape-edit" ? "text-green-500" : "text-red-500"}`}>
+                        {mode === "shape-edit" ? "ON" : "OFF"}
                     </span>
                 </div>
             </div>

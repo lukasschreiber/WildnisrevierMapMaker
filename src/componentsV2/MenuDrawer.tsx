@@ -18,7 +18,7 @@ function MenuDrawer() {
     const unpinPanel = useLayoutStore((state) => state.unpinSidebarItem);
     const navigate = useNavigate();
     const location = useLocation();
-    const keepDrawerOpenOnNavigate = location.pathname.startsWith("/waypoint/") || location.pathname.startsWith("/type/");
+    const keepDrawerOpenOnNavigate = location.pathname.startsWith("/waypoints/") || location.pathname.startsWith("/types/");
 
     return (
         <AnimatePresence>

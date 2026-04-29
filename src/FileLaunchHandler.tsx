@@ -5,6 +5,7 @@ import { useWaypointStore } from "./stores/useWaypoints";
 import { parseWMAPFile } from "./utils/persistence";
 import { useWaypointGroupStore } from "./stores/useGroups";
 import { useShapeStore } from "./stores/useShapes";
+import { useHistoryStore } from "./stores/useHistory";
 
 export function FileLaunchHandler() {
     const setTypes = useWaypointTypeStore((state) => state.setTypes);
@@ -12,6 +13,7 @@ export function FileLaunchHandler() {
     const setPaths = usePathStore((state) => state.setPaths);
     const setGroups = useWaypointGroupStore((state) => state.setWaypointGroups);
     const setShapes = useShapeStore((state) => state.setShapes);
+    const clearHistory = useHistoryStore((state) => state.clearHistory);
 
     useEffect(() => {
         console.log("FileLaunchHandler mounted", "launchQueue" in window);
@@ -49,6 +51,7 @@ export function FileLaunchHandler() {
                             setPaths(parsed.paths);
                             setGroups(parsed.groups);
                             setShapes(parsed.shapes);
+                            clearHistory();
 
                             alert(`Imported ${file.name} successfully.`);
                         } catch (error) {

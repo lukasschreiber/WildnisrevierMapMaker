@@ -32,11 +32,11 @@ export function ColorInput({
             <label
                 className={`
                     flex h-9 w-full items-center gap-2
-                    rounded border px-2 shadow-sm transition
+                    rounded border px-2 transition
                     ${
                         disabled
                             ? "cursor-not-allowed border-slate-200 bg-slate-100 opacity-60"
-                            : "cursor-pointer border-slate-300 bg-white hover:shadow-md focus-within:border-slate-800 focus-within:ring focus-within:ring-slate-800"
+                            : "cursor-pointer border-slate-300 bg-white focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500"
                     }
                     ${className ?? ""}
                 `}

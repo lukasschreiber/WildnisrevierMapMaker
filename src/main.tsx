@@ -21,15 +21,15 @@ const router = createBrowserRouter([
                 }))
             ),
             {
-                path: "/waypoint/:id",
+                path: "/waypoints/:id",
                 element: <SingleWaypointPanelWrapper />,
             },
             {
-                path: "/type/:id",
+                path: "/types/:id",
                 element: <SingleWaypointTypePanelWrapper />,
             },
             {
-                path: "/path/:id",
+                path: "/paths/:id",
                 element: <SinglePathPanelWrapper />,
             }
         ],

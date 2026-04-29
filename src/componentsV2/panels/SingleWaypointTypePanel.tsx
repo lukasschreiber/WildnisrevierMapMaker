@@ -56,6 +56,19 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
         ? `linear-gradient(${type.rotation ?? 0}deg, ${type.color2} 0 50%, ${type.color || "#000000"} 50% 100%)`
         : type.color;
 
+    const iconOptions = [
+        { label: "Circle", value: "circle" },
+        { label: "Square", value: "square" },
+        { label: "Triangle", value: "triangle" },
+        { label: "Star", value: "star" },
+        { label: "Cross", value: "cross" },
+        { label: "Diamond", value: "diamond" },
+        { label: "Apple", value: "apple" },
+        { label: "Cherry", value: "cherry" },
+        { label: "Tree Stump", value: "treestump" },
+        { label: "Camera", value: "camera" },
+    ] as const;
+
     return (
         <Panel topComponent={<div className="h-full w-full opacity-30" style={{ background: topBackground }} />}>
             <div className="p-4 flex items-center flex-col">
@@ -91,7 +104,7 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
 
                         addType(clone);
                         alert("Type duplicated.");
-                        navigate(`/type/${id}`);
+                        navigate(`/types/${id}`);
                     }}
                     label="Duplicate"
                 />
@@ -117,18 +130,22 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
                     label="Icon Shape"
                     value={type.icon}
                     onChange={(value) => updateType(type.id, { icon: value })}
-                    options={[
-                        { children: "Circle", value: "circle" },
-                        { children: "Square", value: "square" },
-                        { children: "Triangle", value: "triangle" },
-                        { children: "Star", value: "star" },
-                        { children: "Cross", value: "cross" },
-                        { children: "Diamond", value: "diamond" },
-                        { children: "Apple", value: "apple" },
-                        { children: "Cherry", value: "cherry" },
-                        { children: "Tree Stump", value: "treestump" },
-                        { children: "Camera", value: "camera" },
-                    ]}
+                    options={iconOptions.map((option) => {
+                        return {
+                            value: option.value,
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <LegendWaypointMarker
+                                        type={{ ...type, icon: option.value }}
+                                        radius={8}
+                                        borderWidth={1}
+                                        borderColor="black"
+                                    />
+                                    <span>{option.label}</span>
+                                </div>
+                            ),
+                        };
+                    })}
                 />
                 <NumberInput
                     value={type.radiusOverride}

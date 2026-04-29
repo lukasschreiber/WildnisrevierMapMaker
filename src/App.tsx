@@ -15,19 +15,21 @@ import { useLayoutStore } from "./stores/useLayout";
 import { TopIsle } from "./componentsV2/TopIsle";
 import { Outlet } from "react-router";
 import { Tooltray } from "./componentsV2/Tooltray";
-import { useWaypointStore } from "./stores/useWaypoints";
+import { InteractionModeBridge } from "./InteractionModeBridge";
+import { useInteractionModeStore } from "./stores/useInteractionMode";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
     const showSidebar = useLayoutStore((state) => state.showSidebar);
-    const addMode = useWaypointStore((state) => state.addMode);
+    const mode = useInteractionModeStore((state) => state.mode);
 
     return (
-        <div className={`flex flex-col h-screen ${addMode ? "add-mode-active" : ""}`}>
+        <div className={`flex flex-col h-screen ${mode === "waypoint-add" ? "add-mode-active" : ""}`}>
             <div className="flex w-screen flex-row flex-1 relative">
                 {showSidebar && <Sidebar />}
                 <MenuDrawer />
                 <FileLaunchHandler />
+                <InteractionModeBridge />
                 <div className="relative">
                     <Outlet />
                 </div>

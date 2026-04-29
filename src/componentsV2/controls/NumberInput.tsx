@@ -28,7 +28,7 @@ export function NumberInput({ label, helpText, id, className, value, onChange, a
                             onChange(parsed);
                         }
                     }}
-                    className={`flex-1 rounded border border-slate-300 shadow-sm hover:shadow-md focus:outline-none focus:ring focus:ring-slate-800 focus:border-slate-800 transition px-3 py-1 text-sm text-gray-800 ${className ?? ""}`}
+                    className={`flex-1 rounded border border-slate-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-0 transition px-3 py-1 text-sm text-gray-800 ${className ?? ""}`}
                     {...rest}
                 />
 

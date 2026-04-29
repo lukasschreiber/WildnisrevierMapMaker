@@ -105,7 +105,7 @@ const SortablePathRow = memo(({ pathId }: { pathId: number }) => {
                 <div
                     className="flex items-center justify-between w-full pr-2 group cursor-pointer"
                     onClick={() => {
-                        navigate(`/path/${path.id}`);
+                        navigate(`/paths/${path.id}`);
                     }}
                 >
                     <div>{path.name}</div>

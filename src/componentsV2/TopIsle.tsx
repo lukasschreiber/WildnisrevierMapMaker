@@ -55,7 +55,7 @@ export function TopIsle() {
     const bubbleItems = waypoints.map((wp) => (
         <Chip
             onClick={() => {
-                navigate(`/waypoint/${wp.id}`);
+                navigate(`/waypoints/${wp.id}`);
                 setInputFocused(false);
             }}
             className="flex items-center gap-2 focus:outline-none"
@@ -132,7 +132,7 @@ export function TopIsle() {
                                                 key={waypoint.id}
                                                 className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-xs cursor-pointer`}
                                                 onClick={() => {
-                                                    navigate(`/waypoint/${waypoint.id}`);
+                                                    navigate(`/waypoints/${waypoint.id}`);
                                                     setInputFocused(false);
                                                 }}
                                             >

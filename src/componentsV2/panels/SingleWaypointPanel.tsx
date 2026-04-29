@@ -13,6 +13,7 @@ import { Divider } from "../common/Divider";
 import { Select } from "../controls/Select";
 import { useWaypointGroupStore } from "../../stores/useGroups";
 import { EyeLinear, EyeSlashLinear } from "@lukasschreiber/icons";
+import { waypointActions } from "../../domain/actions/waypoints";
 
 export interface SingleWaypointPanelProps {
     waypointId: string;
@@ -30,11 +31,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
     const waypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id.toString() === waypointId));
     const types = useWaypointTypeStore((state) => state.types);
     const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
-    const updateWaypointName = useWaypointStore((state) => state.updateWaypointName);
-    const updateWaypointAdditionalText = useWaypointStore((state) => state.updateWaypointAdditionalText);
-    const updateWaypointType = useWaypointStore((state) => state.updateWaypointType);
-    const updateWaypointGroup = useWaypointStore((state) => state.updateWaypointGroup);
-    const toggleWaypointHidden = useWaypointStore((state) => state.toggleWaypointHidden);
+    const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const navigate = useNavigate();
 
@@ -42,7 +39,8 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
         return <div>Error: Waypoint not found</div>;
     }
 
-    const type = types[waypoint.typeId];
+    const typeId = Number(waypoint.typeId);
+    const type = types[typeId];
 
     const topBackground = type.hasTwoColors
         ? `linear-gradient(${type.rotation ?? 0}deg, ${type.color2} 0 50%, ${type.color || "#000000"} 50% 100%)`
@@ -64,7 +62,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton
                     icon={<TypeIcon className="w-5 h-5" />}
                     onClick={() => {
-                        navigate(`/type/${type.id}`);
+                        navigate(`/types/${type.id}`);
                     }}
                     color="blue"
                     label="Edit Type"
@@ -78,7 +76,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton
                     icon={waypoint.hidden ? <EyeLinear className="w-5 h-5" /> : <EyeSlashLinear className="w-5 h-5" />}
                     onClick={() => {
-                        toggleWaypointHidden(waypoint.id);
+                        waypointActions.toggleWaypointHidden(waypoint.id);
                     }}
                     label={waypoint.hidden ? "Show" : "Hide"}
                 />
@@ -86,7 +84,19 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton
                     icon={<TrashIcon className="w-5 h-5" />}
                     disabled={!isDeletable(Number(waypointId))}
-                    onClick={() => {}}
+                    onClick={() => {
+                        if (!isDeletable(waypoint.id)) {
+                            return;
+                        }
+
+                        if (!window.confirm("Are you sure you want to delete this waypoint?")) {
+                            return;
+                        }
+
+                        waypointActions.deleteWaypointWithDependencies(waypoint.id);
+                        deselectWaypoint();
+                        navigate("/");
+                    }}
                     color="red"
                     label="Delete"
                 />
@@ -96,13 +106,13 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <TextInput
                     label="Waypoint Name"
                     value={waypoint.name || ""}
-                    onChange={(value) => updateWaypointName(waypoint.id, value)}
+                    onChange={(value) => waypointActions.updateWaypointName(waypoint.id, value)}
                 />
                 {type.additionalText && (
                     <TextInput
                         label="Additional Text"
                         value={waypoint.additionalText || ""}
-                        onChange={(value) => updateWaypointAdditionalText(waypoint.id, value)}
+                        onChange={(value) => waypointActions.updateWaypointAdditionalText(waypoint.id, value)}
                         placeholder="Additional Text"
                         helpText="This text is shown inside of the Waypoint"
                     />
@@ -110,8 +120,8 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <Select
                     label="Waypoint Type"
                     className="w-full"
-                    value={waypoint.typeId}
-                    onChange={(value) => updateWaypointType(waypoint.id, value)}
+                    value={typeId}
+                    onChange={(value) => waypointActions.updateWaypointType(waypoint.id, Number(value))}
                     helpText="The type determines the look of a waypoint"
                     options={Object.values(types).map((type) => ({
                         value: type.id,
@@ -129,7 +139,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     value={waypoint.groupId ?? ""}
                     onChange={(value) => {
                         const groupId = value === "" ? undefined : value;
-                        updateWaypointGroup(waypoint.id, groupId);
+                        waypointActions.updateWaypointGroup(waypoint.id, groupId);
                     }}
                     options={[
                         { children: "No Group", value: "" },

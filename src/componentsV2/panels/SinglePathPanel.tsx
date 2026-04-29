@@ -16,6 +16,7 @@ import { Select } from "../controls/Select";
 import { NumberInput } from "../controls/NumberInput";
 import { ColorInput } from "../controls/ColorInput";
 import { Checkbox } from "../controls/Checkbox";
+import { pathActions } from "../../domain/actions/paths";
 
 export interface SinglePathPanelProps {
     pathId: number;
@@ -40,8 +41,6 @@ function LineCapPreview({ cap }: { cap: "round" | "butt" | "square" }) {
 
 export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
     const path = usePathStore((state) => state.paths.find((p) => p.id === pathId)!);
-    const deletePath = usePathStore((state) => state.deletePath);
-    const updatePath = usePathStore((state) => state.updatePath);
     const navigate = useNavigate();
 
     return (
@@ -67,7 +66,7 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <IconButton
                     icon={path.hidden ? <EyeLinear className="w-5 h-5" /> : <EyeSlashLinear className="w-5 h-5" />}
                     onClick={() => {
-                        updatePath(path.id, { hidden: !path.hidden });
+                        pathActions.updatePath(path.id, { hidden: !path.hidden });
                     }}
                     label={path.hidden ? "Show" : "Hide"}
                 />
@@ -75,7 +74,7 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <IconButton
                     icon={<TrashLinear className="w-5 h-5" />}
                     onClick={() => {
-                        deletePath(path.id);
+                        pathActions.deletePath(path.id);
                         navigate("/paths");
                     }}
                     color="red"
@@ -87,12 +86,12 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <TextInput
                     label="Path Name"
                     value={path.name || ""}
-                    onChange={(value) => updatePath(pathId, { name: value })}
+                    onChange={(value) => pathActions.updatePath(pathId, { name: value })}
                 />
                 <Select
                     label="Path Style"
                     value={path.style || "solid"}
-                    onChange={(value) => updatePath(path.id, { style: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { style: value })}
                     options={[
                         {
                             value: "solid",
@@ -137,7 +136,7 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                     <TextInput
                         label="Dasharray"
                         value={path.dasharray}
-                        onChange={(value) => updatePath(path.id, { dasharray: value })}
+                        onChange={(value) => pathActions.updatePath(path.id, { dasharray: value })}
                         placeholder="Dasharray"
                         helpText="A SVG Dasharray for example ..."
                     />
@@ -145,7 +144,7 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <NumberInput
                     label="Path Tension"
                     value={path.tension}
-                    onChange={(value) => updatePath(path.id, { tension: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { tension: value })}
                     placeholder="Tension"
                     min={0}
                     max={1}
@@ -155,33 +154,33 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <NumberInput
                     label="Path Thickness"
                     value={path.width}
-                    onChange={(value) => updatePath(path.id, { width: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { width: value })}
                     placeholder="Width"
                     min={0}
                 />
                 <ColorInput
                     label="Path Color"
                     value={path.color}
-                    onChange={(value) => updatePath(path.id, { color: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { color: value })}
                     placeholder="Color"
                 />
                 <NumberInput
                     label="Outline Thickness"
                     value={path.outlineWidth}
-                    onChange={(value) => updatePath(path.id, { outlineWidth: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { outlineWidth: value })}
                     placeholder="Outline Width"
                     min={0}
                 />
                 <ColorInput
                     label="Outline Color"
                     value={path.outlineColor}
-                    onChange={(value) => updatePath(path.id, { outlineColor: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { outlineColor: value })}
                     placeholder="Outline Color"
                 />
                 <Select
                     label="Line Cap"
                     value={path.linecap ?? "round"}
-                    onChange={(value) => updatePath(path.id, { linecap: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { linecap: value })}
                     options={[
                         {
                             value: "round",
@@ -216,14 +215,14 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <NumberInput
                     label="Opacity"
                     value={path.opacity}
-                    onChange={(value) => updatePath(path.id, { opacity: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { opacity: value })}
                     placeholder="Opacity"
                     min={0}
                     max={1}
                     step={0.01}
                 />
                 <Checkbox
-                    onChange={(value) => updatePath(path.id, { hidden: value })}
+                    onChange={(value) => pathActions.updatePath(path.id, { hidden: value })}
                     label="Hidden"
                     value={path.hidden ?? false}
                 />
