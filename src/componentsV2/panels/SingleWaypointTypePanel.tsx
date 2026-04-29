@@ -28,7 +28,7 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
     const type = useWaypointTypeStore((state) => state.types[waypointTypeId]);
     const navigate = useNavigate();
     const numberOfWaypointsUsingThisType = useWaypointStore(
-        (state) => state.waypoints.filter((wp) => wp.typeId === waypointTypeId).length,
+        (state) => state.waypoints.filter((wp) => wp.typeId == waypointTypeId).length,
     );
     const removeType = useWaypointTypeStore((state) => state.removeType);
     const isDeletable = useWaypointTypeStore((state) => state.isDeletable);
@@ -118,16 +118,16 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
                     value={type.icon}
                     onChange={(value) => updateType(type.id, { icon: value })}
                     options={[
-                        { label: "Circle", value: "circle" },
-                        { label: "Square", value: "square" },
-                        { label: "Triangle", value: "triangle" },
-                        { label: "Star", value: "star" },
-                        { label: "Cross", value: "cross" },
-                        { label: "Diamond", value: "diamond" },
-                        { label: "Apple", value: "apple" },
-                        { label: "Cherry", value: "cherry" },
-                        { label: "Tree Stump", value: "treestump" },
-                        { label: "Camera", value: "camera" },
+                        { children: "Circle", value: "circle" },
+                        { children: "Square", value: "square" },
+                        { children: "Triangle", value: "triangle" },
+                        { children: "Star", value: "star" },
+                        { children: "Cross", value: "cross" },
+                        { children: "Diamond", value: "diamond" },
+                        { children: "Apple", value: "apple" },
+                        { children: "Cherry", value: "cherry" },
+                        { children: "Tree Stump", value: "treestump" },
+                        { children: "Camera", value: "camera" },
                     ]}
                 />
                 <NumberInput
@@ -223,11 +223,17 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
                                 })
                             }
                             options={[
-                                { label: "Arial", value: "Arial" },
-                                { label: "Courier New", value: "Courier New" },
-                                { label: "Georgia", value: "Georgia" },
-                                { label: "Times New Roman", value: "Times New Roman" },
-                                { label: "Verdana", value: "Verdana" },
+                                { children: <span style={{ fontFamily: "Arial" }}>Arial</span>, value: "Arial" },
+                                {
+                                    children: <span style={{ fontFamily: "Courier New" }}>Courier New</span>,
+                                    value: "Courier New",
+                                },
+                                { children: <span style={{ fontFamily: "Georgia" }}>Georgia</span>, value: "Georgia" },
+                                {
+                                    children: <span style={{ fontFamily: "Times New Roman" }}>Times New Roman</span>,
+                                    value: "Times New Roman",
+                                },
+                                { children: <span style={{ fontFamily: "Verdana" }}>Verdana</span>, value: "Verdana" },
                             ]}
                         />
                         <NumberInput
@@ -257,10 +263,10 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
                                 })
                             }
                             options={[
-                                { label: "Normal", value: "normal" },
-                                { label: "Bold", value: "bold" },
-                                { label: "Bolder", value: "bolder" },
-                                { label: "Lighter", value: "lighter" },
+                                { children: <span style={{ fontWeight: "normal" }}>Normal</span>, value: "normal" },
+                                { children: <span style={{ fontWeight: "bold" }}>Bold</span>, value: "bold" },
+                                { children: <span style={{ fontWeight: "bolder" }}>Bolder</span>, value: "bolder" },
+                                { children: <span style={{ fontWeight: "lighter" }}>Lighter</span>, value: "lighter" },
                             ]}
                         />
                     </>

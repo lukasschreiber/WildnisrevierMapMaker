@@ -20,3 +20,7 @@ body {
         /* Firefox */
     }
 }
+
+.add-mode-active .leaflet-grab {
+    cursor: crosshair;
+}

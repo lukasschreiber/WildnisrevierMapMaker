@@ -27,7 +27,7 @@ export function FormControl({ id, label, helpText, children }: FormControlProps)
     return (
         <div className="flex flex-col gap-1">
             {label && (
-                <label htmlFor={controlId} className="text-sm text-gray-800">
+                <label htmlFor={controlId} className="text-[8pt] text-gray-800">
                     {label}
                 </label>
             )}
@@ -38,7 +38,7 @@ export function FormControl({ id, label, helpText, children }: FormControlProps)
             })}
 
             {helpText && (
-                <div id={helpId} className="text-xs text-gray-500 flex gap-1 items-start">
+                <div id={helpId} className="text-[8pt] text-gray-500 flex gap-1 items-start">
                     <div className="shrink-0">
                         <CircleInformationLinear size={16} />
                     </div>

@@ -30,6 +30,14 @@ export function SinglePathPanelWrapper() {
     return <SinglePathPanel pathId={Number(params.id)} />;
 }
 
+function LineCapPreview({ cap }: { cap: "round" | "butt" | "square" }) {
+    return (
+        <svg width="28" height="12" viewBox="0 0 28 12" className="shrink-0">
+            <line x1="4" y1="6" x2="24" y2="6" stroke="black" strokeWidth="12" strokeLinecap={cap} />
+        </svg>
+    );
+}
+
 export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
     const path = usePathStore((state) => state.paths.find((p) => p.id === pathId)!);
     const deletePath = usePathStore((state) => state.deletePath);
@@ -39,7 +47,13 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
     return (
         <Panel topComponent={<div className="h-full w-full opacity-30" style={{ background: path.color }} />}>
             <div className="p-4 flex items-center flex-col">
-                <ScribbleLinear style={{ color: path.color, filter: `drop-shadow(1px 1px ${path.outlineColor}) drop-shadow(1px -1px ${path.outlineColor}) drop-shadow(-1px 1px ${path.outlineColor}) drop-shadow(-1px -1px ${path.outlineColor})`}} size={64} />
+                <ScribbleLinear
+                    style={{
+                        color: path.color,
+                        filter: `drop-shadow(1px 1px ${path.outlineColor}) drop-shadow(1px -1px ${path.outlineColor}) drop-shadow(-1px 1px ${path.outlineColor}) drop-shadow(-1px -1px ${path.outlineColor})`,
+                    }}
+                    size={64}
+                />
                 <div className="text-lg text-gray-800 font-medium flex items-center gap-2 mt-2">
                     {path.name}
                     <PenLineSolid className="text-blue-500" size={18} />
@@ -77,12 +91,45 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 />
                 <Select
                     label="Path Style"
-                    value={path.style}
+                    value={path.style || "solid"}
                     onChange={(value) => updatePath(path.id, { style: value })}
                     options={[
-                        { label: "Solid", value: "solid" },
-                        { label: "Dashed", value: "dashed" },
-                        { label: "Dotted", value: "dotted" },
+                        {
+                            value: "solid",
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className="w-6 h-0 border-t-2 border-black"
+                                        style={{ borderStyle: "solid" }}
+                                    />
+                                    Solid
+                                </div>
+                            ),
+                        },
+                        {
+                            value: "dashed",
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className="w-6 h-0 border-t-2 border-black"
+                                        style={{ borderStyle: "dashed" }}
+                                    />
+                                    Dashed
+                                </div>
+                            ),
+                        },
+                        {
+                            value: "dotted",
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className="w-6 h-0 border-t-2 border-black"
+                                        style={{ borderStyle: "dotted" }}
+                                    />
+                                    Dotted
+                                </div>
+                            ),
+                        },
                     ]}
                     placeholder="Style"
                 />
@@ -133,12 +180,36 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 />
                 <Select
                     label="Line Cap"
-                    value={path.linecap}
+                    value={path.linecap ?? "round"}
                     onChange={(value) => updatePath(path.id, { linecap: value })}
                     options={[
-                        { label: "Round", value: "round" },
-                        { label: "Butt", value: "butt" },
-                        { label: "Square", value: "square" },
+                        {
+                            value: "round",
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <LineCapPreview cap="round" />
+                                    Round
+                                </div>
+                            ),
+                        },
+                        {
+                            value: "butt",
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <LineCapPreview cap="butt" />
+                                    Butt
+                                </div>
+                            ),
+                        },
+                        {
+                            value: "square",
+                            children: (
+                                <div className="flex items-center gap-2">
+                                    <LineCapPreview cap="square" />
+                                    Square
+                                </div>
+                            ),
+                        },
                     ]}
                     placeholder="Linecap"
                 />

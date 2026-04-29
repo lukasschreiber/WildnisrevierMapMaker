@@ -85,7 +85,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton icon={<CloneIcon className="w-5 h-5" />} onClick={() => {}} label="Duplicate" />
                 <IconButton
                     icon={<TrashIcon className="w-5 h-5" />}
-                    disabled={isDeletable(Number(waypointId))}
+                    disabled={!isDeletable(Number(waypointId))}
                     onClick={() => {}}
                     color="red"
                     label="Delete"
@@ -98,11 +98,13 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     value={waypoint.name || ""}
                     onChange={(value) => updateWaypointName(waypoint.id, value)}
                 />
-                {waypoint.additionalText && (
+                {type.additionalText && (
                     <TextInput
-                        label="Waypoint Additional Text"
+                        label="Additional Text"
                         value={waypoint.additionalText || ""}
                         onChange={(value) => updateWaypointAdditionalText(waypoint.id, value)}
+                        placeholder="Additional Text"
+                        helpText="This text is shown inside of the Waypoint"
                     />
                 )}
                 <Select
@@ -110,11 +112,16 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     className="w-full"
                     value={waypoint.typeId}
                     onChange={(value) => updateWaypointType(waypoint.id, value)}
-                    options={Object.values(types).map((type) => ({
-                        label: type.name,
-                        value: type.id,
-                    }))}
                     helpText="The type determines the look of a waypoint"
+                    options={Object.values(types).map((type) => ({
+                        value: type.id,
+                        children: (
+                            <div className="flex items-center gap-2">
+                                <LegendWaypointMarker type={type} radius={8} borderWidth={1} borderColor="black" />
+                                <span>{type.name}</span>
+                            </div>
+                        ),
+                    }))}
                 />
                 <Select
                     label="Group"
@@ -125,8 +132,8 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                         updateWaypointGroup(waypoint.id, groupId);
                     }}
                     options={[
-                        { label: "No Group", value: "" },
-                        ...waypointGroups.map((group) => ({ label: group.name, value: group.id })),
+                        { children: "No Group", value: "" },
+                        ...waypointGroups.map((group) => ({ children: group.name, value: group.id })),
                     ]}
                     helpText="Grouping waypoints helps hiding them in bulk"
                 />

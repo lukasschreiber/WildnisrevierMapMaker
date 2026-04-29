@@ -14,13 +14,16 @@ import { Footer } from "./componentsV2/Footer";
 import { useLayoutStore } from "./stores/useLayout";
 import { TopIsle } from "./componentsV2/TopIsle";
 import { Outlet } from "react-router";
+import { Tooltray } from "./componentsV2/Tooltray";
+import { useWaypointStore } from "./stores/useWaypoints";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
     const showSidebar = useLayoutStore((state) => state.showSidebar);
+    const addMode = useWaypointStore((state) => state.addMode);
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className={`flex flex-col h-screen ${addMode ? "add-mode-active" : ""}`}>
             <div className="flex w-screen flex-row flex-1 relative">
                 {showSidebar && <Sidebar />}
                 <MenuDrawer />
@@ -38,6 +41,7 @@ export default function App() {
                     </LayerProvider>
                     <MapEventManager />
                     <ZoomOverlay />
+                    <Tooltray />
                     <MapSwitcher />
                     {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
                     {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}

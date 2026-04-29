@@ -70,7 +70,7 @@ function MenuDrawer() {
                                                 setShowMenu(false);
                                             }
                                         }}
-                                        pinnable={panel.pinnable}
+                                        pinnable={panel.pinnable && showSidebar}
                                         icon={<panel.icon className="w-5 h-5" />}
                                         pinned={pinnedPanels.includes(panel.path)}
                                         onPinClick={() => {

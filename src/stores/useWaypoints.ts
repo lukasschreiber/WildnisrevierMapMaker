@@ -94,6 +94,10 @@ export const useWaypointStore = create<WaypointState>()(
             deselectWaypoint: () => set({ selectedId: null }),
 
             deleteWaypoint: (id) => {
+                if (!get().isDeletable(id)) {
+                    alert("Cannot delete waypoint that is used in a path or shape.");
+                    return;
+                }
                 const { waypoints } = get();
                 set({
                     waypoints: waypoints.filter((wp) => wp.id !== id),
@@ -140,7 +144,10 @@ export const useWaypointStore = create<WaypointState>()(
                 const { paths } = usePathStore.getState();
                 const { shapes } = useShapeStore.getState();
                 const waypoint = waypoints.find((wp) => wp.id === id);
-                if (!waypoint) return false;
+                if (!waypoint) {
+                    console.warn(`Waypoint with id ${id} not found when checking if deletable.`);
+                    return false;
+                }
                 const usedInSegments = paths.some((path) =>
                     path.segments.some((s) => s.from.waypointId === id || s.to.waypointId === id)
                 );

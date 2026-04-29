@@ -165,13 +165,23 @@ export function TopIsle() {
                                         <Select
                                             label="Type"
                                             value={newWaypointType}
-                                            onChange={(value) => setNewWaypointType(value)}
-                                            options={Object.values(types).map((type) => ({
-                                                label: type.name,
-                                                value: type.id,
-                                            }))}
+                                            onChange={setNewWaypointType}
                                             placeholder="Type"
                                             helpText="New Waypoints will be given this type"
+                                            options={Object.values(types).map((type) => ({
+                                                value: type.id,
+                                                children: (
+                                                    <div className="flex items-center gap-2">
+                                                        <LegendWaypointMarker
+                                                            type={type}
+                                                            radius={8}
+                                                            borderWidth={1}
+                                                            borderColor="black"
+                                                        />
+                                                        <span>{type.name}</span>
+                                                    </div>
+                                                ),
+                                            }))}
                                         />
                                     </div>
                                 </div>
