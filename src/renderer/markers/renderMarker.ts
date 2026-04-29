@@ -19,12 +19,15 @@ export function renderMarker({
 }: RenderMarkerOptions): RenderGroupSelection {
     const isHidden = Boolean(group?.hidden || type.hidden || hidden);
     const isIcon = hasSvgIcon(type.icon);
-    const shapeG = g.append("g").attr("class", "marker-group");
+
+    const markerG = g.append("g").attr("class", "marker-group").attr("transform", `translate(${point.x}, ${point.y})`);
+
+    const shapeG = markerG.append("g").attr("class", "marker-shape");
 
     const commonOptions = {
-        g,
+        g: markerG,
         shapeG,
-        point,
+        point: { x: 0, y: 0 },
         rotation: type.rotation ?? 0,
         stroke: showBorder ? borderColor : "none",
         strokeWidth: isSelected ? 2 : borderWidth,
@@ -39,17 +42,19 @@ export function renderMarker({
     };
 
     if (isHidden) {
-        shapeG.attr("data-kind", "hidden-marker");
+        markerG.attr("data-kind", "hidden-marker");
     }
-
-    appendMarkerLabel(shapeG, additionalText, type.additionalText);
 
     if (isBuiltInMarkerShape(type.icon)) {
-        return markerShapeRenderers[type.icon](commonOptions);
+        markerShapeRenderers[type.icon](commonOptions);
+    } else {
+        renderIconMarker({
+            ...commonOptions,
+            type,
+        });
     }
 
-    return renderIconMarker({
-        ...commonOptions,
-        type,
-    });
+    appendMarkerLabel(markerG, additionalText, type.additionalText);
+
+    return markerG;
 }

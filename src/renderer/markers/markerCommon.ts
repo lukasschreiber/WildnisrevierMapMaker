@@ -1,11 +1,10 @@
-import * as d3 from "d3";
-import { RenderGroupSelection, RenderMarkerOptions } from "../types";
+import { AnyD3Selection, RenderGroupSelection, RenderMarkerOptions } from "../types";
 import { applyMarkerFill, applyMarkerOpacity } from "./markerFill";
 
 export type CommonMarkerOptions = {
     g: RenderGroupSelection;
     shapeG: RenderGroupSelection;
-    target: d3.Selection<any, unknown, null, undefined>;
+    target: AnyD3Selection;
     point: RenderMarkerOptions["point"];
     rotation: number;
     stroke: string;
@@ -23,7 +22,6 @@ export function applyMarkerCommonAttrs({
     g,
     shapeG,
     target,
-    point,
     rotation,
     stroke,
     strokeWidth,
@@ -45,7 +43,7 @@ export function applyMarkerCommonAttrs({
     shapeG.selectAll("path").style("pointer-events", "all");
 
     return shapeG
-        .attr("transform", `translate(${point.x}, ${point.y}) rotate(${rotation})`)
+        .attr("transform", rotation ? `rotate(${rotation})` : null)
         .style("stroke", stroke)
         .style("stroke-width", isIcon ? strokeWidth * 0.5 : strokeWidth)
         .style("cursor", "pointer");

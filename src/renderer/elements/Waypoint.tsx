@@ -172,27 +172,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
         const group = g.select(`#waypoint-${waypoint.id}`);
 
-        let xOffset = 0;
-        let yOffset = 0;
-
-        group.selectAll("*").each(function () {
-            const el = d3.select(this);
-            const x = Number(el.attr("icon-offset-x")) || 0;
-            const y = Number(el.attr("icon-offset-y")) || 0;
-            if (x !== 0 || y !== 0) {
-                xOffset = x;
-                yOffset = y;
-            }
-        });
-
-        const existingTransform = group.attr("transform") ?? "";
-
-        const transformWithoutTranslate = existingTransform.replace(/translate\([^)]*\)/g, "").trim();
-
-        group.attr(
-            "transform",
-            `translate(${point.x - xOffset}, ${point.y - yOffset}) ${transformWithoutTranslate}`.trim(),
-        );
+        group.attr("transform", `translate(${point.x}, ${point.y})`);
     }, [g, map, waypoint]);
 
     useEffect(() => {

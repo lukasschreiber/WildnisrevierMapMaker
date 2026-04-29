@@ -1,5 +1,4 @@
-import * as d3 from "d3";
-import { RenderMarkerOptions } from "../types";
+import { AnyD3Selection, RenderMarkerOptions } from "../types";
 import { CommonMarkerOptions, applyMarkerCommonAttrs } from "./markerCommon";
 
 const icons = import.meta.glob("../../assets/*.svg", {
@@ -42,20 +41,23 @@ export function renderIconMarker({
 
     const targetWidth = radius * 2;
     const targetHeight = radius * 2;
+
     const container = shapeG.append("g").html(iconSvg);
     const containerSvg = container.select("svg");
 
-    containerSvg.attr("width", targetWidth);
-    containerSvg.attr("height", targetHeight);
+    containerSvg
+        .attr("width", targetWidth)
+        .attr("height", targetHeight)
+        .attr("x", -targetWidth / 2)
+        .attr("y", -targetHeight / 2);
+
     container.style("pointer-events", "all");
     container.attr("data-icon", iconName);
-    container.attr("icon-offset-x", `${targetWidth / 2}`);
-    container.attr("icon-offset-y", `${targetHeight / 2}`);
 
     return applyMarkerCommonAttrs({
         g,
         shapeG,
-        target: containerSvg.selectChild() as unknown as d3.Selection<any, unknown, null, undefined>,
+        target: containerSvg.selectChild() as unknown as AnyD3Selection,
         point,
         rotation: type.rotation ?? 0,
         stroke,
