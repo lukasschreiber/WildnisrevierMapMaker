@@ -28,7 +28,6 @@ export interface WaypointState {
     newWaypointGroup?: number;
 
     setCurrentPosition: (pos: { lat: number; lng: number } | null) => void;
-    toggleAddMode: () => void;
     setAddMode: (value: boolean) => void;
 
     addWaypoint: (lat: number, lng: number, baseId?: number, name?: string, typeId?: number, groupId?: number) => void;
@@ -65,7 +64,6 @@ export const useWaypointStore = create<WaypointState>()(
             newWaypointGroup: undefined,
 
             setCurrentPosition: (pos) => set({ currentPosition: pos }),
-            toggleAddMode: () => set((s) => ({ addMode: !s.addMode })),
             setAddMode: (value) => set({ addMode: value }),
 
             addWaypoint: (lat, lng, baseId, name, typeId, groupId) => {
