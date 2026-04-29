@@ -1,6 +1,4 @@
 import { useLocation, useNavigate } from "react-router";
-import MenuIcon from "../assets/icons/menu.svg?react";
-import XMarkIcon from "../assets/icons/xmark.svg?react";
 import { useLayoutStore } from "../stores/useLayout";
 import { DisablePropagation } from "./common/DisablePropagation";
 import { useEffect, useRef, useState, useMemo } from "react";
@@ -9,10 +7,10 @@ import { useWaypointStore } from "../stores/useWaypoints";
 import { LegendWaypointMarker } from "../components/legend/LegendWaypointMarker";
 import { TopChipList } from "./TopChipList";
 import { useClickOutside } from "../hooks/useClickOutside";
-import LocationPlusIcon from "../assets/icons/location-plus.svg?react";
 import { TextInput } from "./controls/TextInput";
 import { Select } from "./controls/Select";
 import { Chip } from "./common/Chip";
+import { LocationPlusLinear, MenuLinear, XmarkLinear } from "@lukasschreiber/icons";
 
 export function TopIsle() {
     const toggleMenu = useLayoutStore((state) => state.toggleMenu);
@@ -90,7 +88,7 @@ export function TopIsle() {
                                             className="flex flex-col items-center justify-center cursor-pointer text-gray-600"
                                             onClick={() => toggleMenu()}
                                         >
-                                            <MenuIcon className="w-6 h-6" />
+                                            <MenuLinear className="w-6 h-6" />
                                         </div>
                                     )}
                                     <input
@@ -106,7 +104,7 @@ export function TopIsle() {
                                             className="flex flex-col items-center justify-center cursor-pointer text-gray-600 ml-auto"
                                             onClick={() => navigate("/")}
                                         >
-                                            <XMarkIcon className="w-6 h-6" />
+                                            <XmarkLinear className="w-6 h-6" />
                                         </div>
                                     )}
                                     {addModeSettingsOpen && (
@@ -114,7 +112,7 @@ export function TopIsle() {
                                             className="flex flex-col items-center justify-center cursor-pointer text-gray-600 ml-auto"
                                             onClick={() => setAddModeSettingsOpen(false)}
                                         >
-                                            <XMarkIcon className="w-6 h-6" />
+                                            <XmarkLinear className="w-6 h-6" />
                                         </div>
                                     )}
                                 </div>
@@ -193,7 +191,7 @@ export function TopIsle() {
                                     className="ml-4 pb-0.5 bg-blue-500 text-white text-xs w-fit px-1 rounded-b-sm cursor-pointer"
                                     onClick={() => setAddModeSettingsOpen(!addModeSettingsOpen)}
                                 >
-                                    <LocationPlusIcon className="w-4 h-4 inline-block" />
+                                    <LocationPlusLinear className="w-4 h-4 inline-block" />
                                     {newWaypointName !== "" && <>Name: {newWaypointName} -</>} Type:{" "}
                                     {types[newWaypointType]?.name || "Unknown"}
                                 </div>

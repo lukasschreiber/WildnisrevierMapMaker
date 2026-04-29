@@ -3,16 +3,12 @@ import { Panel } from "../MainPanel";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
-import TypeIcon from "../../assets/icons/shapes.svg?react";
-import TrashIcon from "../../assets/icons/trash.svg?react";
-import CloneIcon from "../../assets/icons/clone.svg?react";
-import FolderPlusIcon from "../../assets/icons/folder-plus.svg?react";
 import { IconButton } from "../controls/IconButton";
 import { TextInput } from "../controls/TextInput";
 import { Divider } from "../common/Divider";
 import { Select } from "../controls/Select";
 import { useWaypointGroupStore } from "../../stores/useGroups";
-import { EyeLinear, EyeSlashLinear } from "@lukasschreiber/icons";
+import { CloneLinear, EyeLinear, EyeSlashLinear, FolderPlusLinear, ShapesLinear, TrashLinear } from "@lukasschreiber/icons";
 import { waypointActions } from "../../domain/actions/waypoints";
 
 export interface SingleWaypointPanelProps {
@@ -60,7 +56,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
             <Divider />
             <div className="px-4 py-2 flex gap-2 items-center justify-center">
                 <IconButton
-                    icon={<TypeIcon className="w-5 h-5" />}
+                    icon={<ShapesLinear className="w-5 h-5" />}
                     onClick={() => {
                         navigate(`/types/${type.id}`);
                     }}
@@ -68,7 +64,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     label="Edit Type"
                 />
                 <IconButton
-                    icon={<FolderPlusIcon className="w-5 h-5" />}
+                    icon={<FolderPlusLinear className="w-5 h-5" />}
                     onClick={() => {}}
                     color="blue"
                     label="Add to Group"
@@ -80,9 +76,9 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     }}
                     label={waypoint.hidden ? "Show" : "Hide"}
                 />
-                <IconButton icon={<CloneIcon className="w-5 h-5" />} onClick={() => {}} label="Duplicate" />
+                <IconButton icon={<CloneLinear className="w-5 h-5" />} onClick={() => {}} label="Duplicate" />
                 <IconButton
-                    icon={<TrashIcon className="w-5 h-5" />}
+                    icon={<TrashLinear className="w-5 h-5" />}
                     disabled={!isDeletable(Number(waypointId))}
                     onClick={() => {
                         if (!isDeletable(waypoint.id)) {

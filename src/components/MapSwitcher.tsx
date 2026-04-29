@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useSettingsStore } from "../stores/useSettings";
 import { TileLayerConfigs, TileLayerVersion } from "../utils/tiles";
 import { MapTypePreview } from "./common/MapTypePreview";
-import StarIcon from "../assets/icons/star.svg?react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DisablePropagation } from "./common/DisablePropagation";
 import { useLocation } from "react-router";
+import { StarLinear } from "@lukasschreiber/icons";
 
 export function MapSwitcher() {
     const mapVersion = useSettingsStore((state) => state.settings.mapVersion);
@@ -43,7 +43,7 @@ export function MapSwitcher() {
                                 onClick={() => useSettingsStore.getState().set("mapVersion", key as TileLayerVersion)}
                             >
                                 {config.highlight && (
-                                    <StarIcon className="absolute top-1 right-1 w-5 h-5 text-yellow-500 z-[1001] fill-yellow-300" />
+                                    <StarLinear className="absolute top-1 right-1 w-5 h-5 text-yellow-500 z-[1001] fill-yellow-300" />
                                 )}
                                 <MapTypePreview map={key as TileLayerVersion} />
                                 <MapTypeName map={key as TileLayerVersion} />

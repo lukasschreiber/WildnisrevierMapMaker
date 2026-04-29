@@ -1,9 +1,9 @@
-import MenuIcon from "../assets/icons/menu.svg?react";
 import { useLayoutStore } from "../stores/useLayout";
 import { DisablePropagation } from "./common/DisablePropagation";
 import { useLocation, useNavigate } from "react-router";
 import Tooltip from "./common/Tooltip";
 import { usePanels } from "../panels";
+import { MenuLinear } from "@lukasschreiber/icons";
 
 export function Sidebar() {
     const toggleMenu = useLayoutStore((state) => state.toggleMenu);
@@ -15,7 +15,7 @@ export function Sidebar() {
     return (
         <DisablePropagation className="h-full w-12 bg-white text-gray-800 flex flex-col gap-1 z-[10005]">
             <div className="flex flex-col items-center justify-center py-4 cursor-pointer" onClick={() => toggleMenu()}>
-                <MenuIcon className="w-6 h-6" />
+                <MenuLinear className="w-6 h-6" />
             </div>
             <div className="flex flex-col items-center justify-center mt-4">
                 {panels

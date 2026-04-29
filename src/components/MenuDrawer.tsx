@@ -1,12 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLayoutStore } from "../stores/useLayout";
-import XMarkIcon from "../assets/icons/xmark.svg?react";
 import BadgerIcon from "../assets/icons/badger.svg?react";
-import SidebarIcon from "../assets/icons/sidebar.svg?react";
-import PinIcon from "../assets/icons/thumbtack.svg?react";
 import { useLocation, useNavigate } from "react-router";
 import { Checkbox } from "./controls/Checkbox";
 import { usePanels } from "../panels";
+import { MenuLinear, ThumbtackLinear, XmarkLinear } from "@lukasschreiber/icons";
 
 function MenuDrawer() {
     const menuOpen = useLayoutStore((state) => state.menuOpen);
@@ -48,10 +46,10 @@ function MenuDrawer() {
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 cursor-pointer"
                             onClick={() => setShowMenu(false)}
                         >
-                            <XMarkIcon className="w-6 h-6" />
+                            <XmarkLinear className="w-6 h-6" />
                         </button>
                         <label className="flex items-center text-md mb-4 cursor-pointer text-gray-600">
-                            <SidebarIcon className="w-5 h-5 mr-4" />
+                            <MenuLinear className="w-5 h-5 mr-4" />
                             Show Sidebar
                             <div className="inline-flex items-center ml-auto">
                                 <Checkbox value={showSidebar} onChange={(value) => setShowSidebar(value)} />
@@ -123,7 +121,7 @@ function MenuItem({
                         onPinClick?.();
                     }}
                 >
-                    <PinIcon className={`w-4.5 h-4.5 ${pinned && "fill-gray-800 hover:fill-gray-900 hover:text-gray-900"}`} />
+                    <ThumbtackLinear className={`w-4.5 h-4.5 ${pinned && "fill-gray-800 hover:fill-gray-900 hover:text-gray-900"}`} />
                 </button>
             )}
         </button>

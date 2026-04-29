@@ -1,6 +1,5 @@
+import { SearchMinusLinear, SearchPlusLinear } from "@lukasschreiber/icons";
 import { useMap } from "../context/MapContext";
-import PlusIcon from "../assets/icons/search-plus.svg?react";
-import MinusIcon from "../assets/icons/search-minus.svg?react";
 import { DisablePropagation } from "./common/DisablePropagation";
 
 export function ZoomOverlay() {
@@ -18,7 +17,7 @@ export function ZoomOverlay() {
                     }
                 }}
             >
-                <PlusIcon className="w-4 h-4" />
+                <SearchPlusLinear className="w-4 h-4" />
             </button>
             <div className="border-t border-gray-200" />
             <button
@@ -32,7 +31,7 @@ export function ZoomOverlay() {
                     }
                 }}
             >
-                <MinusIcon className="w-4 h-4" />
+                <SearchMinusLinear className="w-4 h-4" />
             </button>
         </DisablePropagation>
     );

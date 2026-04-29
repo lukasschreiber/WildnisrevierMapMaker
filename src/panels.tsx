@@ -1,11 +1,3 @@
-import ShapeIcon from "./assets/icons/shapes.svg?react";
-import DrawSquareIcon from "./assets/icons/draw-square.svg?react";
-import WaypointIcon from "./assets/icons/location-pin.svg?react";
-import PathIcon from "./assets/icons/scribble.svg?react";
-import SettingsIcon from "./assets/icons/settings.svg?react";
-import GitIcon from "./assets/icons/code-branch.svg?react";
-import FolderIcon from "./assets/icons/folder.svg?react";
-import SlidersIcon from "./assets/icons/sliders.svg?react";
 import { WaypointsPanel } from "./components/panels/WaypointsPanel";
 import { Panel } from "./components/MainPanel";
 import { SVGProps } from "react";
@@ -17,6 +9,7 @@ import { usePathStore } from "./stores/usePaths";
 import { useWaypointGroupStore } from "./stores/useGroups";
 import { useShapeStore } from "./stores/useShapes";
 import { PathsPanel } from "./components/panels/PathsPanel";
+import { CodeBranchLinear, DrawSquareLinear, FolderLinear, LocationPinLinear, ScribbleLinear, ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
 
 export function usePanels(): PanelGroupConfig[] {
     const waypointTypesCount = useWaypointTypeStore((state) => Object.values(state.types).length);
@@ -31,7 +24,7 @@ export function usePanels(): PanelGroupConfig[] {
             panels: [
                 {
                     title: "Waypoints",
-                    icon: WaypointIcon,
+                    icon: LocationPinLinear,
                     component: WaypointsPanel,
                     path: "/waypoints",
                     pinnable: true,
@@ -39,7 +32,7 @@ export function usePanels(): PanelGroupConfig[] {
                 },
                 {
                     title: "Waypoint Types",
-                    icon: ShapeIcon,
+                    icon: ShapesLinear,
                     component: WaypointTypesPanel,
                     path: "/types",
                     pinnable: true,
@@ -47,7 +40,7 @@ export function usePanels(): PanelGroupConfig[] {
                 },
                 {
                     title: "Paths",
-                    icon: PathIcon,
+                    icon: ScribbleLinear,
                     component: PathsPanel,
                     path: "/paths",
                     pinnable: true,
@@ -55,7 +48,7 @@ export function usePanels(): PanelGroupConfig[] {
                 },
                 {
                     title: "Shapes",
-                    icon: DrawSquareIcon,
+                    icon: DrawSquareLinear,
                     component: () => <Panel title="Shapes Panel"></Panel>, // Placeholder for ShapesPanel
                     path: "/shapes",
                     pinnable: true,
@@ -63,7 +56,7 @@ export function usePanels(): PanelGroupConfig[] {
                 },
                 {
                     title: "Groups",
-                    icon: FolderIcon,
+                    icon: FolderLinear,
                     component: () => <Panel title="Groups Panel"></Panel>, // Placeholder for ShapesPanel
                     path: "/groups",
                     pinnable: true,
@@ -71,7 +64,7 @@ export function usePanels(): PanelGroupConfig[] {
                 },
                 {
                     title: "Layout",
-                    icon: SlidersIcon,
+                    icon: SlidersLinear,
                     component: () => <Panel title="Layout Panel"></Panel>, // Placeholder for ShapesPanel
                     path: "/layout",
                     pinnable: true,
@@ -83,14 +76,14 @@ export function usePanels(): PanelGroupConfig[] {
             panels: [
                 {
                     title: "Git Integration",
-                    icon: GitIcon,
+                    icon: CodeBranchLinear,
                     component: GitIntegrationPanel,
                     path: "settings/source-control",
                     pinnable: true,
                 },
                 {
                     title: "Settings",
-                    icon: SettingsIcon,
+                    icon: SlidersLinear, // Cog
                     component: () => <Panel title="Settings Panel"></Panel>, // Placeholder for SettingsPanel
                     path: "settings",
                     pinnable: true,

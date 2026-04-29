@@ -164,8 +164,6 @@ export function renderMarker<E extends d3.Selection<SVGGElement, unknown, null, 
                 containerSvg.attr("width", targetWidth);
                 containerSvg.attr("height", targetHeight);
 
-                console.log("Rendering icon:", iconName, "at", point.x, point.y);
-
                 container.style("pointer-events", "all");
                 container.attr("data-icon", iconName);
                 container.attr("icon-offset-x", `${targetWidth / 2}`);

@@ -8,8 +8,7 @@ import { TextInput } from "../controls/TextInput";
 import { Select } from "../controls/Select";
 import { useState, useRef } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
-import SliderIcon from "../../assets/icons/sliders.svg?react";
-import { ShapesLinear } from "@lukasschreiber/icons";
+import { ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
 
 export function WaypointsPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
@@ -89,7 +88,7 @@ export function WaypointsPanel() {
                             onClick={() => setFilterOpen(!filterOpen)}
                             aria-label="filter"
                         >
-                            <SliderIcon className="w-5 h-5 text-gray-600" />
+                            <SlidersLinear className="w-5 h-5 text-gray-600" />
                         </button>
                         {filterOpen && (
                             <div className="absolute right-0 top-full mt-2 font-normal bg-white border border-gray-200 rounded-md shadow-lg p-3 z-[1005] w-56">
