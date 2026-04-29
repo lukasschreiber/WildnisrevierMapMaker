@@ -12,80 +12,93 @@ import { Panel } from "./componentsV2/MainPanel";
 import { SVGProps } from "react";
 import { GitIntegrationPanel } from "./componentsV2/panels/GitIntegrationPanel";
 import { WaypointTypesPanel } from "./componentsV2/panels/WaypointTypesPanel";
+import { useWaypointTypeStore } from "./stores/useWaypointTypes";
+import { useWaypointStore } from "./stores/useWaypoints";
+import { usePathStore } from "./stores/usePaths";
+import { useWaypointGroupStore } from "./stores/useGroups";
+import { useShapeStore } from "./stores/useShapes";
 
-export const panels: PanelGroupConfig[] = [
-    {
-        title: "Current Map",
-        panels: [
-            {
-                title: "Waypoints",
-                icon: WaypointIcon,
-                component: WaypointsPanel,
-                path: "/waypoints",
-                pinnable: true,
-                count: 22,
-            },
-            {
-                title: "Waypoint Types",
-                icon: ShapeIcon,
-                component: WaypointTypesPanel,
-                path: "/types",
-                pinnable: true,
-                count: 4,
-            },
-            {
-                title: "Paths",
-                icon: PathIcon,
-                component: PathsPanel,
-                path: "/paths",
-                pinnable: true,
-                count: 5,
-            },
-            {
-                title: "Shapes",
-                icon: DrawSquareIcon,
-                component: () => <Panel title="Shapes Panel"></Panel>, // Placeholder for ShapesPanel
-                path: "/shapes",
-                pinnable: true,
-                count: 0
-            },
-            {
-                title: "Groups",
-                icon: FolderIcon,
-                component: () => <Panel title="Groups Panel"></Panel>, // Placeholder for ShapesPanel
-                path: "/groups",
-                pinnable: true,
-                count: 3,
-            },
-            {
-                title: "Layout",
-                icon: SlidersIcon,
-                component: () => <Panel title="Layout Panel"></Panel>, // Placeholder for ShapesPanel
-                path: "/layout",
-                pinnable: true,
-            },
-        ],
-    },
-    {
-        title: "General",
-        panels: [
-            {
-                title: "Git Integration",
-                icon: GitIcon,
-                component: GitIntegrationPanel,
-                path: "settings/source-control",
-                pinnable: true,
-            },
-            {
-                title: "Settings",
-                icon: SettingsIcon,
-                component: () => <Panel title="Settings Panel"></Panel>, // Placeholder for SettingsPanel
-                path: "settings",
-                pinnable: true,
-            },
-        ],
-    },
-];
+export function usePanels(): PanelGroupConfig[] {
+    const waypointTypesCount = useWaypointTypeStore((state) => Object.values(state.types).length);
+    const waypointsCount = useWaypointStore((state) => state.waypoints.length);
+    const pathsCount = usePathStore((state) => state.paths.length);
+    const groupsCount = useWaypointGroupStore((state) => state.waypointGroups.length);
+    const shapesCount = useShapeStore((state) => state.shapes.length);
+
+    return [
+        {
+            title: "Current Map",
+            panels: [
+                {
+                    title: "Waypoints",
+                    icon: WaypointIcon,
+                    component: WaypointsPanel,
+                    path: "/waypoints",
+                    pinnable: true,
+                    count: waypointsCount,
+                },
+                {
+                    title: "Waypoint Types",
+                    icon: ShapeIcon,
+                    component: WaypointTypesPanel,
+                    path: "/types",
+                    pinnable: true,
+                    count: waypointTypesCount,
+                },
+                {
+                    title: "Paths",
+                    icon: PathIcon,
+                    component: PathsPanel,
+                    path: "/paths",
+                    pinnable: true,
+                    count: pathsCount,
+                },
+                {
+                    title: "Shapes",
+                    icon: DrawSquareIcon,
+                    component: () => <Panel title="Shapes Panel"></Panel>, // Placeholder for ShapesPanel
+                    path: "/shapes",
+                    pinnable: true,
+                    count: shapesCount,
+                },
+                {
+                    title: "Groups",
+                    icon: FolderIcon,
+                    component: () => <Panel title="Groups Panel"></Panel>, // Placeholder for ShapesPanel
+                    path: "/groups",
+                    pinnable: true,
+                    count: groupsCount,
+                },
+                {
+                    title: "Layout",
+                    icon: SlidersIcon,
+                    component: () => <Panel title="Layout Panel"></Panel>, // Placeholder for ShapesPanel
+                    path: "/layout",
+                    pinnable: true,
+                },
+            ],
+        },
+        {
+            title: "General",
+            panels: [
+                {
+                    title: "Git Integration",
+                    icon: GitIcon,
+                    component: GitIntegrationPanel,
+                    path: "settings/source-control",
+                    pinnable: true,
+                },
+                {
+                    title: "Settings",
+                    icon: SettingsIcon,
+                    component: () => <Panel title="Settings Panel"></Panel>, // Placeholder for SettingsPanel
+                    path: "settings",
+                    pinnable: true,
+                },
+            ],
+        },
+    ];
+}
 
 interface PanelConfig {
     title: string;

@@ -5,8 +5,8 @@ import BadgerIcon from "../assets/icons/badger.svg?react";
 import SidebarIcon from "../assets/icons/sidebar.svg?react";
 import PinIcon from "../assets/icons/thumbtack.svg?react";
 import { useLocation, useNavigate } from "react-router";
-import { panels } from "../panels";
 import { Checkbox } from "./controls/Checkbox";
+import { usePanels } from "../panels";
 
 function MenuDrawer() {
     const menuOpen = useLayoutStore((state) => state.menuOpen);
@@ -18,6 +18,7 @@ function MenuDrawer() {
     const unpinPanel = useLayoutStore((state) => state.unpinSidebarItem);
     const navigate = useNavigate();
     const location = useLocation();
+    const panels = usePanels();
     const keepDrawerOpenOnNavigate = location.pathname.startsWith("/waypoints/") || location.pathname.startsWith("/types/");
 
     return (

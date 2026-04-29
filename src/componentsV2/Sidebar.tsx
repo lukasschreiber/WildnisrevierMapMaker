@@ -2,16 +2,15 @@ import MenuIcon from "../assets/icons/menu.svg?react";
 import { useLayoutStore } from "../stores/useLayout";
 import { DisablePropagation } from "./common/DisablePropagation";
 import { useLocation, useNavigate } from "react-router";
-import { panels } from "../panels";
 import Tooltip from "./common/Tooltip";
+import { usePanels } from "../panels";
 
 export function Sidebar() {
     const toggleMenu = useLayoutStore((state) => state.toggleMenu);
     const navigate = useNavigate();
     const location = useLocation();
     const pinnedPanels = useLayoutStore((state) => state.pinnedSidebarItems);
-
-    // TODO: highlight current active panel (the one that is currently open in the main area)
+    const panels = usePanels();
 
     return (
         <DisablePropagation className="h-full w-12 bg-white text-gray-800 flex flex-col gap-1 z-[10005]">
@@ -31,7 +30,7 @@ export function Sidebar() {
                         >
                             <Tooltip key={panel.path} text={panel.title} position="right">
                                 {<panel.icon className="w-6 h-6" />}
-                                {panel.count && (
+                                {panel.count !== undefined && panel.count > 0 && (
                                     <div className="absolute right-1 bottom-1 w-4 h-4 rounded-full bg-blue-500 text-white text-[6pt] flex items-center justify-center">
                                         {Math.min(panel.count, 99)}
                                     </div>
