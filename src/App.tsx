@@ -6,17 +6,17 @@ import { WaypointArrowLayer } from "./renderer/layers/WaypointArrowLayer";
 import { ShapeLayer } from "./renderer/layers/ShapeLayer";
 import { Map } from "./components/Map";
 import { PathLayer } from "./renderer/layers/PathsLayer";
-import { Sidebar } from "./componentsV2/Sidebar";
-import { MapSwitcher } from "./componentsV2/MapSwitcher";
-import { ZoomOverlay } from "./componentsV2/ZoomOverlay";
-import MenuDrawer from "./componentsV2/MenuDrawer";
-import { Footer } from "./componentsV2/Footer";
+import { Sidebar } from "./components/Sidebar";
+import { MapSwitcher } from "./components/MapSwitcher";
+import MenuDrawer from "./components/MenuDrawer";
+import { Footer } from "./components/Footer";
 import { useLayoutStore } from "./stores/useLayout";
-import { TopIsle } from "./componentsV2/TopIsle";
 import { Outlet } from "react-router";
-import { Tooltray } from "./componentsV2/Tooltray";
+import { Tooltray } from "./components/Tooltray";
 import { InteractionModeBridge } from "./InteractionModeBridge";
 import { useInteractionModeStore } from "./stores/useInteractionMode";
+import { TopIsle } from "./components/TopIsle";
+import { ZoomOverlay } from "./components/ZoomOverlay";
 
 export default function App() {
     // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
@@ -45,8 +45,6 @@ export default function App() {
                     <ZoomOverlay />
                     <Tooltray />
                     <MapSwitcher />
-                    {/* <Menu showSidePanel={true} setShowSidePanel={() => {}} /> */}
-                    {/* <SidePanel activeTab={activeTab} setActiveTab={setActiveTab} /> */}
                 </Map>
             </div>
             <Footer />

@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 import { Panel } from "../MainPanel";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
-import { LegendWaypointMarker } from "../../components/legend/LegendWaypointMarker";
+import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
 import TypeIcon from "../../assets/icons/shapes.svg?react";
 import TrashIcon from "../../assets/icons/trash.svg?react";
 import CloneIcon from "../../assets/icons/clone.svg?react";

@@ -1,19 +1,18 @@
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { usePathStore } from "../../stores/usePaths";
-import React, { useMemo } from "react";
+import { Panel } from "../MainPanel";
+import { memo, useMemo } from "react";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
-import { TextInput } from "../inputs/TextInput";
-import { NumberInput } from "../inputs/NumberInput";
-import { ColorInput } from "../inputs/ColorInput";
-import { Checkbox } from "../inputs/Checkbox";
-import { Select } from "../inputs/Select";
-import { pathActions } from "../../domain/actions/paths";
-import { useInteractionModeStore } from "../../stores/useInteractionMode";
+import { Button } from "../controls/Button";
+import { GripDotsVerticalLinear, PlusLinear, TrashLinear } from "@lukasschreiber/icons";
+import { useNavigate } from "react-router";
 
 export function PathsPanel() {
     const paths = usePathStore((state) => state.paths);
+    const addPath = usePathStore((state) => state.addPath);
+    const updatePath = usePathStore((state) => state.updatePath);
 
     const sensors = useSensors(useSensor(PointerSensor));
 
@@ -40,41 +39,51 @@ export function PathsPanel() {
         if (oldIndex !== newIndex) {
             const reordered = arrayMove(sortedPaths, oldIndex, newIndex);
             reordered.forEach((path, index) => {
-                pathActions.updatePath(path.id, { order: index });
+                updatePath(path.id, { order: index });
             });
         }
     };
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="font-bold text-sm mb-2">Paths - {paths.length}</div>
-            <DndContext
-                sensors={sensors}
-                onDragEnd={handleDragEnd}
-                collisionDetection={closestCenter}
-                modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-            >
-                <SortableContext items={sortedPaths.map((path) => path.id)} strategy={verticalListSortingStrategy}>
-                    {sortedPaths.map((path) => (
-                        <SortablePathRow key={path.id} pathId={path.id} />
-                    ))}
-                </SortableContext>
-            </DndContext>
-            <button
-                onClick={() => pathActions.addPath("New Path", "#000000")}
-                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded"
-            >
-                Add Path
-            </button>
-        </div>
+        <Panel
+            title={
+                <div className="flex justify-between gap-1">
+                    <div>Paths · {Object.values(paths).length}</div>
+                    <Button
+                        icon={<PlusLinear className="w-4 h-4" />}
+                        onClick={() => {
+                            addPath("New Path", "#000000");
+                        }}
+                        className="mb-2 text-xs font-normal"
+                        color="blue"
+                    >
+                        New
+                    </Button>
+                </div>
+            }
+        >
+            <div className="flex flex-col gap-1 p-2">
+                <DndContext
+                    sensors={sensors}
+                    onDragEnd={handleDragEnd}
+                    collisionDetection={closestCenter}
+                    modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                >
+                    <SortableContext items={sortedPaths.map((path) => path.id)} strategy={verticalListSortingStrategy}>
+                        {sortedPaths.map((path) => (
+                            <SortablePathRow key={path.id} pathId={path.id} />
+                        ))}
+                    </SortableContext>
+                </DndContext>
+            </div>
+        </Panel>
     );
 }
 
-const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
+const SortablePathRow = memo(({ pathId }: { pathId: number }) => {
     const path = usePathStore((state) => state.paths.find((p) => p.id === pathId))!;
-    const mode = useInteractionModeStore((state) => state.mode);
-    const activePathId = useInteractionModeStore((state) => state.activePathId);
-    const togglePathEdit = useInteractionModeStore((state) => state.togglePathEdit);
+    const deletePath = usePathStore((state) => state.deletePath);
+    const navigate = useNavigate();
 
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: path.id });
 
@@ -84,98 +93,33 @@ const SortablePathRow = React.memo(({ pathId }: { pathId: number }) => {
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="flex flex-col gap-1 border p-1">
-            <div className="flex flex-row gap-2 items-center">
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex flex-col gap-1 border bg-gray-50 border-none rounded-md py-1"
+        >
+            <div className="flex flex-row gap-2 items-center text-sm">
                 <div {...attributes} {...listeners} className="cursor-grab p-1 select-none">
-                    ⋮⋮
+                    <GripDotsVerticalLinear className="text-gray-400" height={17} />
                 </div>
-                <TextInput value={path.name} onChange={(value) => pathActions.updatePath(path.id, { name: value })} />
-                <Select
-                    value={path.style}
-                    onChange={(value) => pathActions.updatePath(path.id, { style: value })}
-                    options={[
-                        { label: "Solid", value: "solid" },
-                        { label: "Dashed", value: "dashed" },
-                        { label: "Dotted", value: "dotted" },
-                    ]}
-                    placeholder="Style"
-                />
-                <NumberInput
-                    value={path.tension}
-                    onChange={(value) => pathActions.updatePath(path.id, { tension: value })}
-                    placeholder="Tension"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="max-w-14"
-                />
-                <NumberInput
-                    value={path.width}
-                    onChange={(value) => pathActions.updatePath(path.id, { width: value })}
-                    placeholder="Width"
-                    min={0}
-                    className="max-w-14"
-                />
-                <ColorInput
-                    value={path.color}
-                    onChange={(value) => pathActions.updatePath(path.id, { color: value })}
-                    placeholder="Color"
-                    className="max-w-14"
-                />
-                <NumberInput
-                    value={path.outlineWidth}
-                    onChange={(value) => pathActions.updatePath(path.id, { outlineWidth: value })}
-                    placeholder="Outline Width"
-                    min={0}
-                    className="max-w-14"
-                />
-                <ColorInput
-                    value={path.outlineColor}
-                    onChange={(value) => pathActions.updatePath(path.id, { outlineColor: value })}
-                    placeholder="Outline Color"
-                    className="max-w-14"
-                />
-                <Select
-                    value={path.linecap}
-                    onChange={(value) => pathActions.updatePath(path.id, { linecap: value })}
-                    options={[
-                        { label: "Round", value: "round" },
-                        { label: "Butt", value: "butt" },
-                        { label: "Square", value: "square" },
-                    ]}
-                    placeholder="Linecap"
-                />
-                <NumberInput
-                    value={path.opacity}
-                    onChange={(value) => pathActions.updatePath(path.id, { opacity: value })}
-                    placeholder="Opacity"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="max-w-14"
-                />
-                <Checkbox
-                    onChange={(value) => pathActions.updatePath(path.id, { hidden: value })}
-                    label="Hidden"
-                    value={path.hidden}
-                />
-                <TextInput
-                    value={path.dasharray}
-                    onChange={(value) => pathActions.updatePath(path.id, { dasharray: value })}
-                    placeholder="Dasharray"
-                />
-                <div>{path.segments?.length?.toFixed(0).padStart(2, "0")} seg</div>
-                <button
+                <div
+                    className="flex items-center justify-between w-full pr-2 group cursor-pointer"
                     onClick={() => {
-                        togglePathEdit(path.id);
+                        navigate(`/paths/${path.id}`);
                     }}
-                    className="px-3 py-1 bg-green-500 hover:bg-green-600 rounded"
                 >
-                    {mode === "path-edit" && activePathId === path.id ? "Cancel" : "Edit Points"}
-                </button>
-                <button onClick={() => pathActions.deletePath(path.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded">
-                    Delete
-                </button>
+                    <div>{path.name}</div>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            deletePath(path.id);
+                        }}
+                        className="disabled:opacity-50 hover:text-red-600 disabled:hover:text-red-500 hidden group-hover:block cursor-pointer"
+                    >
+                        <TrashLinear className="w-5 h-5 text-red-500" />
+                    </button>
+                </div>
             </div>
         </div>
     );

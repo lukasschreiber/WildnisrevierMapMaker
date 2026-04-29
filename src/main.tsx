@@ -5,9 +5,9 @@ import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { usePanels } from "./panels.tsx";
-import { SingleWaypointPanelWrapper } from "./componentsV2/panels/SingleWaypointPanel.tsx";
-import { SingleWaypointTypePanelWrapper } from "./componentsV2/panels/SingleWaypointTypePanel.tsx";
-import { SinglePathPanelWrapper } from "./componentsV2/panels/SinglePathPanel.tsx";
+import { SingleWaypointPanelWrapper } from "./components/panels/SingleWaypointPanel.tsx";
+import { SingleWaypointTypePanelWrapper } from "./components/panels/SingleWaypointTypePanel.tsx";
+import { SinglePathPanelWrapper } from "./components/panels/SinglePathPanel.tsx";
 
 function Root() {
     const panels = usePanels();

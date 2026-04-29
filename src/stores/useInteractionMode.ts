@@ -11,15 +11,13 @@ type InteractionModeState = {
 
     activateSelect: () => void;
     activateWaypointAdd: () => void;
-    activatePathEdit: (pathId: number) => void;
-    activateShapeEdit: (shapeId: number) => void;
-    togglePathEdit: (pathId: number) => void;
-    toggleShapeEdit: (shapeId: number) => void;
+    activatePathEdit: () => void;
+    activateShapeEdit: () => void;
 };
 
 export const useInteractionModeStore = create<InteractionModeState>()(
     persist(
-        (set, get) => ({
+        (set) => ({
             mode: "select",
             activePathId: null,
             activeShapeId: null,
@@ -38,37 +36,19 @@ export const useInteractionModeStore = create<InteractionModeState>()(
                     activeShapeId: null,
                 }),
 
-            activatePathEdit: (pathId) =>
+            activatePathEdit: () =>
                 set({
                     mode: "path-edit",
-                    activePathId: pathId,
+                    activePathId: null,
                     activeShapeId: null,
                 }),
 
-            activateShapeEdit: (shapeId) =>
+            activateShapeEdit: () =>
                 set({
                     mode: "shape-edit",
                     activePathId: null,
-                    activeShapeId: shapeId,
+                    activeShapeId: null,
                 }),
-
-            togglePathEdit: (pathId) => {
-                const { mode, activePathId } = get();
-                if (mode === "path-edit" && activePathId === pathId) {
-                    get().activateSelect();
-                    return;
-                }
-                get().activatePathEdit(pathId);
-            },
-
-            toggleShapeEdit: (shapeId) => {
-                const { mode, activeShapeId } = get();
-                if (mode === "shape-edit" && activeShapeId === shapeId) {
-                    get().activateSelect();
-                    return;
-                }
-                get().activateShapeEdit(shapeId);
-            },
         }),
         {
             name: getLocalStorageKey("interaction_mode"),

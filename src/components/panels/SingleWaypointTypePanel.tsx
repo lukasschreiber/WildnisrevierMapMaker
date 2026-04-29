@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router";
 import { Panel } from "../MainPanel";
-import { LegendWaypointMarker } from "../../components/legend/LegendWaypointMarker";
+import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { TextInput } from "../controls/TextInput";
 import { CloneLinear, EyeLinear, EyeSlashLinear, PenLineSolid, TrashLinear } from "@lukasschreiber/icons";

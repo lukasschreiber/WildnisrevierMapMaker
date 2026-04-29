@@ -11,8 +11,7 @@ import {
     LocationCrosshairsLinear,
     CompassDraftingLinear,
     RulerLinear,
-    ArrowLeftLinear,
-    ArrowRightLinear,
+    ForwardLinear,
 } from "@lukasschreiber/icons";
 
 import { DisablePropagation } from "./common/DisablePropagation";
@@ -23,7 +22,17 @@ import { useInteractionModeStore } from "../stores/useInteractionMode";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { useHistoryStore } from "../stores/useHistory";
 
-type ToolId = "select" | "marker" | "path" | "shape" | "delete" | "locate" | "measure" | "relative-marker" | "undo" | "redo";
+type ToolId =
+    | "select"
+    | "marker"
+    | "path"
+    | "shape"
+    | "delete"
+    | "locate"
+    | "measure"
+    | "relative-marker"
+    | "undo"
+    | "redo";
 
 type ToolDefinition = {
     id: ToolId;
@@ -58,6 +67,8 @@ export function Tooltray() {
     const mode = useInteractionModeStore((state) => state.mode);
     const activateSelect = useInteractionModeStore((state) => state.activateSelect);
     const activateWaypointAdd = useInteractionModeStore((state) => state.activateWaypointAdd);
+    const activatePathEdit = useInteractionModeStore((state) => state.activatePathEdit);
+    const activateShapeEdit = useInteractionModeStore((state) => state.activateShapeEdit);
     const setCurrentPosition = useWaypointStore((state) => state.setCurrentPosition);
     const canUndo = useHistoryStore((state) => state.canUndo());
     const canRedo = useHistoryStore((state) => state.canRedo());
@@ -104,7 +115,7 @@ export function Tooltray() {
                     icon: ScribbleLinear,
                     selectable: true,
                     onClick: () => {
-                        activateSelect();
+                        activatePathEdit();
                     },
                 },
                 {
@@ -113,7 +124,7 @@ export function Tooltray() {
                     icon: DrawSquareLinear,
                     selectable: true,
                     onClick: () => {
-                        activateSelect();
+                        activateShapeEdit();
                     },
                 },
             ],
@@ -150,26 +161,28 @@ export function Tooltray() {
                 {
                     id: "undo",
                     label: "Undo",
-                    icon: ArrowLeftLinear,
+                    icon: ({ className, ...props }) => (
+                        <ForwardLinear {...props} className={`${className} rotate-y-180`} />
+                    ),
                     selectable: false,
                     disabled: () => !canUndo,
                     onClick: () => {
                         undo();
-                    }
+                    },
                 },
                 {
                     id: "redo",
                     label: "Redo",
-                    icon: ArrowRightLinear,
+                    icon: ForwardLinear,
                     selectable: false,
                     disabled: () => !canRedo,
                     onClick: () => {
                         redo();
                     },
-                }
-            ]
+                },
+            ],
         ];
-    }, [activateSelect, activateWaypointAdd, map, setCurrentPosition, canUndo, canRedo, undo, redo]);
+    }, [activateSelect, activateWaypointAdd, activatePathEdit, activateShapeEdit, setCurrentPosition, map, canUndo, undo, canRedo, redo]);
 
     const location = useLocation();
     const isPanelVisible = location.pathname !== "/";

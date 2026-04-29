@@ -19,18 +19,41 @@ export function InteractionModeBridge() {
     const setShapeReferenceId = useShapeStore((state) => state.setAddModeReferenceShapeId);
 
     useEffect(() => {
-        setWaypointAddMode(mode === "waypoint-add");
+        // Avoid unnecessary set calls that may trigger cascading updates
+        const waypointAddDesired = mode === "waypoint-add";
+        const currentWaypointAdd = useWaypointStore.getState().addMode;
+        if (currentWaypointAdd !== waypointAddDesired) {
+            setWaypointAddMode(waypointAddDesired);
+        }
 
         const pathModeActive = mode === "path-edit";
-        setPathAddMode(pathModeActive);
-        setPathReferenceId(pathModeActive ? activePathId : null);
+        const currentPathAdd = usePathStore.getState().addMode;
+        if (currentPathAdd !== pathModeActive) {
+            setPathAddMode(pathModeActive);
+        }
+
+        const desiredPathRef = pathModeActive ? activePathId : null;
+        const currentPathRef = usePathStore.getState().addModeReferencePathId;
+        if (currentPathRef !== desiredPathRef) {
+            setPathReferenceId(desiredPathRef);
+        }
 
         const shapeModeActive = mode === "shape-edit";
-        setShapeAddMode(shapeModeActive);
-        setShapeReferenceId(shapeModeActive ? activeShapeId : null);
+        const currentShapeAdd = useShapeStore.getState().addMode;
+        if (currentShapeAdd !== shapeModeActive) {
+            setShapeAddMode(shapeModeActive);
+        }
+
+        const desiredShapeRef = shapeModeActive ? activeShapeId : null;
+        const currentShapeRef = useShapeStore.getState().addModeReferenceShapeId;
+        if (currentShapeRef !== desiredShapeRef) {
+            setShapeReferenceId(desiredShapeRef);
+        }
 
         if (!pathModeActive) {
-            cancelSegmentConnection();
+            // Only cancel connection if it is actually started to avoid extra sets
+            const connStarted = usePathStore.getState().segmentConnectionStarted;
+            if (connStarted) cancelSegmentConnection();
         }
     }, [
         activePathId,

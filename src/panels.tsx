@@ -6,17 +6,17 @@ import SettingsIcon from "./assets/icons/settings.svg?react";
 import GitIcon from "./assets/icons/code-branch.svg?react";
 import FolderIcon from "./assets/icons/folder.svg?react";
 import SlidersIcon from "./assets/icons/sliders.svg?react";
-import { WaypointsPanel } from "./componentsV2/panels/WaypointsPanel";
-import { PathsPanel } from "./componentsV2/panels/PathsPanel";
-import { Panel } from "./componentsV2/MainPanel";
+import { WaypointsPanel } from "./components/panels/WaypointsPanel";
+import { Panel } from "./components/MainPanel";
 import { SVGProps } from "react";
-import { GitIntegrationPanel } from "./componentsV2/panels/GitIntegrationPanel";
-import { WaypointTypesPanel } from "./componentsV2/panels/WaypointTypesPanel";
+import { GitIntegrationPanel } from "./components/panels/GitIntegrationPanel";
+import { WaypointTypesPanel } from "./components/panels/WaypointTypesPanel";
 import { useWaypointTypeStore } from "./stores/useWaypointTypes";
 import { useWaypointStore } from "./stores/useWaypoints";
 import { usePathStore } from "./stores/usePaths";
 import { useWaypointGroupStore } from "./stores/useGroups";
 import { useShapeStore } from "./stores/useShapes";
+import { PathsPanel } from "./components/panels/PathsPanel";
 
 export function usePanels(): PanelGroupConfig[] {
     const waypointTypesCount = useWaypointTypeStore((state) => Object.values(state.types).length);

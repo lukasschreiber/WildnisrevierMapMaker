@@ -1,210 +1,71 @@
-import { memo } from "react";
-import { Select } from "../inputs/Select";
-import { TextInput } from "../inputs/TextInput";
-import { NumberInput } from "../inputs/NumberInput";
-import { Checkbox } from "../inputs/Checkbox";
-import { ColorInput } from "../inputs/ColorInput";
-import { useWaypointTypeStore, WaypointType } from "../../stores/useWaypointTypes";
+import { Button } from "../controls/Button";
+import { Panel } from "../MainPanel";
+import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
+import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
+import { useNavigate } from "react-router";
+import { PlusLinear, TrashLinear } from "@lukasschreiber/icons";
 
 export function WaypointTypesPanel() {
     const types = useWaypointTypeStore((state) => state.types);
     const addType = useWaypointTypeStore((state) => state.addType);
-    const typeList = Object.values(types);
-
-    return (
-        <div className="flex flex-col gap-2">
-            <h2 className="text-lg font-bold">Waypoint Types</h2>
-            {typeList.map((type) => (
-                <MemoizedWaypointTypeListItem key={type.id} type={type} isOnlyOne={typeList.length <= 1} />
-            ))}
-            <button
-                onClick={() =>
-                    addType({
-                        id: Date.now(),
-                        name: "New Type",
-                        icon: "circle",
-                        color: "#000000",
-                        hidden: false,
-                        hasTwoColors: false,
-                    })
-                }
-                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded"
-            >
-                Add Waypoint Type
-            </button>
-        </div>
-    );
-}
-
-const MemoizedWaypointTypeListItem = memo(WaypointTypeListItem);
-
-export function WaypointTypeListItem({ type, isOnlyOne }: { type: WaypointType; isOnlyOne: boolean }) {
-    const updateType = useWaypointTypeStore((state) => state.updateType);
     const removeType = useWaypointTypeStore((state) => state.removeType);
     const isDeletable = useWaypointTypeStore((state) => state.isDeletable);
-
+    const navigate = useNavigate();
     return (
-        <div className="flex flex-row gap-2 items-center">
-            <div className="flex flex-col gap-1">
-                <div className="flex flex-row gap-2 items-center">
-                    <TextInput value={type.name} onChange={(value) => updateType(type.id, { name: value })} />
-                    <Select
-                        value={type.icon}
-                        onChange={(value) => updateType(type.id, { icon: value })}
-                        options={[
-                            { label: "Circle", value: "circle" },
-                            { label: "Square", value: "square" },
-                            { label: "Triangle", value: "triangle" },
-                            { label: "Star", value: "star" },
-                            { label: "Cross", value: "cross" },
-                            { label: "Diamond", value: "diamond" },
-                            { label: "Apple", value: "apple" },
-                            { label: "Cherry", value: "cherry" },
-                            { label: "Tree Stump", value: "treestump" },
-                            { label: "Camera", value: "camera" },
-                        ]}
-                    />
-                    <NumberInput
-                        value={type.radiusOverride ?? ("" as unknown as number)}
-                        min={-1}
-                        max={100}
-                        onChange={(value) =>
-                            updateType(type.id, {
-                                radiusOverride: value < 0 ? undefined : value,
-                            })
-                        }
-                        className="bg-black/50 p-1 rounded-md max-w-12"
-                        placeholder="size"
-                    />
-                    <NumberInput
-                        value={type.rotation ?? ("" as unknown as number)}
-                        min={0}
-                        max={360}
-                        onChange={(value) =>
-                            updateType(type.id, {
-                                rotation: value < 0 ? undefined : value,
-                            })
-                        }
-                        className="bg-black/50 p-1 rounded-md max-w-12"
-                        placeholder="rotation"
-                    />
-                    <ColorInput
-                        value={type.color}
-                        onChange={(value) => updateType(type.id, { color: value })}
-                        className="bg-black/50 p-1 rounded-md"
-                    />
-                    <ColorInput
-                        value={type.color2 || "#000000"}
-                        onChange={(value) => updateType(type.id, { color2: value })}
-                        disabled={!type.hasTwoColors}
-                    />
-                    <Checkbox
-                        label="Hidden"
-                        value={type.hidden}
-                        onChange={(value) => updateType(type.id, { hidden: value })}
-                    />
-                    <Checkbox
-                        label="Two Colors"
-                        value={type.hasTwoColors}
-                        onChange={(value) => updateType(type.id, { hasTwoColors: value })}
-                    />
-                    <Checkbox
-                        label="Add. Text"
-                        value={!!type.additionalText}
-                        onChange={(value) => {
-                            if (value) {
-                                updateType(type.id, {
-                                    additionalText: {
-                                        color: "#000000",
-                                        fontSize: 12,
-                                        fontFamily: "Arial",
-                                        fontWeight: "normal",
-                                    },
-                                });
-                            } else {
-                                updateType(type.id, { additionalText: undefined });
-                            }
+        <Panel
+            title={
+                <div className="flex justify-between gap-1">
+                    <div>Waypoint Types · {Object.values(types).length}</div>
+                    <Button
+                        icon={<PlusLinear className="w-4 h-4" />}
+                        onClick={() => {
+                            const id = Date.now();
+                            addType({
+                                id,
+                                name: "New Type",
+                                icon: "circle",
+                                color: "#000000",
+                                hidden: false,
+                                hasTwoColors: false,
+                            });
+                            navigate(`/types/${id}`);
                         }}
-                    />
+                        className="mb-2 text-xs font-normal"
+                        color="blue"
+                    >
+                        New
+                    </Button>
                 </div>
-                {type.additionalText && (
-                    <div className="flex flex-row gap-2 items-center">
-                        <div>Additional Text Properties:</div>
-                        <ColorInput
-                            value={type.additionalText.color || "#000000"}
-                            onChange={(value) =>
-                                updateType(type.id, {
-                                    additionalText: {
-                                        ...type.additionalText,
-                                        color: value,
-                                    },
-                                })
-                            }
-                            className="bg-black/50 p-1 rounded-md"
-                        />
-                        <Select
-                            value={type.additionalText.fontFamily || "Arial"}
-                            onChange={(value) =>
-                                updateType(type.id, {
-                                    additionalText: {
-                                        ...type.additionalText,
-                                        fontFamily: value,
-                                    },
-                                })
-                            }
-                            options={[
-                                { label: "Arial", value: "Arial" },
-                                { label: "Courier New", value: "Courier New" },
-                                { label: "Georgia", value: "Georgia" },
-                                { label: "Times New Roman", value: "Times New Roman" },
-                                { label: "Verdana", value: "Verdana" },
-                            ]}
-                            className="bg-black/50 p-1 rounded-md"
-                        />
-                        <NumberInput
-                            value={type.additionalText.fontSize || 12}
-                            min={1}
-                            max={100}
-                            onChange={(value) =>
-                                updateType(type.id, {
-                                    additionalText: {
-                                        ...type.additionalText,
-                                        fontSize: value,
-                                    },
-                                })
-                            }
-                            className="bg-black/50 p-1 rounded-md max-w-12"
-                            placeholder="Font Size"
-                        />
-                        <Select
-                            value={type.additionalText.fontWeight || "normal"}
-                            onChange={(value) =>
-                                updateType(type.id, {
-                                    additionalText: {
-                                        ...type.additionalText,
-                                        fontWeight: value,
-                                    },
-                                })
-                            }
-                            options={[
-                                { label: "Normal", value: "normal" },
-                                { label: "Bold", value: "bold" },
-                                { label: "Bolder", value: "bolder" },
-                                { label: "Lighter", value: "lighter" },
-                            ]}
-                            className="bg-black/50 p-1 rounded-md"
-                        />
-                    </div>
-                )}
-            </div>
+            }
+        >
+            <div className="px-4 py-2 text-sm">
+                <div className="flex flex-col">
+                    {Object.values(types).map((type) => (
+                        <div
+                            key={type.id}
+                            onClick={() => navigate(`/types/${type.id}`)}
+                            className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 group cursor-pointer"
+                        >
+                            <div className="flex items-center gap-2">
+                                <LegendWaypointMarker type={type} radius={8} borderWidth={1} borderColor="black" />
 
-            <button
-                onClick={() => removeType(type.id)}
-                disabled={isOnlyOne || type.id === 1 || !isDeletable(type.id)}
-                className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-red-500"
-            >
-                Remove
-            </button>
-        </div>
+                                <div className="">{type.name}</div>
+                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    removeType(type.id);
+                                }}
+                                disabled={!isDeletable(type.id)}
+                                className="disabled:opacity-50 hover:text-red-600 disabled:hover:text-red-500 hidden group-hover:block cursor-pointer"
+                            >
+                                <TrashLinear className="w-5 h-5 text-red-500" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </Panel>
     );
 }
