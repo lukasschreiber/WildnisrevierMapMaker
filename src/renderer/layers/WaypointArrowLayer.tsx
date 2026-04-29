@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { useLayer } from "../../context/LayerContext";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { WaypointArrow } from "../elements/WaypointArrow";
+import { useLayer } from "../../context/useLayer";
 
 export function WaypointArrowLayer() {
     const g = useLayer(11);

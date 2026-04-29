@@ -3,13 +3,13 @@ import { persist } from "zustand/middleware";
 import { useWaypointStore } from "./useWaypoints"; // Adjust if path differs
 import { getLocalStorageKey } from "../utils/keys";
 
-export type WaypointGroup = {
+export interface WaypointGroup {
     id: number;
     name: string;
     hidden: boolean;
 };
 
-type WaypointGroupStore = {
+interface WaypointGroupStore {
     waypointGroups: WaypointGroup[];
     addWaypointGroup: (group: WaypointGroup) => void;
     removeWaypointGroup: (id: number) => void;

@@ -3,10 +3,12 @@ import { persist } from "zustand/middleware";
 import { getLocalStorageKey } from "../utils/keys";
 import { useWaypointStore } from "./useWaypoints";
 
-export type WaypointType = {
+export type WaypointTypeIcons = "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry" | "treestump" | "camera";
+
+export interface WaypointType {
     id: number;
     name: string;
-    icon: "circle" | "square" | "triangle" | "star" | "cross" | "diamond" | "apple" | "cherry" | "treestump" | "camera";
+    icon: WaypointTypeIcons;
     color: string;
     hasTwoColors: boolean;
     radiusOverride?: number;

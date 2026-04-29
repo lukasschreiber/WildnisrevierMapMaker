@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { WaypointType } from "../../stores/useWaypointTypes";
 import * as d3 from "d3";
-import { renderMarker } from "../../renderer/renderMarkers";
+import { renderMarker } from "../../renderer";
 
 export function LegendWaypointMarker(props: {
     type: WaypointType;
@@ -16,23 +16,23 @@ export function LegendWaypointMarker(props: {
         if (containerRef.current && type) {
             d3.select(containerRef.current).selectAll("*").remove(); // Clear previous icons
             const g = d3.select(containerRef.current).append("g").attr("class", "waypoint-icon");
-            renderMarker(
+            renderMarker({
                 g,
-                {
+                point: {
                     x: (radius ?? defaultRadius) + (borderWidth || 0) + 1,
                     y: (radius ?? defaultRadius) + (borderWidth || 0) + 1,
                 },
-                type.additionalText ? "1" : undefined,
-                false,
-                false,
-                radius ?? defaultRadius,
+                additionalText: type.additionalText ? "1" : undefined,
+                hidden: false,
+                isSelected: false,
+                radius: radius ?? defaultRadius,
                 type,
-                undefined,
-                borderWidth ?? 0,
-                borderColor ?? "black",
-                borderWidth ? true : false,
-                true
-            );
+                group: undefined,
+                borderWidth: borderWidth ?? 0,
+                borderColor: borderColor ?? "black",
+                showBorder: borderWidth ? true : false,
+                visualizeHiddenItems: true,
+            });
         }
     }, [containerRef, type, radius, borderWidth, borderColor]);
     return (

@@ -1,11 +1,10 @@
 import { useCallback, useEffect } from "react";
 import { useWaypointStore } from "../stores/useWaypoints";
-import { useMap, useMapContext } from "../context/MapContext";
 import { evaluationEventEmitter } from "../utils/evaluation";
+import { useMapContext } from "../context/useMap";
 
 export function StandaloneMapEventManager() {
-    const map = useMap();
-    const { setSelectedWaypoint } = useMapContext();
+    const { setSelectedWaypoint, map } = useMapContext();
     const selectedId = useWaypointStore((state) => state.selectedId);
     const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
 

@@ -1,6 +1,6 @@
 import { SearchMinusLinear, SearchPlusLinear } from "@lukasschreiber/icons";
-import { useMap } from "../context/MapContext";
 import { DisablePropagation } from "./common/DisablePropagation";
+import { useMap } from "../context/useMap";
 
 export function ZoomOverlay() {
     const map = useMap();

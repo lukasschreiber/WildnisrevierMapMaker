@@ -9,7 +9,7 @@ import { getLocalStorageKey } from "../utils/keys";
 
 export type HistoryTarget = "waypoints" | "paths" | "shapes" | "waypointTypes" | "waypointGroups";
 
-export type HistoryValueByTarget = {
+export interface HistoryValueByTarget {
     waypoints: Waypoint[];
     paths: Path[];
     shapes: Shape[];
@@ -17,20 +17,20 @@ export type HistoryValueByTarget = {
     waypointGroups: WaypointGroup[];
 };
 
-export type HistoryMutation<T extends HistoryTarget = HistoryTarget> = {
+export interface HistoryMutation<T extends HistoryTarget = HistoryTarget> {
     target: T;
     before: HistoryValueByTarget[T];
     after: HistoryValueByTarget[T];
 };
 
-export type HistoryStep = {
+export interface HistoryStep {
     id: string;
     label: string;
     timestamp: number;
     mutations: HistoryMutation[];
 };
 
-type HistoryState = {
+interface HistoryState {
     version: number;
     maxSteps: number;
     past: HistoryStep[];

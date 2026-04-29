@@ -9,7 +9,7 @@ export interface Repository {
     key: string
 }
 
-type RepoStore = {
+interface RepoStore {
     repositories: Repository[];
     encryptKeys: boolean;
     addRepository: (repo: Repository) => void;

@@ -1,6 +1,6 @@
 import { executeHistoryAction } from "../history/executeHistoryAction";
 import { usePathStore } from "../../stores/usePaths";
-import { useWaypointStore } from "../../stores/useWaypoints";
+import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 
 export const waypointActions = {
     addWaypoint: (lat: number, lng: number, baseId?: number, name?: string, typeId?: number, groupId?: number) => {
@@ -9,39 +9,9 @@ export const waypointActions = {
         });
     },
 
-    updateWaypointPosition: (id: number, lat: number, lng: number) => {
-        executeHistoryAction("Move waypoint", ["waypoints"], () => {
-            useWaypointStore.getState().updateWaypointPosition(id, lat, lng);
-        });
-    },
-
-    updateWaypointName: (id: number, name: string) => {
-        executeHistoryAction("Rename waypoint", ["waypoints"], () => {
-            useWaypointStore.getState().updateWaypointName(id, name);
-        });
-    },
-
-    updateWaypointAdditionalText: (id: number, text: string) => {
-        executeHistoryAction("Update waypoint text", ["waypoints"], () => {
-            useWaypointStore.getState().updateWaypointAdditionalText(id, text);
-        });
-    },
-
-    updateWaypointType: (id: number, typeId: number) => {
-        executeHistoryAction("Change waypoint type", ["waypoints"], () => {
-            useWaypointStore.getState().updateWaypointType(id, typeId);
-        });
-    },
-
-    updateWaypointGroup: (id: number, groupId?: number) => {
-        executeHistoryAction("Change waypoint group", ["waypoints"], () => {
-            useWaypointStore.getState().updateWaypointGroup(id, groupId);
-        });
-    },
-
-    toggleWaypointHidden: (id: number) => {
-        executeHistoryAction("Toggle waypoint visibility", ["waypoints"], () => {
-            useWaypointStore.getState().toggleWaypointHidden(id);
+    updateWaypoint: (id: number, waypoint: Partial<Waypoint>) => {
+        executeHistoryAction("Update waypoint", ["waypoints"], () => {
+            useWaypointStore.getState().updateWaypoint(id, waypoint);
         });
     },
 

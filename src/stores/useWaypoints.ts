@@ -1,12 +1,11 @@
-// store/useWaypointStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { calculateRelativeWaypoint } from "../renderer/relativeWaypoints";
+import { calculateRelativeWaypoint } from "../utils/relativeWaypoints";
 import { usePathStore } from "./usePaths";
 import { useShapeStore } from "./useShapes";
 import { getLocalStorageKey } from "../utils/keys";
 
-export type Waypoint = {
+export interface Waypoint {
     id: number;
     lat: number;
     lng: number;
@@ -37,12 +36,7 @@ export interface WaypointState {
     deselectWaypoint: () => void;
     deleteWaypoint: (id: number) => void;
     getWaypointById: (id: number) => Waypoint | undefined;
-    updateWaypointPosition: (id: number, lat: number, lng: number) => void;
-    updateWaypointName: (id: number, name: string) => void;
-    toggleWaypointHidden: (id: number) => void;
-    updateWaypointAdditionalText: (id: number, text: string) => void;
-    updateWaypointType: (id: number, typeId: number) => void;
-    updateWaypointGroup: (id: number, groupId?: number) => void;
+    updateWaypoint(id: number, waypoint: Partial<Waypoint>): void;
     isDeletable: (id: number) => boolean;
 
     setWaypoints: (wps: Waypoint[]) => void;
@@ -105,36 +99,9 @@ export const useWaypointStore = create<WaypointState>()(
 
             getWaypointById: (id) => get().waypoints.find((wp) => wp.id === id),
 
-            updateWaypointPosition: (id, lat, lng) =>
-                set((s) => ({
-                    waypoints: s.waypoints.map((wp) => (wp.id === id ? { ...wp, lat, lng } : wp)),
-                })),
-
-            updateWaypointName: (id, name) =>
-                set((s) => ({
-                    waypoints: s.waypoints.map((wp) => (wp.id === id ? { ...wp, name } : wp)),
-                })),
-
-            toggleWaypointHidden: (id) =>
-                set((s) => ({
-                    waypoints: s.waypoints.map((wp) =>
-                        wp.id === id ? { ...wp, hidden: !wp.hidden } : wp
-                    ),
-                })),
-
-            updateWaypointType: (id, typeId) =>
-                set((s) => ({
-                    waypoints: s.waypoints.map((wp) => (wp.id === id ? { ...wp, typeId } : wp)),
-                })),
-
-            updateWaypointAdditionalText: (id, text) =>
-                set((s) => ({
-                    waypoints: s.waypoints.map((wp) => (wp.id === id ? { ...wp, additionalText: text } : wp)),
-                })),
-
-            updateWaypointGroup: (id, groupId) =>
-                set((s) => ({
-                    waypoints: s.waypoints.map((wp) => (wp.id === id ? { ...wp, groupId } : wp)),
+            updateWaypoint: (id, updated) =>
+                set((state) => ({
+                    waypoints: state.waypoints.map((wp) => (wp.id === id ? { ...wp, ...updated } : wp)),
                 })),
 
             isDeletable: (id) => {

@@ -5,13 +5,13 @@ import { WaypointLayer } from "../renderer/layers/WaypointLayer";
 import { WMAPFormatContent } from "../utils/persistence";
 import { ShapeLayer } from "../renderer/layers/ShapeLayer";
 import { StandaloneMapEventManager } from "./StandaloneMapEventManager";
-import { useMap, useMapContext } from "../context/MapContext";
 import { WaypointType } from "../stores/useWaypointTypes";
 import L from "leaflet";
 import { ReactNode, useCallback, useEffect } from "react";
 import { PathLayer } from "../renderer/layers/PathsLayer";
 import { Waypoint } from "../stores/useWaypoints";
 import { createPortal } from "react-dom";
+import { useMapContext } from "../context/useMap";
 
 type StandaloneMapProps = {
     name?: string;
@@ -97,8 +97,7 @@ function SelectedWaypointLabel(props: {
     radius?: number;
     labelRenderer?: Record<number, (waypoint: Waypoint, type: WaypointType) => ReactNode>;
 }) {
-    const { selectedWaypoint } = useMapContext();
-    const map = useMap();
+    const { selectedWaypoint, map } = useMapContext();
 
     const type = selectedWaypoint ? props.types[selectedWaypoint.typeId] : undefined;
 
@@ -110,7 +109,7 @@ function SelectedWaypointLabel(props: {
         if (label) {
             label.style.transform = `translate(${point.x + offset + 5}px, ${point.y - 15}px)`;
         }
-    }, [map, selectedWaypoint]);
+    }, [map, props.radius, selectedWaypoint, type?.radiusOverride]);
 
     useEffect(() => {
         map.on("move zoom zoomanim", updatePosition);
@@ -118,7 +117,7 @@ function SelectedWaypointLabel(props: {
         return () => {
             map.off("move zoom zoomanim", updatePosition);
         };
-    }, [map, selectedWaypoint]);
+    }, [map, selectedWaypoint, updatePosition]);
 
     useEffect(() => {
         updatePosition();

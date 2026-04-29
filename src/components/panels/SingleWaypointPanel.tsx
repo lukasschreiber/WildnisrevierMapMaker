@@ -72,7 +72,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton
                     icon={waypoint.hidden ? <EyeLinear className="w-5 h-5" /> : <EyeSlashLinear className="w-5 h-5" />}
                     onClick={() => {
-                        waypointActions.toggleWaypointHidden(waypoint.id);
+                        waypointActions.updateWaypoint(waypoint.id, { hidden: !waypoint.hidden });
                     }}
                     label={waypoint.hidden ? "Show" : "Hide"}
                 />
@@ -102,13 +102,13 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <TextInput
                     label="Waypoint Name"
                     value={waypoint.name || ""}
-                    onChange={(value) => waypointActions.updateWaypointName(waypoint.id, value)}
+                    onChange={(value) => waypointActions.updateWaypoint(waypoint.id, { name: value })}
                 />
                 {type.additionalText && (
                     <TextInput
                         label="Additional Text"
                         value={waypoint.additionalText || ""}
-                        onChange={(value) => waypointActions.updateWaypointAdditionalText(waypoint.id, value)}
+                        onChange={(value) => waypointActions.updateWaypoint(waypoint.id, { additionalText: value })}
                         placeholder="Additional Text"
                         helpText="This text is shown inside of the Waypoint"
                     />
@@ -117,7 +117,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     label="Waypoint Type"
                     className="w-full"
                     value={typeId}
-                    onChange={(value) => waypointActions.updateWaypointType(waypoint.id, Number(value))}
+                    onChange={(value) => waypointActions.updateWaypoint(waypoint.id, { typeId: value })}
                     helpText="The type determines the look of a waypoint"
                     options={Object.values(types).map((type) => ({
                         value: type.id,
@@ -135,7 +135,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                     value={waypoint.groupId ?? ""}
                     onChange={(value) => {
                         const groupId = value === "" ? undefined : value;
-                        waypointActions.updateWaypointGroup(waypoint.id, groupId);
+                        waypointActions.updateWaypoint(waypoint.id, { groupId });
                     }}
                     options={[
                         { children: "No Group", value: "" },

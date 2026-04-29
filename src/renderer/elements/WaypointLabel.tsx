@@ -4,9 +4,9 @@ import { useWaypointTypeStore, WaypointType } from "../../stores/useWaypointType
 import { useWaypointGroupStore, WaypointGroup } from "../../stores/useGroups";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
-import { renderLabel } from "../renderLabel";
+import { useMap } from "../../context/useMap";
+import { renderLabel } from "../labels/renderLabel";
 
 type WaypointLabelProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -39,6 +39,12 @@ export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLa
     const labelColor = props.labelColor ?? storeLabelColor;
     const showLabels = props.showLabels ?? storeShowLabels;
 
+    const getLabelPosition = useCallback(() => {
+        if (!g || !waypoint) return;
+        const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
+        return { x: point.x + 4 + waypointRadius, y: point.y + 4 };
+    }, [g, waypoint, map, waypointRadius]);
+
     useEffect(() => {
         if (!g || !waypoint || !type) return;
         if (!showLabels) return;
@@ -55,34 +61,27 @@ export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLa
 
         const { id, name } = waypoint;
 
-        const renderedLabel = renderLabel(
+        const renderedLabel = renderLabel({
             g,
-            point.x,
-            point.y,
-            id.toString() + (name ? ` (${name})` : ""),
-            undefined,
-            labelColor
-        );
+            x: point.x,
+            y: point.y,
+            text: id.toString() + (name ? ` (${name})` : ""),
+            color: labelColor,
+        });
 
         renderedLabel.attr("id", `waypoint-label-${id}`).classed("waypoint-label");
 
         return () => {
             renderedLabel.remove();
         };
-    }, [waypoint, type, group, g, showLabels, map, labelColor, waypointRadius]);
-
-    const getLabelPosition = useCallback(() => {
-        if (!g || !waypoint) return;
-        const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
-        return { x: point.x + 4 + waypointRadius, y: point.y + 4 };
-    }, [waypointId, g, waypoint, map, waypointRadius]);
+    }, [waypoint, type, group, g, showLabels, map, labelColor, waypointRadius, getLabelPosition]);
 
     const updatePosition = useCallback(() => {
         if (!g || !waypoint) return;
         const point = getLabelPosition();
         if (!point) return;
         g.select(`#waypoint-label-${waypoint.id}`).attr("x", point.x).attr("y", point.y);
-    }, [g, waypoint]);
+    }, [g, getLabelPosition, waypoint]);
 
     useEffect(() => {
         map.on("move zoom zoomanim", updatePosition);
@@ -90,7 +89,7 @@ export const WaypointLabel = React.memo(({ g, waypointId, ...props }: WaypointLa
         return () => {
             map.off("move zoom zoomanim", updatePosition);
         };
-    }, [map, g, waypoint]);
+    }, [map, updatePosition]);
 
     return null;
 }, areEqual);

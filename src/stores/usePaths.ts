@@ -2,17 +2,17 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getLocalStorageKey } from "../utils/keys";
 
-export type PathNode = {
+export interface PathNode {
   waypointId: number;
 };
 
-export type PathSegment = {
+export interface PathSegment {
   id: number;
   from: PathNode;
   to: PathNode;
 };
 
-export type Path = {
+export interface Path {
   id: number;
   name: string;
   color: string;

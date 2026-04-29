@@ -4,7 +4,7 @@ import { getLocalStorageKey } from "../utils/keys";
 
 export type InteractionMode = "select" | "waypoint-add" | "path-edit" | "shape-edit";
 
-type InteractionModeState = {
+interface InteractionModeState {
     mode: InteractionMode;
     activePathId: number | null;
     activeShapeId: number | null;

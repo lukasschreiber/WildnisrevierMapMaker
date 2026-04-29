@@ -20,7 +20,7 @@ export class Vector {
     }
 
     normalize(): Vector {
-        let length = this.mag();
+        const length = this.mag();
         return this.scale(1 / length);
     }
 

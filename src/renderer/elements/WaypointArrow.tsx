@@ -2,11 +2,11 @@ import React, { useCallback, useEffect } from "react";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
-import { renderLabel } from "../renderLabel";
-import { renderWaypointArrow } from "../renderWaypointArrow";
-import { haversineDistance } from "../relativeWaypoints";
+import { haversineDistance } from "../../utils/relativeWaypoints";
+import { useMap } from "../../context/useMap";
+import { renderLabel } from "../labels/renderLabel";
+import { renderWaypointArrow } from "../arrows/renderWaypointArrow";
 
 type WaypointArrowProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -41,33 +41,34 @@ export const WaypointArrow = React.memo(({ g, waypointId }: WaypointArrowProps) 
         const basePoint = map.latLngToLayerPoint(new L.LatLng(baseWaypoint.lat, baseWaypoint.lng));
         const dist = haversineDistance(lat, lng, baseWaypoint.lat, baseWaypoint.lng);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const renderedComponents: d3.Selection<any, unknown, null, undefined>[] = [];
 
         if (showWaypointLines) {
             renderedComponents.push(
-                renderWaypointArrow(
+                renderWaypointArrow({
                     g,
-                    point,
-                    basePoint,
-                    waypointRadius,
-                    arrowColor,
-                    arrowSize,
-                    arrowWidth,
-                    arrowOpacity
-                ).attr("id", `waypoint-arrow-${waypoint.id}`)
+                    a: point,
+                    b: basePoint,
+                    offset: waypointRadius,
+                    color: arrowColor,
+                    size: arrowSize,
+                    width: arrowWidth,
+                    opacity: arrowOpacity,
+                }).attr("id", `waypoint-arrow-${waypoint.id}`)
             );
         }
 
         if (showWaypointDistances) {
             renderedComponents.push(
-                renderLabel(
+                renderLabel({
                     g,
-                    (point.x + basePoint.x) / 2,
-                    (point.y + basePoint.y) / 2 - 5,
-                    `${dist.toFixed(2)} m`,
-                    "distance-label",
-                    labelColor
-                ).attr("id", `waypoint-distance-label-${waypoint.id}`)
+                    x: (point.x + basePoint.x) / 2,
+                    y: (point.y + basePoint.y) / 2 - 5,
+                    text: `${dist.toFixed(2)} m`,
+                    hiddenOnExportKind: "distance-label",
+                    color: labelColor,
+                }).attr("id", `waypoint-distance-label-${waypoint.id}`)
             );
         }
 
@@ -93,7 +94,7 @@ export const WaypointArrow = React.memo(({ g, waypointId }: WaypointArrowProps) 
 
     const updatePosition = useCallback(() => {
         draw();
-    }, [g, draw]);
+    }, [draw]);
 
     useEffect(() => {
         map.on("move zoom zoomanim", updatePosition);

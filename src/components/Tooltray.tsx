@@ -17,10 +17,10 @@ import {
 import { DisablePropagation } from "./common/DisablePropagation";
 import { Divider } from "./common/Divider";
 import { useLocation } from "react-router";
-import { useMap } from "../context/MapContext";
 import { useInteractionModeStore } from "../stores/useInteractionMode";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { useHistoryStore } from "../stores/useHistory";
+import { useMap } from "../context/useMap";
 
 type ToolId =
     | "select"

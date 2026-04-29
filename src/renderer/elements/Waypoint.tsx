@@ -2,16 +2,16 @@ import React, { useCallback, useEffect } from "react";
 import { useWaypointStore, Waypoint as TWaypoint } from "../../stores/useWaypoints";
 import { useWaypointTypeStore, WaypointType } from "../../stores/useWaypointTypes";
 import { useWaypointGroupStore, WaypointGroup } from "../../stores/useGroups";
-import { renderMarker } from "../renderMarkers";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap, useMapContext } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { usePathStore } from "../../stores/usePaths";
 import { evaluationEventEmitter } from "../../utils/evaluation";
 import { useInteractionModeStore } from "../../stores/useInteractionMode";
 import { pathActions } from "../../domain/actions/paths";
 import { shapeActions } from "../../domain/actions/shapes";
+import { useMapContext } from "../../context/useMap";
+import { renderMarker } from "../markers/renderMarker";
 
 type WaypointProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -32,16 +32,14 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const storeWaypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id === waypointId));
     const waypoint = props.waypoint ?? storeWaypoint;
 
-    const { selectedWaypoint, setSelectedWaypoint } = useMapContext();
+    const { selectedWaypoint, setSelectedWaypoint, map } = useMapContext();
     const selectedId = useWaypointStore((state) => state.selectedId);
     const isSelected = selectedId === waypoint?.id;
-
-    const map = useMap();
 
     const storeType = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
     const type = props.type ?? storeType;
     const storeGroup = useWaypointGroupStore((state) =>
-        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId ?? -1)) : undefined
+        waypoint ? state.getWaypointGroupById(Number(waypoint.groupId ?? -1)) : undefined,
     );
     const group = props.group ?? storeGroup;
 
@@ -67,23 +65,23 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     useEffect(() => {
         if (!g || !waypoint || !type) return;
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
-        const renderedMarker = renderMarker(
+        const renderedMarker = renderMarker({
             g,
             point,
-            waypoint?.additionalText,
-            waypoint?.hidden ?? false,
-            selectedId === waypoint.id,
-            type.radiusOverride ? type.radiusOverride : waypointRadius,
+            additionalText: waypoint?.additionalText,
+            hidden: waypoint?.hidden ?? false,
+            isSelected: selectedId === waypoint.id,
+            radius: type.radiusOverride ? type.radiusOverride : waypointRadius,
             type,
             group,
-            waypointBorderWidth,
-            waypointBorderColor,
-            showWaypointBorder,
-            props.visualizeHiddenItems ?? true
-        );
+            borderWidth: waypointBorderWidth,
+            borderColor: waypointBorderColor,
+            showBorder: showWaypointBorder,
+            visualizeHiddenItems: props.visualizeHiddenItems ?? true,
+        });
 
         if (props.highlightType) {
-            renderedMarker.on("click", (e) => {
+            renderedMarker.on("click", (e: Event) => {
                 e.stopPropagation(); // This will stop the second click event from firing TODO: not clean
                 setSelectedWaypoint(waypoint);
                 evaluationEventEmitter.emit({
@@ -94,7 +92,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
                         waypointId: waypoint.id,
                         action: "labelSelect",
                     },
-                })
+                });
             });
 
             if (selectedWaypoint && selectedWaypoint.typeId !== waypoint.typeId) {
@@ -115,7 +113,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
                             pathActions.addSegment(
                                 activePathId,
                                 { waypointId: connectionStartedWaypointId },
-                                { waypointId: waypoint.id }
+                                { waypointId: waypoint.id },
                             );
                         }
                         cancelSegmentConnection();
@@ -141,7 +139,32 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         return () => {
             renderedMarker.remove();
         };
-    }, [waypoint, type, group, g, isSelected, waypointRadius, waypointBorderWidth, waypointBorderColor, showWaypointBorder, mode, map, segmentConnectionStarted, connectionStartedWaypointId, startSegmentConnection, cancelSegmentConnection, activePathId, activeShapeId, selectWaypoint, selectedWaypoint, props.disableSelection, props.visualizeHiddenItems, props.highlightType, selectedId, setSelectedWaypoint]);
+    }, [
+        waypoint,
+        type,
+        group,
+        g,
+        isSelected,
+        waypointRadius,
+        waypointBorderWidth,
+        waypointBorderColor,
+        showWaypointBorder,
+        mode,
+        map,
+        segmentConnectionStarted,
+        connectionStartedWaypointId,
+        startSegmentConnection,
+        cancelSegmentConnection,
+        activePathId,
+        activeShapeId,
+        selectWaypoint,
+        selectedWaypoint,
+        props.disableSelection,
+        props.visualizeHiddenItems,
+        props.highlightType,
+        selectedId,
+        setSelectedWaypoint,
+    ]);
 
     const updatePosition = useCallback(() => {
         if (!g || !waypoint) return;
@@ -152,7 +175,6 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         let xOffset = 0;
         let yOffset = 0;
 
-        // Check all children for offset attributes
         group.selectAll("*").each(function () {
             const el = d3.select(this);
             const x = Number(el.attr("icon-offset-x")) || 0;
@@ -163,7 +185,14 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             }
         });
 
-        group.attr("transform", `translate(${point.x - xOffset}, ${point.y - yOffset})`);
+        const existingTransform = group.attr("transform") ?? "";
+
+        const transformWithoutTranslate = existingTransform.replace(/translate\([^)]*\)/g, "").trim();
+
+        group.attr(
+            "transform",
+            `translate(${point.x - xOffset}, ${point.y - yOffset}) ${transformWithoutTranslate}`.trim(),
+        );
     }, [g, map, waypoint]);
 
     useEffect(() => {

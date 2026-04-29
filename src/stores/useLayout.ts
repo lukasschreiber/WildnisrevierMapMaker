@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getLocalStorageKey } from "../utils/keys";
 
-type LayoutStore = {
+interface LayoutStore {
     menuOpen: boolean;
     showSidebar: boolean;
     setShowSidebar: (show: boolean) => void;

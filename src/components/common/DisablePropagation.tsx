@@ -9,9 +9,7 @@ export function DisablePropagation(props: HTMLProps<HTMLDivElement>) {
             L.DomEvent.disableClickPropagation(containerRef.current);
             L.DomEvent.disableScrollPropagation(containerRef.current);
         }
-    }, [containerRef.current]);
+    }, []);
 
-    return (
-        <div ref={containerRef} {...props} />
-    );
+    return <div ref={containerRef} {...props} />;
 }

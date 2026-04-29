@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { usePathStore } from "../stores/usePaths";
-import { useMap } from "../context/MapContext";
 import { useLocation, useNavigate } from "react-router";
 import { useInteractionModeStore } from "../stores/useInteractionMode";
 import { waypointActions } from "../domain/actions/waypoints";
 import { useHistoryStore } from "../stores/useHistory";
+import { useMap } from "../context/useMap";
 
 function isTextInputTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) {
@@ -96,7 +96,7 @@ export function MapEventManager() {
                             return wp;
                     }
 
-                    waypointActions.updateWaypointPosition(wp.id, lat, lng);
+                    waypointActions.updateWaypoint(wp.id, { lat, lng });
                     break; // Exit the loop after updating the selected waypoint
                 }
             }

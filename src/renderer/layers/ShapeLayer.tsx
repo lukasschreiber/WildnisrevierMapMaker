@@ -1,8 +1,8 @@
 import React from "react";
-import { useLayer } from "../../context/LayerContext";
 import { Shape as TShape, useShapeStore } from "../../stores/useShapes";
 import { Shape } from "../elements/Shape";
 import { Waypoint } from "../../stores/useWaypoints";
+import { useLayer } from "../../context/useLayer";
 
 export function ShapeLayer(props: {
     shapes?: TShape[];

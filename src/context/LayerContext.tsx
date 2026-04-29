@@ -1,15 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useMap } from "../context/MapContext";
+import { useCallback, useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import * as d3 from "d3";
+import { LayerContext } from "./useLayer";
+import { useMap } from "./useMap";
 
 type GMap = Map<number, d3.Selection<SVGGElement, unknown, null, undefined>>;
-
-interface LayerContextType {
-    getLayer: (zIndex: number) => d3.Selection<SVGGElement, unknown, null, undefined> | null;
-}
-
-const LayerContext = createContext<LayerContextType | undefined>(undefined);
 
 export function LayerProvider({ children }: React.PropsWithChildren) {
     const map = useMap();
@@ -24,6 +19,7 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
         svgLayer.addTo(map);
 
         layerRef.current = svgLayer;
+        const gMap = gMapRef.current;
 
         const svg = d3.select(map.getPanes().overlayPane).select<SVGSVGElement>("svg");
         svg.attr("pointer-events", "auto");
@@ -31,8 +27,8 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
         setSvgReady(true);
 
         const updateLayerOrder = () => {
-            const gs = Array.from(gMapRef.current.entries()).sort(([a], [b]) => a - b);
-            gs.forEach(([_, g]) => {
+            const gs = Array.from(gMap.entries()).sort(([a], [b]) => a - b);
+            gs.forEach(([, g]) => {
                 svg.node()?.appendChild(g.node()!);
             });
         };
@@ -41,7 +37,7 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
 
         return () => {
             svgLayer.remove();
-            gMapRef.current.clear();
+            gMap.clear();
             svgRef.current = null;
             setSvgReady(false);
         };
@@ -65,7 +61,7 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
         gMapRef.current.set(zIndex, g);
 
         const sorted = Array.from(gMapRef.current.entries()).sort(([a], [b]) => a - b);
-        sorted.forEach(([_, layer]) => svg.node()?.appendChild(layer.node()!));
+        sorted.forEach(([, layer]) => svg.node()?.appendChild(layer.node()!));
 
         return g;
     }, []);
@@ -85,12 +81,4 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
     }, [isSvgReady, map]);
 
     return <LayerContext.Provider value={{ getLayer }}>{isSvgReady && children}</LayerContext.Provider>;
-}
-
-export function useLayer(zIndex: number) {
-    const context = useContext(LayerContext);
-    if (context === undefined) {
-        throw new Error("useLayer must be used within a LayerProvider");
-    }
-    return context.getLayer(zIndex);
 }

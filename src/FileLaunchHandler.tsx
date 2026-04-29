@@ -20,6 +20,7 @@ export function FileLaunchHandler() {
 
         if ("launchQueue" in window) {
             console.log("has launchQueue");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (window.launchQueue as any).setConsumer(async (launchParams: any) => {
                 if (!launchParams.files.length) return;
                 console.log("launchParams", launchParams);
@@ -54,14 +55,14 @@ export function FileLaunchHandler() {
                             clearHistory();
 
                             alert(`Imported ${file.name} successfully.`);
-                        } catch (error) {
+                        } catch {
                             alert("Failed to parse imported JSON file.");
                         }
                     }
                 }
             });
         }
-    }, []);
+    }, [clearHistory, setGroups, setPaths, setShapes, setTypes, setWaypoints]);
 
     return null;
 }

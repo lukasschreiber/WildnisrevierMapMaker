@@ -2,11 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getLocalStorageKey } from "../utils/keys";
 
-export type ShapeNode = {
+export interface ShapeNode {
     waypointId: number;
 };
 
-export type Shape = {
+export interface Shape {
     id: number;
     nodes: ShapeNode[];
     name: string;
@@ -22,7 +22,7 @@ export type Shape = {
     labelColor?: string;
 };
 
-type ShapeState = {
+interface ShapeState {
     shapes: Shape[];
     selectedId: number | null;
     addMode: boolean;

@@ -1,10 +1,10 @@
 import React from "react";
-import { useLayer } from "../../context/LayerContext";
 import { useWaypointStore, Waypoint as TWaypoint } from "../../stores/useWaypoints";
 import { Waypoint } from "../elements/Waypoint";
 import { WaypointLabel } from "../elements/WaypointLabel";
 import { WaypointType } from "../../stores/useWaypointTypes";
 import { WaypointGroup } from "../../stores/useGroups";
+import { useLayer } from "../../context/useLayer";
 
 export function WaypointLayer(props: {
     waypoints?: TWaypoint[];

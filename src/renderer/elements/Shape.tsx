@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import L from "leaflet";
 import * as d3 from "d3";
-import { useMap } from "../../context/MapContext";
 import { useSettingsStore } from "../../stores/useSettings";
 import { useShapeStore, Shape as TShape } from "../../stores/useShapes";
-import { renderShape } from "../renderShape";
+import { useMap } from "../../context/useMap";
+import { renderShape } from "../shapes/renderShape";
 
 type ShapeProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -63,7 +63,7 @@ export const Shape = React.memo(({ g, shapeId, order, ...props }: ShapeProps) =>
 
         const points = waypoints.map((waypoint) => map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)));
 
-        const rendered = renderShape(
+        const rendered = renderShape({
             map,
             g,
             shape,
@@ -71,9 +71,9 @@ export const Shape = React.memo(({ g, shapeId, order, ...props }: ShapeProps) =>
             showOriginalShapeEdges,
             showOriginalShapeVertices,
             showShapeControlPointEdges,
-            shapeLabelColor,
-            showSolidBlockBehindLabels
-        );
+            labelColor: shapeLabelColor,
+            showSolidBlockBehindLabel: showSolidBlockBehindLabels,
+        });
 
         if (rendered) {
             if (!existing.empty()) {

@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect } from "react";
-import { useLayer } from "../../context/LayerContext";
 import { Path as TPath, usePathStore } from "../../stores/usePaths";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import { Path } from "../elements/Path";
-import { useMap } from "../../context/MapContext";
 import L from "leaflet";
+import { useLayer } from "../../context/useLayer";
+import { useMap } from "../../context/useMap";
 
 export function PathLayer(props: { paths?: TPath[]; waypoints?: Waypoint[]; debugging?: boolean }) {
     const g = useLayer(10);
@@ -30,7 +30,7 @@ export function PathLayer(props: { paths?: TPath[]; waypoints?: Waypoint[]; debu
         if (!g) return;
         g.selectAll(".path-segment-preview").remove(); // Remove any existing preview lines
 
-        let pathSegmentPreview = g
+        const pathSegmentPreview = g
             .append("line")
             .attr("x1", 0)
             .attr("y1", 0)

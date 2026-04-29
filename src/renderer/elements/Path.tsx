@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { Path as TPath, usePathStore } from "../../stores/usePaths";
-import { useMap } from "../../context/MapContext";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import L from "leaflet";
-import { renderPath } from "../renderPath";
 import { useSettingsStore } from "../../stores/useSettings";
+import { useMap } from "../../context/useMap";
+import { renderPath } from "../paths/renderPath";
 
 type PathProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -60,7 +60,7 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
         }
 
         const points = waypoints.map((waypoint) => map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)));
-        const rendered = renderPath(
+        const rendered = renderPath({
             g,
             map,
             path,
@@ -68,8 +68,8 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
             hideOriginalPaths,
             hideFancyPaths,
             getWaypointById,
-            selectSegment
-        );
+            selectSegment,
+        });
 
         if (rendered) {
             if (!existing.empty()) {

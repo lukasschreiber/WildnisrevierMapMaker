@@ -8,7 +8,7 @@ export function useLocalStorage<T>(key_: string, defaultValue: T): [T, React.Dis
 
         try {
             currentValue = JSON.parse(localStorage.getItem(key) || String(defaultValue));
-        } catch (error) {
+        } catch {
             currentValue = defaultValue;
         }
 
