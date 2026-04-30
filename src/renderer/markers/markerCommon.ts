@@ -9,7 +9,6 @@ export type CommonMarkerOptions = {
     rotation: number;
     stroke: string;
     strokeWidth: number;
-    isSelected: boolean;
     isIcon: boolean;
     isHidden: boolean;
     visualizeHiddenItems: boolean;
@@ -25,7 +24,6 @@ export function applyMarkerCommonAttrs({
     rotation,
     stroke,
     strokeWidth,
-    isSelected,
     isIcon,
     isHidden,
     visualizeHiddenItems,
@@ -34,7 +32,7 @@ export function applyMarkerCommonAttrs({
     hasTwoColors,
 }: CommonMarkerOptions) {
     applyMarkerFill(g, target, fillColor, fillColor2, hasTwoColors);
-    applyMarkerOpacity(target, isSelected, isHidden);
+    applyMarkerOpacity(target, isHidden);
 
     if (isHidden && !visualizeHiddenItems) {
         target.attr("visibility", "hidden");

@@ -8,7 +8,6 @@ export function renderMarker({
     point,
     additionalText,
     hidden,
-    isSelected,
     radius,
     type,
     group,
@@ -22,6 +21,19 @@ export function renderMarker({
 
     const markerG = g.append("g").attr("class", "marker-group").attr("transform", `translate(${point.x}, ${point.y})`);
 
+    const selectionRadius = radius * 2;
+
+    markerG
+        .append("circle")
+        .attr("class", "waypoint-selection-ring")
+        .attr("r", selectionRadius)
+        .style("fill", "white")
+        .style("stroke", "white")
+        .style("stroke-width", 2)
+        .style("fill-opacity", 0.8)
+        .style("pointer-events", "none")
+        .style("display", "none");
+
     const shapeG = markerG.append("g").attr("class", "marker-shape");
 
     const commonOptions = {
@@ -30,8 +42,7 @@ export function renderMarker({
         point: { x: 0, y: 0 },
         rotation: type.rotation ?? 0,
         stroke: showBorder ? borderColor : "none",
-        strokeWidth: isSelected ? 2 : borderWidth,
-        isSelected,
+        strokeWidth: borderWidth,
         isIcon,
         isHidden,
         visualizeHiddenItems,
@@ -55,6 +66,8 @@ export function renderMarker({
     }
 
     appendMarkerLabel(markerG, additionalText, type.additionalText);
+
+    markerG.select(".waypoint-label").raise();
 
     return markerG;
 }

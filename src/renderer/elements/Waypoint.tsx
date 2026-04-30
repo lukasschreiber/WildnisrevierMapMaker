@@ -38,6 +38,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
     const storeType = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
     const type = props.type ?? storeType;
+
     const storeGroup = useWaypointGroupStore((state) =>
         waypoint ? state.getWaypointGroupById(Number(waypoint.groupId ?? -1)) : undefined,
     );
@@ -45,16 +46,20 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
     const storeWaypointRadius = useSettingsStore((state) => state.settings.waypointRadius);
     const waypointRadius = props.radius ?? storeWaypointRadius;
+
     const storeWaypointBorderColor = useSettingsStore((state) => state.settings.waypointBorderColor);
     const waypointBorderColor = props.borderColor ?? storeWaypointBorderColor;
+
     const storeShowWaypointBorder = useSettingsStore((state) => state.settings.showWaypointBorder);
     const showWaypointBorder = props.showBorder ?? storeShowWaypointBorder;
+
     const storeWaypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
     const waypointBorderWidth = props.borderWidth ?? storeWaypointBorderWidth;
 
     const mode = useInteractionModeStore((state) => state.mode);
     const activePathId = useInteractionModeStore((state) => state.activePathId);
     const activeShapeId = useInteractionModeStore((state) => state.activeShapeId);
+
     const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
     const startSegmentConnection = usePathStore((state) => state.startSegmentConnection);
     const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
@@ -64,13 +69,14 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
     useEffect(() => {
         if (!g || !waypoint || !type) return;
+
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
+
         const renderedMarker = renderMarker({
             g,
             point,
-            additionalText: waypoint?.additionalText,
-            hidden: waypoint?.hidden ?? false,
-            isSelected: selectedId === waypoint.id,
+            additionalText: waypoint.additionalText,
+            hidden: waypoint.hidden ?? false,
             radius: type.radiusOverride ? type.radiusOverride : waypointRadius,
             type,
             group,
@@ -80,10 +86,29 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             visualizeHiddenItems: props.visualizeHiddenItems ?? true,
         });
 
+        renderedMarker.attr("id", `waypoint-${waypoint.id}`).classed("waypoint", true);
+
+        const updateSelectionVisual = (selected: boolean) => {
+            renderedMarker.select(".waypoint-selection-ring").style("display", () => (selected ? null : "none"));
+            renderedMarker.select(".waypoint-label").raise();
+        };
+
+        updateSelectionVisual(isSelected);
+
+        renderedMarker
+            .on("mouseenter", () => {
+                updateSelectionVisual(true);
+            })
+            .on("mouseleave", () => {
+                updateSelectionVisual(selectedId === waypoint.id);
+            });
+
         if (props.highlightType) {
             renderedMarker.on("click", (e: Event) => {
-                e.stopPropagation(); // This will stop the second click event from firing TODO: not clean
+                e.stopPropagation();
+
                 setSelectedWaypoint(waypoint);
+
                 evaluationEventEmitter.emit({
                     name: "labelSelect",
                     timestamp: new Date(),
@@ -103,6 +128,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         if (!props.disableSelection) {
             renderedMarker.on("click", (event: MouseEvent) => {
                 event.stopPropagation();
+
                 if (mode === "path-edit") {
                     if (activePathId === null) {
                         return;
@@ -116,6 +142,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
                                 { waypointId: waypoint.id },
                             );
                         }
+
                         cancelSegmentConnection();
                     } else {
                         startSegmentConnection(waypoint.id);
@@ -126,15 +153,12 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
                     }
                 } else {
                     selectWaypoint(waypoint.id);
-                    if (waypoint) {
-                        const { lat, lng } = waypoint;
-                        map.setView([lat, lng], map.getZoom());
-                    }
+
+                    const { lat, lng } = waypoint;
+                    map.setView([lat, lng], map.getZoom());
                 }
             });
         }
-
-        renderedMarker.attr("id", `waypoint-${waypoint.id}`).classed("waypoint");
 
         return () => {
             renderedMarker.remove();
@@ -170,9 +194,9 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         if (!g || !waypoint) return;
 
         const point = map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng));
-        const group = g.select(`#waypoint-${waypoint.id}`);
+        const markerGroup = g.select(`#waypoint-${waypoint.id}`);
 
-        group.attr("transform", `translate(${point.x}, ${point.y})`);
+        markerGroup.attr("transform", `translate(${point.x}, ${point.y})`);
     }, [g, map, waypoint]);
 
     useEffect(() => {
@@ -181,7 +205,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         return () => {
             map.off("move zoom zoomanim", updatePosition);
         };
-    }, [map, g, waypoint, updatePosition]);
+    }, [map, updatePosition]);
 
     return null;
 }, areEqual);

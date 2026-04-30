@@ -24,7 +24,6 @@ export function LegendWaypointMarker(props: {
                 },
                 additionalText: type.additionalText ? "1" : undefined,
                 hidden: false,
-                isSelected: false,
                 radius: radius ?? defaultRadius,
                 type,
                 group: undefined,

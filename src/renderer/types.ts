@@ -16,7 +16,6 @@ export interface RenderMarkerOptions {
     point: RenderPoint;
     additionalText?: string;
     hidden: boolean;
-    isSelected: boolean;
     radius: number;
     type: WaypointType;
     group?: WaypointGroup;

@@ -33,9 +33,8 @@ export function applyMarkerFill<T extends SVGElement | d3.BaseType>(
 
 export function applyMarkerOpacity<T extends SVGElement | d3.BaseType>(
     waypoint: d3.Selection<T, unknown, null, undefined>,
-    isSelected: boolean,
     isHidden: boolean,
 ) {
-    const opacity = isHidden ? 0.1 : isSelected ? 0.5 : 1;
+    const opacity = isHidden ? 0.1 : 1;
     waypoint.style("opacity", opacity);
 }

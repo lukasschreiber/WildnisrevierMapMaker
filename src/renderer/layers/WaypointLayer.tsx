@@ -21,6 +21,7 @@ export function WaypointLayer(props: {
     highlightType?: boolean;
 }) {
     const g = useLayer(12);
+    const labelG = useLayer(13)
     const waypointsFromStore = useWaypointStore((state) => state.waypoints);
     const waypoints = props.waypoints ?? waypointsFromStore;
 
@@ -46,7 +47,7 @@ export function WaypointLayer(props: {
                     highlightType={props.highlightType}
                 />
                 <WaypointLabel
-                    g={g}
+                    g={labelG}
                     waypointId={waypoint.id}
                     waypoint={props.waypoints && waypoint}
                     type={type}
