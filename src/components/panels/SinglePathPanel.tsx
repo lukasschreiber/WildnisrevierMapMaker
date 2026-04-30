@@ -217,6 +217,7 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                     value={path.opacity}
                     onChange={(value) => pathActions.updatePath(path.id, { opacity: value })}
                     placeholder="Opacity"
+                    allowNull
                     min={0}
                     max={1}
                     step={0.01}

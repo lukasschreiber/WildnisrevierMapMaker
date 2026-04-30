@@ -38,6 +38,7 @@ export function MapEventManager() {
     const deselect = useInteractionsStore((state) => state.deselect);
     const clearSelection = useInteractionsStore((state) => state.clearSelection);
     const cancelPathConnection = useInteractionsStore((state) => state.cancelPathConnection);
+    const cancelRelativeWaypointCreation = useInteractionsStore((state) => state.cancelRelativeWaypointCreation);
 
     const selectedWaypointId = useMemo(
         () => (selectedWaypointIds.length > 0 ? selectedWaypointIds[selectedWaypointIds.length - 1] : null),
@@ -93,9 +94,10 @@ export function MapEventManager() {
             }
 
             cancelPathConnection();
+            cancelRelativeWaypointCreation();
             clearSelection();
         },
-        [mode, cancelPathConnection, clearSelection, selectOnly],
+        [mode, cancelPathConnection, cancelRelativeWaypointCreation, clearSelection, selectOnly],
     );
 
     const onKeyDown = useCallback(

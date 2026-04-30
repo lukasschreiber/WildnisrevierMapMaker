@@ -67,6 +67,7 @@ export function Tooltray() {
 
     const mode = useInteractionsStore((state) => state.mode);
     const setMode = useInteractionsStore((state) => state.setMode);
+    const startRelativeWaypointCreation = useInteractionsStore((state) => state.startRelativeWaypointCreation);
     const setCurrentPosition = useWaypointStore((state) => state.setCurrentPosition);
     const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
     const bulkDeleteWaypoints = useWaypointStore((state) => state.bulkDeleteWaypoints);
@@ -137,7 +138,11 @@ export function Tooltray() {
                     disabled: () => selectedWaypointIds.length === 0,
                     count: selectedWaypointIds.length,
                     onClick: () => {
-                        if (window.confirm(`Are you sure you want to delete ${selectedWaypointIds.length} selected waypoint(s)?`)) {
+                        if (
+                            window.confirm(
+                                `Are you sure you want to delete ${selectedWaypointIds.length} selected waypoint(s)?`,
+                            )
+                        ) {
                             bulkDeleteWaypoints(selectedWaypointIds);
                         }
                     },
@@ -147,7 +152,10 @@ export function Tooltray() {
                     label: "Marker+",
                     icon: CompassDraftingLinear,
                     selectable: false,
-                    disabled: () => true,
+                    disabled: () => selectedWaypointIds.length !== 1,
+                    onClick: () => {
+                        startRelativeWaypointCreation(selectedWaypointIds[0]);
+                    },
                 },
                 {
                     id: "locate",
@@ -188,7 +196,7 @@ export function Tooltray() {
                 },
             ],
         ];
-    }, [selectedWaypointIds.length, setMode, setCurrentPosition, map, canUndo, undo, canRedo, redo]);
+    }, [selectedWaypointIds, setMode, bulkDeleteWaypoints, startRelativeWaypointCreation, setCurrentPosition, map, canUndo, undo, canRedo, redo]);
 
     const location = useLocation();
     const isPanelVisible = location.pathname !== "/";

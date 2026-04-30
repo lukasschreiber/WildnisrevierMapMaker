@@ -24,6 +24,7 @@
     "events": "^3.3.0",
     "framer-motion": "^12.23.9",
     "leaflet": "^1.9.4",
+    "leaflet-geometryutil": "^0.10.3",
     "maplibre-gl": "4.7.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

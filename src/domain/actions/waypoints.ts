@@ -1,12 +1,18 @@
 import { executeHistoryAction } from "../history/executeHistoryAction";
 import { usePathStore } from "../../stores/usePaths";
-import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
+import { AddRelativeWaypointOptions, useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import { useInteractionsStore } from "../../stores/useInteractions";
 
 export const waypointActions = {
     addWaypoint: (lat: number, lng: number, baseId?: number, name?: string, typeId?: number, groupId?: number): number => {
         return executeHistoryAction("Add waypoint", ["waypoints"], () => {
             return useWaypointStore.getState().addWaypoint(lat, lng, baseId, name, typeId, groupId);
+        });
+    },
+
+    addRelativeWaypoint: (options: AddRelativeWaypointOptions): number => {
+        return executeHistoryAction("Add relative waypoint", ["waypoints"], () => {
+            return useWaypointStore.getState().addRelativeWaypoint(options);
         });
     },
 

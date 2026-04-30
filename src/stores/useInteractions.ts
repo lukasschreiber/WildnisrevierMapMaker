@@ -4,6 +4,7 @@ import { getLocalStorageKey } from "../utils/keys";
 import { usePathStore } from "./usePaths";
 import { pathActions } from "../domain/actions/paths";
 import { canAppendToPath, findExtendablePathFromWaypoint } from "../renderer/paths/pathUtils";
+import { waypointActions } from "../domain/actions/waypoints";
 
 export type InteractionMode = "select" | "waypoint-add" | "path-edit" | "shape-edit";
 
@@ -18,6 +19,12 @@ type NewWaypointConfig = {
 type PathEdit = {
     connectionStartedWaypointId: number | null;
     selectedSegmentId: number | null;
+};
+
+type RelativeWaypointDraft = {
+    startWaypointId: number | null;
+    bearing: number;
+    distance: number;
 };
 
 type SelectionKey = "selectedWaypointIds" | "selectedPathIds" | "selectedShapeIds";
@@ -39,6 +46,13 @@ interface InteractionModeState {
     selectedWaypointIds: number[];
     selectedPathIds: number[];
     selectedShapeIds: number[];
+
+    relativeWaypoint: RelativeWaypointDraft;
+    setRelativeWaypointBearing: (bearing: number) => void;
+    setRelativeWaypointDistance: (distance: number) => void;
+    startRelativeWaypointCreation: (startWaypointId: number) => void;
+    createRelativeWaypoint: () => number;
+    cancelRelativeWaypointCreation: () => void;
 
     isSelected: (entity: SelectableEntity, id: number) => boolean;
     select: (entity: SelectableEntity, id: number) => void;
@@ -72,6 +86,69 @@ export const useInteractionsStore = create<InteractionModeState>()(
             },
 
             newWaypointConfig: defaultNewWaypointConfig,
+
+            relativeWaypoint: {
+                startWaypointId: null,
+                bearing: 45,
+                distance: 12,
+            },
+
+            setRelativeWaypointBearing: (bearing) => {
+                set((state) => ({
+                    relativeWaypoint: {
+                        ...state.relativeWaypoint,
+                        bearing,
+                    },
+                }));
+            },
+
+            setRelativeWaypointDistance: (distance) => {
+                set((state) => ({
+                    relativeWaypoint: {
+                        ...state.relativeWaypoint,
+                        distance,
+                    },
+                }));
+            },
+
+            startRelativeWaypointCreation: (startWaypointId) => {
+                set((state) => ({
+                    relativeWaypoint: {
+                        ...state.relativeWaypoint,
+                        startWaypointId,
+                    },
+                }));
+            },
+
+            createRelativeWaypoint: () => {
+                const { startWaypointId, bearing, distance } = get().relativeWaypoint;
+
+                if (startWaypointId === null) throw new Error("No start waypoint selected for relative waypoint creation");
+
+                const newId = waypointActions.addRelativeWaypoint({
+                    startWaypointId,
+                    bearing,
+                    distance,
+                });
+
+                set((state) => ({
+                    relativeWaypoint: {
+                        ...state.relativeWaypoint,
+                        startWaypointId: null,
+                    },
+                }));
+
+                return newId;
+            },
+
+            cancelRelativeWaypointCreation: () => {
+                set((state) => ({
+                    relativeWaypoint: {
+                        ...state.relativeWaypoint,
+                        startWaypointId: null,
+                    },
+                }));
+            },
 
             updateNewWaypointConfig: (config) => {
                 set((state) => ({
@@ -145,7 +222,7 @@ export const useInteractionsStore = create<InteractionModeState>()(
                     selectedShapeIds: entity === "shape" ? [id] : [],
                 });
             },
-            
+
             pathEdit: {
                 selectedSegmentId: null,
                 connectionStartedWaypointId: null,
@@ -232,6 +309,7 @@ export const useInteractionsStore = create<InteractionModeState>()(
                 selectedPathIds: state.selectedPathIds,
                 selectedShapeIds: state.selectedShapeIds,
                 pathEdit: state.pathEdit,
+                relativeWaypoint: state.relativeWaypoint,
             }),
         },
     ),

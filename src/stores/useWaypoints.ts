@@ -18,6 +18,14 @@ export interface Waypoint {
     hidden?: boolean;
 }
 
+export interface AddRelativeWaypointOptions {
+    name?: string;
+    typeId?: number;
+    startWaypointId: number;
+    distance: number;
+    bearing: number;
+}
+
 export interface WaypointState {
     waypoints: Waypoint[];
 
@@ -33,7 +41,7 @@ export interface WaypointState {
         typeId?: number,
         groupId?: number,
     ) => number;
-    addRelativeWaypoint: (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => number;
+    addRelativeWaypoint: (options: AddRelativeWaypointOptions) => number;
 
     deleteWaypoint: (id: number) => void;
     getWaypointById: (id: number) => Waypoint | undefined;
@@ -76,11 +84,12 @@ export const useWaypointStore = create<WaypointState>()(
                 return id;
             },
 
-            addRelativeWaypoint: (baseId, distance, bearing, name, typeId) => {
-                const base = get().waypoints.find((w) => w.id === baseId);
-                if (!base) throw new Error(`Base waypoint with id ${baseId} not found`);
-                const { lat, lng } = calculateRelativeWaypoint(base.lat, base.lng, distance, bearing);
-                return get().addWaypoint(lat, lng, baseId, name, typeId);
+            // TODO: This should only store the distance and bearing, the lat/lng should be calculated when rendering
+            addRelativeWaypoint: (options: AddRelativeWaypointOptions) => {
+                const base = get().waypoints.find((w) => w.id === options.startWaypointId);
+                if (!base) throw new Error(`Base waypoint with id ${options.startWaypointId} not found`);
+                const { lat, lng } = calculateRelativeWaypoint(base.lat, base.lng, options.distance, options.bearing);
+                return get().addWaypoint(lat, lng, options.startWaypointId, options.name, options.typeId);
             },
 
             deleteWaypoint: (id) => {
