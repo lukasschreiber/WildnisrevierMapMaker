@@ -8,8 +8,16 @@ import { TextInput } from "../controls/TextInput";
 import { Divider } from "../common/Divider";
 import { Select } from "../controls/Select";
 import { useWaypointGroupStore } from "../../stores/useGroups";
-import { CloneLinear, EyeLinear, EyeSlashLinear, FolderPlusLinear, ShapesLinear, TrashLinear } from "@lukasschreiber/icons";
+import {
+    CloneLinear,
+    EyeLinear,
+    EyeSlashLinear,
+    FolderPlusLinear,
+    ShapesLinear,
+    TrashLinear,
+} from "@lukasschreiber/icons";
 import { waypointActions } from "../../domain/actions/waypoints";
+import { useInteractionsStore } from "../../stores/useInteractions";
 
 export interface SingleWaypointPanelProps {
     waypointId: string;
@@ -27,7 +35,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
     const waypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id.toString() === waypointId));
     const types = useWaypointTypeStore((state) => state.types);
     const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
-    const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
+    const deselect = useInteractionsStore((state) => state.deselect);
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const navigate = useNavigate();
 
@@ -85,12 +93,8 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                             return;
                         }
 
-                        if (!window.confirm("Are you sure you want to delete this waypoint?")) {
-                            return;
-                        }
-
                         waypointActions.deleteWaypointWithDependencies(waypoint.id);
-                        deselectWaypoint();
+                        deselect("waypoint", waypoint.id);
                         navigate("/");
                     }}
                     color="red"

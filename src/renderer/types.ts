@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import L from "leaflet";
 import { WaypointGroup } from "../stores/useGroups";
-import { Path, PathSegment } from "../stores/usePaths";
+import { Path } from "../stores/usePaths";
 import { Shape } from "../stores/useShapes";
 import { Waypoint } from "../stores/useWaypoints";
 import { WaypointType } from "../stores/useWaypointTypes";
@@ -57,22 +57,7 @@ export interface RenderPathOptions {
     hideFancyPaths: boolean;
     getWaypointById: (id: number) => Waypoint | undefined;
     selectSegment: (id: number) => void;
-}
-
-export interface RenderSegmentsOptions {
-    g: RenderGroupSelection;
-    map: L.Map;
-    segments: PathSegment[];
-    getWaypointById: (id: number) => Waypoint | undefined;
-    useUniqueColors: boolean;
-    pathWidth: number;
-    pathColor: string;
-    pathOutlineWidth: number;
-    pathOutlineColor: string;
-    hideOriginalPaths: boolean;
-    hideFancyPaths: boolean;
-    tension: number;
-    selectSegment: (id: number) => void;
+    selected?: boolean;
 }
 
 export interface RenderShapeOptions {

@@ -7,7 +7,7 @@ export interface WaypointGroup {
     id: number;
     name: string;
     hidden: boolean;
-};
+}
 
 interface WaypointGroupStore {
     waypointGroups: WaypointGroup[];
@@ -17,7 +17,7 @@ interface WaypointGroupStore {
     getWaypointGroupById: (id: number) => WaypointGroup | undefined;
     isDeletable: (id: number) => boolean;
     setWaypointGroups: (groups: WaypointGroup[]) => void;
-};
+}
 
 export const useWaypointGroupStore = create<WaypointGroupStore>()(
     persist(
@@ -31,18 +31,14 @@ export const useWaypointGroupStore = create<WaypointGroupStore>()(
             },
 
             removeWaypointGroup: (id) => {
-                if (confirm("Are you sure you want to delete this waypoint group?")) {
-                    set((state) => ({
-                        waypointGroups: state.waypointGroups.filter((group) => group.id !== id),
-                    }));
-                }
+                set((state) => ({
+                    waypointGroups: state.waypointGroups.filter((group) => group.id !== id),
+                }));
             },
 
             updateWaypointGroup: (id, group) => {
                 set((state) => ({
-                    waypointGroups: state.waypointGroups.map((g) =>
-                        g.id === id ? { ...g, ...group } : g
-                    ),
+                    waypointGroups: state.waypointGroups.map((g) => (g.id === id ? { ...g, ...group } : g)),
                 }));
             },
 
@@ -61,6 +57,6 @@ export const useWaypointGroupStore = create<WaypointGroupStore>()(
         }),
         {
             name: getLocalStorageKey("waypoint_groups"),
-        }
-    )
+        },
+    ),
 );

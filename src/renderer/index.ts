@@ -9,7 +9,6 @@ export * from "./markers/markerFill";
 export * from "./markers/markerPaths";
 
 export * from "./paths/renderPath";
-export * from "./paths/renderSegments";
 export * from "./paths/pathGraph";
 
 export * from "./shapes/renderShape";

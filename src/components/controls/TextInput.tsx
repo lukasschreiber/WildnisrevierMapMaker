@@ -1,8 +1,9 @@
+import { ReactNode } from "react";
 import { FormControl, InputProps } from "./FormControl";
 
 export interface TextInputProps extends InputProps<string, HTMLInputElement> {
-    label?: string;
-    helpText?: string;
+    label?: ReactNode;
+    helpText?: ReactNode;
 }
 
 export function TextInput({ label, helpText, id, className, value, onChange, ...rest }: TextInputProps) {

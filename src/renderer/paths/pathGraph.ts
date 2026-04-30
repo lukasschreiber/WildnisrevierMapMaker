@@ -1,5 +1,6 @@
 import { PathSegment } from "../../stores/usePaths";
 
+// This is only used to convert the old segments format to the new paths format. The new paths format should be used everywhere else in the codebase and the segments format should be removed in the future.
 export function getPaths(segments: PathSegment[]): number[][] {
     const connections = buildConnections(segments);
     const visited = new Set<number>();

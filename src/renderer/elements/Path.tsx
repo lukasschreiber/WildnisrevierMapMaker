@@ -5,6 +5,7 @@ import L from "leaflet";
 import { useSettingsStore } from "../../stores/useSettings";
 import { useMap } from "../../context/useMap";
 import { renderPath } from "../paths/renderPath";
+import { useInteractionsStore } from "../../stores/useInteractions";
 
 type PathProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -15,6 +16,12 @@ type PathProps = {
     debugging?: boolean;
 };
 
+function getOrderedWaypointIdsFromSegments(path: TPath): number[] {
+    if (path.segments.length === 0) return [];
+
+    return [path.segments[0].from.waypointId, ...path.segments.map((segment) => segment.to.waypointId)];
+}
+
 export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
     const map = useMap();
     const renderedOrder = useRef(order);
@@ -23,19 +30,24 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
     const path = props.path ?? pathFromStore;
 
     const getWaypointById = useWaypointStore((state) => state.getWaypointById);
-    const selectSegment = usePathStore((state) => state.selectSegment);
+
+    const select = useInteractionsStore((state) => state.select);
+    const selectOnly = useInteractionsStore((state) => state.selectOnly);
+    const selectSegment = useInteractionsStore((state) => state.selectSegment);
+    const isPathSelected = useInteractionsStore((state) => (path ? state.isSelected("path", path.id) : false));
 
     const storeAllWaypoints = useWaypointStore((state) => state.waypoints);
     const allWaypoints = props.waypoints ?? storeAllWaypoints;
 
     const waypoints = useMemo(() => {
         if (!path) return [];
+
         const waypointMap = new Map(allWaypoints.map((wp) => [wp.id, wp]));
-        // TODO: Not really good, the path could be unsteady...
-        const waypoints = path.segments.map((s) => waypointMap.get(s.from.waypointId)!).filter(Boolean);
-        if (path.segments.length === 0) return [];
-        waypoints.push(waypointMap.get(path.segments[path.segments.length - 1].to.waypointId)!);
-        return waypoints;
+        const waypointIds = getOrderedWaypointIdsFromSegments(path);
+
+        return waypointIds
+            .map((id) => waypointMap.get(id))
+            .filter((waypoint): waypoint is Waypoint => Boolean(waypoint));
     }, [allWaypoints, path]);
 
     const storeHideFancyPaths = useSettingsStore((state) => state.settings.hideFancyPaths);
@@ -60,6 +72,12 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
         }
 
         const points = waypoints.map((waypoint) => map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)));
+
+        if (points.length < 2) {
+            existing.remove();
+            return;
+        }
+
         const rendered = renderPath({
             g,
             map,
@@ -69,17 +87,40 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
             hideFancyPaths,
             getWaypointById,
             selectSegment,
+            selected: isPathSelected, 
         });
 
-        if (rendered) {
-            if (!existing.empty()) {
-                const node = existing.node()! as SVGElement;
-                node.replaceWith(rendered.node()!);
+        if (!rendered) return;
+
+        rendered.attr("id", `path-${path.id}`).classed("path", true).classed("path-selected", isPathSelected);
+
+        rendered.selectAll("path, line, polyline").classed("path-selected", isPathSelected);
+
+        const handlePathClick = (event: MouseEvent) => {
+            event.stopPropagation();
+
+            if (event.shiftKey) {
+                select("path", path.id);
             } else {
-                g.node()?.appendChild(rendered.node()!);
+                selectOnly("path", path.id);
             }
+        };
+
+        rendered.on("click.selection", handlePathClick);
+
+        rendered.selectAll("path").on("click.selection", handlePathClick);
+
+        if (isPathSelected) {
+            rendered.raise();
         }
-    }, [g, path, waypoints, map, getWaypointById, selectSegment, order, hideFancyPaths, hideOriginalPaths]);
+
+        if (!existing.empty()) {
+            const node = existing.node()! as SVGElement;
+            node.replaceWith(rendered.node()!);
+        } else {
+            g.node()?.appendChild(rendered.node()!);
+        }
+    }, [g, path, waypoints, map, getWaypointById, selectSegment, order, hideFancyPaths, hideOriginalPaths, isPathSelected, select, selectOnly]);
 
     React.useEffect(() => {
         draw();
@@ -100,5 +141,30 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
 }, areEqual);
 
 function areEqual(prev: PathProps, next: PathProps) {
-    return prev.pathId === next.pathId && prev.g === next.g && prev.order === next.order;
+    if (
+        prev.pathId !== next.pathId ||
+        prev.g !== next.g ||
+        prev.order !== next.order ||
+        prev.debugging !== next.debugging ||
+        prev.path !== next.path
+    ) {
+        return false;
+    }
+
+    if (prev.waypoints === next.waypoints) return true;
+    if (!prev.waypoints || !next.waypoints) return prev.waypoints === next.waypoints;
+    if (prev.waypoints.length !== next.waypoints.length) return false;
+
+    return prev.waypoints.every((wp, index) => {
+        const nextWp = next.waypoints![index];
+
+        return (
+            wp.id === nextWp.id &&
+            wp.lat === nextWp.lat &&
+            wp.lng === nextWp.lng &&
+            wp.hidden === nextWp.hidden &&
+            wp.typeId === nextWp.typeId &&
+            wp.groupId === nextWp.groupId
+        );
+    });
 }

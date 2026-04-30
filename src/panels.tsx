@@ -9,7 +9,9 @@ import { usePathStore } from "./stores/usePaths";
 import { useWaypointGroupStore } from "./stores/useGroups";
 import { useShapeStore } from "./stores/useShapes";
 import { PathsPanel } from "./components/panels/PathsPanel";
-import { CodeBranchLinear, DrawSquareLinear, FolderLinear, LocationPinLinear, ScribbleLinear, ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
+import { CodeBranchLinear, DrawSquareLinear, FolderLinear, LocationPinLinear, RefreshCcwClockLinear, ScribbleLinear, ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
+import { HistoryPanel } from "./components/panels/HistoryPanel";
+import { SettingsPanel } from "./components/panels/SettingsPanel";
 
 export function usePanels(): PanelGroupConfig[] {
     const waypointTypesCount = useWaypointTypeStore((state) => Object.values(state.types).length);
@@ -69,6 +71,13 @@ export function usePanels(): PanelGroupConfig[] {
                     path: "/layout",
                     pinnable: true,
                 },
+                {
+                    title: "History",
+                    icon: RefreshCcwClockLinear,
+                    component: HistoryPanel,
+                    path: "/history",
+                    pinnable: true,
+                }
             ],
         },
         {
@@ -84,7 +93,7 @@ export function usePanels(): PanelGroupConfig[] {
                 {
                     title: "Settings",
                     icon: SlidersLinear, // Cog
-                    component: () => <Panel title="Settings Panel"></Panel>, // Placeholder for SettingsPanel
+                    component: SettingsPanel,
                     path: "settings",
                     pinnable: true,
                 },

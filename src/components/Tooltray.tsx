@@ -17,7 +17,7 @@ import {
 import { DisablePropagation } from "./common/DisablePropagation";
 import { Divider } from "./common/Divider";
 import { useLocation } from "react-router";
-import { useInteractionModeStore } from "../stores/useInteractionMode";
+import { useInteractionsStore } from "../stores/useInteractions";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { useHistoryStore } from "../stores/useHistory";
 import { useMap } from "../context/useMap";
@@ -41,6 +41,7 @@ type ToolDefinition = {
     selectable?: boolean;
     disabled?: () => boolean;
     onClick?: () => void;
+    count?: number;
 };
 
 type ToolGroup = ToolDefinition[];
@@ -64,12 +65,11 @@ function getSelectedToolIdFromState(mode: "select" | "waypoint-add" | "path-edit
 export function Tooltray() {
     const [isOpen, setIsOpen] = useState(true);
 
-    const mode = useInteractionModeStore((state) => state.mode);
-    const activateSelect = useInteractionModeStore((state) => state.activateSelect);
-    const activateWaypointAdd = useInteractionModeStore((state) => state.activateWaypointAdd);
-    const activatePathEdit = useInteractionModeStore((state) => state.activatePathEdit);
-    const activateShapeEdit = useInteractionModeStore((state) => state.activateShapeEdit);
+    const mode = useInteractionsStore((state) => state.mode);
+    const setMode = useInteractionsStore((state) => state.setMode);
     const setCurrentPosition = useWaypointStore((state) => state.setCurrentPosition);
+    const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
+    const bulkDeleteWaypoints = useWaypointStore((state) => state.bulkDeleteWaypoints);
     const canUndo = useHistoryStore((state) => state.canUndo());
     const canRedo = useHistoryStore((state) => state.canRedo());
     const undo = useHistoryStore((state) => state.undo);
@@ -88,7 +88,7 @@ export function Tooltray() {
                     icon: CursorLinear,
                     selectable: true,
                     onClick: () => {
-                        activateSelect();
+                        setMode("select");
                     },
                 },
                 {
@@ -97,7 +97,7 @@ export function Tooltray() {
                     icon: RulerLinear,
                     selectable: true,
                     onClick: () => {
-                        activateSelect();
+                        setMode("select");
                     },
                 },
                 {
@@ -106,7 +106,7 @@ export function Tooltray() {
                     icon: LocationPlusLinear,
                     selectable: true,
                     onClick: () => {
-                        activateWaypointAdd();
+                        setMode("waypoint-add");
                     },
                 },
                 {
@@ -115,7 +115,7 @@ export function Tooltray() {
                     icon: ScribbleLinear,
                     selectable: true,
                     onClick: () => {
-                        activatePathEdit();
+                        setMode("path-edit");
                     },
                 },
                 {
@@ -124,7 +124,7 @@ export function Tooltray() {
                     icon: DrawSquareLinear,
                     selectable: true,
                     onClick: () => {
-                        activateShapeEdit();
+                        setMode("shape-edit");
                     },
                 },
             ],
@@ -134,7 +134,13 @@ export function Tooltray() {
                     label: "Delete",
                     icon: TrashLinear,
                     selectable: false,
-                    disabled: () => true,
+                    disabled: () => selectedWaypointIds.length === 0,
+                    count: selectedWaypointIds.length,
+                    onClick: () => {
+                        if (window.confirm(`Are you sure you want to delete ${selectedWaypointIds.length} selected waypoint(s)?`)) {
+                            bulkDeleteWaypoints(selectedWaypointIds);
+                        }
+                    },
                 },
                 {
                     id: "relative-marker",
@@ -182,7 +188,7 @@ export function Tooltray() {
                 },
             ],
         ];
-    }, [activateSelect, activateWaypointAdd, activatePathEdit, activateShapeEdit, setCurrentPosition, map, canUndo, undo, canRedo, redo]);
+    }, [selectedWaypointIds.length, setMode, setCurrentPosition, map, canUndo, undo, canRedo, redo]);
 
     const location = useLocation();
     const isPanelVisible = location.pathname !== "/";
@@ -235,7 +241,7 @@ export function Tooltray() {
                                                         tool.onClick?.();
                                                     }}
                                                     className={[
-                                                        "flex w-10 flex-col items-center justify-center rounded-md p-1 transition-colors",
+                                                        "flex w-10 flex-col items-center justify-center rounded-md p-1 transition-colors relative",
                                                         isSelected
                                                             ? "bg-blue-100 text-blue-500 hover:bg-blue-200"
                                                             : "text-gray-600 hover:bg-gray-100",
@@ -248,6 +254,11 @@ export function Tooltray() {
                                                 >
                                                     <Icon className="h-4 w-4" />
                                                     <div className="text-[7pt]">{tool.label}</div>
+                                                    {tool.count !== undefined && tool.count > 0 && (
+                                                        <div className="absolute right-2 bottom-4 w-3 h-3 rounded-full bg-blue-500 text-white text-[5pt] flex items-center justify-center">
+                                                            {Math.min(tool.count, 99)}
+                                                        </div>
+                                                    )}
                                                 </button>
                                             );
                                         })}

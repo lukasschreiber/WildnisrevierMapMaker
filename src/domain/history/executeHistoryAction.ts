@@ -45,15 +45,14 @@ function createHistoryStep(label: string, mutations: HistoryMutation[]): History
     };
 }
 
-export function executeHistoryAction(
+export function executeHistoryAction<T>(
     label: string,
     targets: HistoryTarget[],
-    action: () => void,
-): void {
+    action: () => T,
+): T {
     const historyState = useHistoryStore.getState();
     if (historyState.isReplaying) {
-        action();
-        return;
+        return action();
     }
 
     const before = new Map<HistoryTarget, unknown>();
@@ -61,7 +60,7 @@ export function executeHistoryAction(
         before.set(target, getTargetState(target));
     }
 
-    action();
+    const result = action();
 
     const mutations: HistoryMutation[] = [];
     for (const target of targets) {
@@ -80,8 +79,9 @@ export function executeHistoryAction(
     }
 
     if (mutations.length === 0) {
-        return;
+        return result;
     }
 
     useHistoryStore.getState().pushStep(createHistoryStep(label, mutations));
+    return result;
 }

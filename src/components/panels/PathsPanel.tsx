@@ -108,7 +108,13 @@ const SortablePathRow = memo(({ pathId }: { pathId: number }) => {
                         navigate(`/paths/${path.id}`);
                     }}
                 >
-                    <div>{path.name}</div>
+                    <div className="flex items-center gap-2">
+                        <svg width="16" height="16">
+                            <circle cx="8" cy="8" r="7" fill={path.color} stroke={path.outlineColor} />
+                        </svg>
+                        <div>{pathId}</div>
+                        <div>{path.name}</div>
+                    </div>
                     <button
                         onClick={(e) => {
                             e.stopPropagation();

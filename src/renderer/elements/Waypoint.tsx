@@ -5,11 +5,8 @@ import { useWaypointGroupStore, WaypointGroup } from "../../stores/useGroups";
 import L from "leaflet";
 import * as d3 from "d3";
 import { useSettingsStore } from "../../stores/useSettings";
-import { usePathStore } from "../../stores/usePaths";
 import { evaluationEventEmitter } from "../../utils/evaluation";
-import { useInteractionModeStore } from "../../stores/useInteractionMode";
-import { pathActions } from "../../domain/actions/paths";
-import { shapeActions } from "../../domain/actions/shapes";
+import { useInteractionsStore } from "../../stores/useInteractions";
 import { useMapContext } from "../../context/useMap";
 import { renderMarker } from "../markers/renderMarker";
 
@@ -33,8 +30,13 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const waypoint = props.waypoint ?? storeWaypoint;
 
     const { selectedWaypoint, setSelectedWaypoint, map } = useMapContext();
-    const selectedId = useWaypointStore((state) => state.selectedId);
-    const isSelected = selectedId === waypoint?.id;
+
+    const mode = useInteractionsStore((state) => state.mode);
+    const select = useInteractionsStore((state) => state.select);
+    const selectOnly = useInteractionsStore((state) => state.selectOnly);
+    const isWaypointSelected = useInteractionsStore((state) =>
+        waypoint ? state.isSelected("waypoint", waypoint.id) : false,
+    );
 
     const storeType = useWaypointTypeStore((state) => (waypoint ? state.getTypeById(waypoint.typeId) : undefined));
     const type = props.type ?? storeType;
@@ -56,16 +58,11 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const storeWaypointBorderWidth = useSettingsStore((state) => state.settings.waypointBorderWidth);
     const waypointBorderWidth = props.borderWidth ?? storeWaypointBorderWidth;
 
-    const mode = useInteractionModeStore((state) => state.mode);
-    const activePathId = useInteractionModeStore((state) => state.activePathId);
-    const activeShapeId = useInteractionModeStore((state) => state.activeShapeId);
+    const connectionStartedWaypointId = useInteractionsStore((state) => state.pathEdit.connectionStartedWaypointId);
+    const startPathConnection = useInteractionsStore((state) => state.startPathConnection);
+    const endPathConnection = useInteractionsStore((state) => state.endPathConnection);
 
-    const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
-    const startSegmentConnection = usePathStore((state) => state.startSegmentConnection);
-    const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
-    const connectionStartedWaypointId = usePathStore((state) => state.connectionStartedWaypointId);
-
-    const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
+    const segmentConnectionStarted = connectionStartedWaypointId !== null;
 
     useEffect(() => {
         if (!g || !waypoint || !type) return;
@@ -90,22 +87,23 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
         const updateSelectionVisual = (selected: boolean) => {
             renderedMarker.select(".waypoint-selection-ring").style("display", () => (selected ? null : "none"));
+
             renderedMarker.select(".waypoint-label").raise();
         };
 
-        updateSelectionVisual(isSelected);
+        updateSelectionVisual(isWaypointSelected);
 
         renderedMarker
             .on("mouseenter", () => {
                 updateSelectionVisual(true);
             })
             .on("mouseleave", () => {
-                updateSelectionVisual(selectedId === waypoint.id);
+                updateSelectionVisual(isWaypointSelected);
             });
 
         if (props.highlightType) {
-            renderedMarker.on("click", (e: Event) => {
-                e.stopPropagation();
+            renderedMarker.on("click.highlight-type", (event: Event) => {
+                event.stopPropagation();
 
                 setSelectedWaypoint(waypoint);
 
@@ -126,36 +124,26 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         }
 
         if (!props.disableSelection) {
-            renderedMarker.on("click", (event: MouseEvent) => {
+            renderedMarker.on("click.selection", (event: MouseEvent) => {
                 event.stopPropagation();
 
                 if (mode === "path-edit") {
-                    if (activePathId === null) {
+                    if (connectionStartedWaypointId !== null) {
+                        endPathConnection(waypoint.id);
                         return;
                     }
 
-                    if (segmentConnectionStarted) {
-                        if (connectionStartedWaypointId !== null && connectionStartedWaypointId !== waypoint.id) {
-                            pathActions.addSegment(
-                                activePathId,
-                                { waypointId: connectionStartedWaypointId },
-                                { waypointId: waypoint.id },
-                            );
-                        }
+                    startPathConnection(waypoint.id);
+                }
 
-                        cancelSegmentConnection();
+                if (mode === "select") {
+                    if (event.shiftKey) {
+                        select("waypoint", waypoint.id);
                     } else {
-                        startSegmentConnection(waypoint.id);
+                        selectOnly("waypoint", waypoint.id);
                     }
-                } else if (mode === "shape-edit") {
-                    if (activeShapeId !== null) {
-                        shapeActions.addNode(activeShapeId, waypoint.id);
-                    }
-                } else {
-                    selectWaypoint(waypoint.id);
 
-                    const { lat, lng } = waypoint;
-                    map.setView([lat, lng], map.getZoom());
+                    map.setView([waypoint.lat, waypoint.lng], map.getZoom());
                 }
             });
         }
@@ -164,30 +152,28 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
             renderedMarker.remove();
         };
     }, [
+        g,
         waypoint,
         type,
         group,
-        g,
-        isSelected,
+        map,
+        mode,
+        select,
+        isWaypointSelected,
         waypointRadius,
         waypointBorderWidth,
         waypointBorderColor,
         showWaypointBorder,
-        mode,
-        map,
         segmentConnectionStarted,
         connectionStartedWaypointId,
-        startSegmentConnection,
-        cancelSegmentConnection,
-        activePathId,
-        activeShapeId,
-        selectWaypoint,
         selectedWaypoint,
+        setSelectedWaypoint,
         props.disableSelection,
         props.visualizeHiddenItems,
         props.highlightType,
-        selectedId,
-        setSelectedWaypoint,
+        selectOnly,
+        endPathConnection,
+        startPathConnection,
     ]);
 
     const updatePosition = useCallback(() => {

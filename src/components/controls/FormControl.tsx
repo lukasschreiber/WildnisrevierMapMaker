@@ -1,5 +1,5 @@
 import { CircleInformationLinear } from "@lukasschreiber/icons";
-import { cloneElement, ReactElement, useId } from "react";
+import { cloneElement, ReactElement, ReactNode, useId } from "react";
 
 type ChildWithId = ReactElement<{ id?: string; "aria-describedby"?: string }>;
 
@@ -14,8 +14,8 @@ export interface InputProps<T, El extends HTMLElement> extends Omit<
 
 interface FormControlProps {
     id?: string;
-    label?: string;
-    helpText?: string;
+    label?: ReactNode;
+    helpText?: ReactNode;
     children: ChildWithId;
 }
 

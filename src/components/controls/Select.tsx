@@ -17,7 +17,7 @@ export interface SelectProps<T extends string | number> extends Omit<
     onChange: (value: T) => void;
     options: SelectOption<T>[];
     label?: string;
-    helpText?: string;
+    helpText?: ReactNode;
     placeholder?: ReactNode;
     startAdornment?: ReactNode | ((value: T) => ReactNode);
 }

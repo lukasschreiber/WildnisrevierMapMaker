@@ -1,87 +1,158 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { Path as TPath, usePathStore } from "../../stores/usePaths";
 import { useWaypointStore, Waypoint } from "../../stores/useWaypoints";
 import { Path } from "../elements/Path";
 import L from "leaflet";
 import { useLayer } from "../../context/useLayer";
 import { useMap } from "../../context/useMap";
+import { useInteractionsStore } from "../../stores/useInteractions";
+import { renderPath } from "../paths/renderPath";
+import { findExtendablePathFromWaypoint, getOrderedWaypointIdsFromPath } from "../paths/pathUtils";
+import { createPreviewPath } from "../paths/createPreviewPath";
+
+const PREVIEW_WAYPOINT_ID = -999;
 
 export function PathLayer(props: { paths?: TPath[]; waypoints?: Waypoint[]; debugging?: boolean }) {
     const g = useLayer(10);
-    const pathsFromStore = usePathStore((state) => state.paths.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-    const paths = props.paths?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) ?? pathsFromStore;
 
-    const segmentConnectionStarted = usePathStore((state) => state.segmentConnectionStarted);
-    const segmentConnectionStartedWaypointId = usePathStore((state) => state.connectionStartedWaypointId);
+    const storePaths = usePathStore((state) => state.paths);
+
+    const pathsFromStore = useMemo(() => {
+        return [...storePaths].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    }, [storePaths]);
+
+    const paths = useMemo(() => {
+        return props.paths !== undefined
+            ? [...props.paths].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+            : pathsFromStore;
+    }, [props.paths, pathsFromStore]);
+
+    const segmentConnectionStartedWaypointId = useInteractionsStore(
+        (state) => state.pathEdit.connectionStartedWaypointId,
+    );
+
+    const storeWaypoints = useWaypointStore((state) => state.waypoints);
+    const allWaypoints = props.waypoints ?? storeWaypoints;
+
     const storeGetWaypointById = useWaypointStore((state) => state.getWaypointById);
+
     const getWaypointById = useCallback(
         (id: number) => {
             if (props.waypoints) {
                 return props.waypoints.find((waypoint) => waypoint.id === id);
             }
+
             return storeGetWaypointById(id);
         },
-        [storeGetWaypointById, props.waypoints]
+        [storeGetWaypointById, props.waypoints],
     );
 
     const map = useMap();
 
     useEffect(() => {
         if (!g) return;
-        g.selectAll(".path-segment-preview").remove(); // Remove any existing preview lines
 
-        const pathSegmentPreview = g
-            .append("line")
-            .attr("x1", 0)
-            .attr("y1", 0)
-            .attr("x2", 0)
-            .attr("y2", 0)
-            .classed("path-segment-preview", true)
-            .style("stroke", "black")
-            .attr("stroke-linecap", "round")
-            .style("stroke-width", 5)
-            .style("pointer-events", "none") // Disable pointer events for the preview line
-            .style("display", "none") // Initially hidden
-            .style("opacity", 0.5);
+        const restoreHiddenPreviewedPaths = () => {
+            g.selectAll(".path-hidden-during-preview")
+                .classed("path-hidden-during-preview", false)
+                .style("opacity", null);
+        };
+
+        const removePreview = () => {
+            g.select("#path-segment-preview").remove();
+            g.selectAll(".path-segment-preview").remove();
+            restoreHiddenPreviewedPaths();
+        };
+
+        removePreview();
 
         const onMouseMove = (e: MouseEvent) => {
-            if (!segmentConnectionStarted || !segmentConnectionStartedWaypointId) {
-                pathSegmentPreview.style("display", "none");
-                return;
+            removePreview();
+
+            if (segmentConnectionStartedWaypointId === null) return;
+
+            const fromWaypoint = getWaypointById(segmentConnectionStartedWaypointId);
+            if (!fromWaypoint) return;
+
+            const toLatLng = map.mouseEventToLatLng(e);
+
+            const previewWaypoint: Waypoint = {
+                ...fromWaypoint,
+                id: PREVIEW_WAYPOINT_ID,
+                name: "Preview",
+                lat: toLatLng.lat,
+                lng: toLatLng.lng,
+            };
+
+            const basePath = findExtendablePathFromWaypoint(paths, segmentConnectionStartedWaypointId);
+
+            if (basePath) {
+                g.select(`#path-${basePath.id}`).classed("path-hidden-during-preview", true).style("opacity", 0);
             }
 
-            const fromWaypoint = getWaypointById(segmentConnectionStartedWaypointId)!;
-            const fromPoint = map.latLngToLayerPoint(new L.LatLng(fromWaypoint.lat, fromWaypoint.lng));
-            const toLatLng = map.mouseEventToLatLng(e);
-            const toPoint = map.latLngToLayerPoint(toLatLng);
+            const previewPath = createPreviewPath(basePath, segmentConnectionStartedWaypointId, PREVIEW_WAYPOINT_ID);
 
-            pathSegmentPreview
-                .style("display", "block")
-                .attr("x1", fromPoint.x)
-                .attr("y1", fromPoint.y)
-                .attr("x2", toPoint.x)
-                .attr("y2", toPoint.y);
+            const waypointMap = new Map<number, Waypoint>([
+                ...allWaypoints.map((waypoint) => [waypoint.id, waypoint] as const),
+                [PREVIEW_WAYPOINT_ID, previewWaypoint],
+            ]);
+
+            const previewWaypoints = getOrderedWaypointIdsFromPath(previewPath)
+                .map((id) => waypointMap.get(id))
+                .filter((waypoint): waypoint is Waypoint => Boolean(waypoint));
+
+            const points = previewWaypoints.map((waypoint) =>
+                map.latLngToLayerPoint(new L.LatLng(waypoint.lat, waypoint.lng)),
+            );
+
+            const renderedPreview = renderPath({
+                g,
+                map,
+                path: previewPath,
+                points,
+                hideOriginalPaths: true,
+                hideFancyPaths: false,
+                getWaypointById: (id) => waypointMap.get(id),
+                selectSegment: () => {},
+            });
+
+            renderedPreview
+                .attr("id", "path-segment-preview")
+                .classed("path-segment-preview", true)
+                .style("pointer-events", "none")
+                .style("opacity", 0.75)
+                .raise();
+
+            renderedPreview.selectAll("*").style("pointer-events", "none");
         };
 
         const container = g.node()?.closest("svg");
+
         if (!container) {
             console.error("Container not found");
             return;
         }
 
         container.addEventListener("mousemove", onMouseMove);
+
         return () => {
             container.removeEventListener("mousemove", onMouseMove);
+            removePreview();
         };
-    }, [g, segmentConnectionStarted, segmentConnectionStartedWaypointId, getWaypointById, map]);
+    }, [g, segmentConnectionStartedWaypointId, getWaypointById, map, allWaypoints, paths]);
 
-    if (!g) return null; // Ensure g is defined before proceeding
+    if (!g) return null;
 
-    return paths.map((path, index) => {
-        return (
-            <React.Fragment key={path.id}>
-                <Path g={g} pathId={path.id} order={path.order ?? index} path={props.paths && path} debugging={props.debugging} waypoints={props.waypoints} />
-            </React.Fragment>
-        );
-    });
+    return paths.map((path, index) => (
+        <React.Fragment key={path.id}>
+            <Path
+                g={g}
+                pathId={path.id}
+                order={path.order ?? index}
+                path={props.paths && path}
+                debugging={props.debugging}
+                waypoints={props.waypoints}
+            />
+        </React.Fragment>
+    ));
 }

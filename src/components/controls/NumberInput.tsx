@@ -1,9 +1,10 @@
 import { XmarkLinear } from "@lukasschreiber/icons";
 import { FormControl, InputProps } from "./FormControl";
+import { ReactNode } from "react";
 
 interface NumberInputProps extends InputProps<number | undefined, HTMLInputElement> {
-    label?: string;
-    helpText?: string;
+    label?: ReactNode;
+    helpText?: ReactNode;
     allowNull?: boolean;
 }
 

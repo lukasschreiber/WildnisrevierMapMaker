@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router";
 import { useLayoutStore } from "../stores/useLayout";
 import { DisablePropagation } from "./common/DisablePropagation";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWaypointTypeStore } from "../stores/useWaypointTypes";
 import { useWaypointStore } from "../stores/useWaypoints";
 import { LegendWaypointMarker } from "../components/legend/LegendWaypointMarker";
@@ -11,6 +11,7 @@ import { TextInput } from "./controls/TextInput";
 import { Select } from "./controls/Select";
 import { Chip } from "./common/Chip";
 import { LocationPlusLinear, MenuLinear, XmarkLinear } from "@lukasschreiber/icons";
+import { useInteractionsStore } from "../stores/useInteractions";
 
 export function TopIsle() {
     const toggleMenu = useLayoutStore((state) => state.toggleMenu);
@@ -22,10 +23,8 @@ export function TopIsle() {
     const types = useWaypointTypeStore((state) => state.types);
     const waypoints = useWaypointStore((state) => state.waypoints);
     const containerRef = useRef<HTMLDivElement>(null);
-    const newWaypointName = useWaypointStore((state) => state.newWaypointName);
-    const newWaypointType = useWaypointStore((state) => state.newWaypointType);
-    const setNewWaypointName = useWaypointStore((state) => state.setNewWaypointName);
-    const setNewWaypointType = useWaypointStore((state) => state.setNewWaypointType);
+    const newWaypointConfig = useInteractionsStore((state) => state.newWaypointConfig);
+    const updateNewWaypointConfig = useInteractionsStore((state) => state.updateNewWaypointConfig);
 
     const [searchValue, setSearchValue] = useState("");
 
@@ -62,15 +61,6 @@ export function TopIsle() {
             <span className="text-sm text-gray-800">{wp.name ? `${wp.id} (${wp.name})` : wp.id}</span>
         </Chip>
     ));
-
-    const randomChips = useMemo(() => {
-        return Array.from({ length: 10 }).map((_, i) => (
-            <Chip key={i}>
-                <div className="w-4 h-4 rounded-full bg-blue-300" />
-                <span className="text-sm text-gray-800">{`Chip ${i + 1}`}</span>
-            </Chip>
-        ));
-    }, []);
 
     return (
         <DisablePropagation>
@@ -154,16 +144,16 @@ export function TopIsle() {
                                     <div className="flex flex-col gap-2 px-2 ">
                                         <TextInput
                                             label="Name"
-                                            value={newWaypointName}
-                                            onChange={(value) => setNewWaypointName(value)}
+                                            value={newWaypointConfig.name}
+                                            onChange={(value) => updateNewWaypointConfig({ name: value })}
                                             type="text"
                                             placeholder="Name"
                                             helpText="New Waypoints will be given this name, leave it empty to enter a name per Waypoint"
                                         />
                                         <Select
                                             label="Type"
-                                            value={newWaypointType}
-                                            onChange={setNewWaypointType}
+                                            value={newWaypointConfig.typeId}
+                                            onChange={(value) => updateNewWaypointConfig({ typeId: Number(value) })}
                                             placeholder="Type"
                                             helpText="New Waypoints will be given this type"
                                             options={Object.values(types).map((type) => ({
@@ -192,15 +182,15 @@ export function TopIsle() {
                                     onClick={() => setAddModeSettingsOpen(!addModeSettingsOpen)}
                                 >
                                     <LocationPlusLinear className="w-4 h-4 inline-block" />
-                                    {newWaypointName !== "" && <>Name: {newWaypointName} -</>} Type:{" "}
-                                    {types[newWaypointType]?.name || "Unknown"}
+                                    {newWaypointConfig.name !== "" && <>Name: {newWaypointConfig.name} -</>} Type:{" "}
+                                    {types[newWaypointConfig.typeId]?.name || "Unknown"}
                                 </div>
                             </div>
                         )}
                     </div>
-                    {(randomChips.length > 0 || bubbleItems.length > 0) && (
+                    {(bubbleItems.length > 0) && (
                         <TopChipList
-                            items={[...randomChips, ...bubbleItems]}
+                            items={bubbleItems}
                             className={`order-2 w-64 mt-0 md:order-none md:flex-1 md:min-w-0 md:w-[calc(100vw-30rem)] md:max-w-[calc(100vw-30rem)] ${isPanelVisible ? "ml-4 hidden md:block" : ""}`}
                         />
                     )}

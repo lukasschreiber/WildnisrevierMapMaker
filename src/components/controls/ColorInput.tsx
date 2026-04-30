@@ -1,10 +1,10 @@
-import { useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { FormControl, InputProps } from "./FormControl";
 import { debounce } from "../../utils/debounce";
 
 interface ColorInputProps extends InputProps<string, HTMLInputElement> {
-    label?: string;
-    helpText?: string;
+    label?: ReactNode;
+    helpText?: ReactNode;
     debounceMs?: number;
 }
 

@@ -30,7 +30,8 @@ export function renderMarker({
         .style("fill", "white")
         .style("stroke", "white")
         .style("stroke-width", 2)
-        .style("fill-opacity", 0.8)
+        .style("stroke-opacity", 0.8)
+        .style("fill-opacity", 0.6)
         .style("pointer-events", "none")
         .style("display", "none");
 

@@ -4,6 +4,7 @@ import { calculateRelativeWaypoint } from "../utils/relativeWaypoints";
 import { usePathStore } from "./usePaths";
 import { useShapeStore } from "./useShapes";
 import { getLocalStorageKey } from "../utils/keys";
+import { useInteractionsStore } from "./useInteractions";
 
 export interface Waypoint {
     id: number;
@@ -15,35 +16,33 @@ export interface Waypoint {
     groupId?: number;
     additionalText?: string;
     hidden?: boolean;
-};
+}
 
 export interface WaypointState {
     waypoints: Waypoint[];
-    selectedId: number | null;
-    currentPosition: { lat: number; lng: number } | null;
-    addMode: boolean;
-    newWaypointName: string;
-    newWaypointType: number;
-    newWaypointGroup?: number;
 
+    // TODO: find a better place for this
+    currentPosition: { lat: number; lng: number } | null; // TODO should this be here?
     setCurrentPosition: (pos: { lat: number; lng: number } | null) => void;
-    setAddMode: (value: boolean) => void;
 
-    addWaypoint: (lat: number, lng: number, baseId?: number, name?: string, typeId?: number, groupId?: number) => void;
-    addRelativeWaypoint: (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => void;
+    addWaypoint: (
+        lat: number,
+        lng: number,
+        baseId?: number,
+        name?: string,
+        typeId?: number,
+        groupId?: number,
+    ) => number;
+    addRelativeWaypoint: (baseId: number, distance: number, bearing: number, name?: string, typeId?: number) => number;
 
-    selectWaypoint: (id: number) => void;
-    deselectWaypoint: () => void;
     deleteWaypoint: (id: number) => void;
     getWaypointById: (id: number) => Waypoint | undefined;
     updateWaypoint(id: number, waypoint: Partial<Waypoint>): void;
+    bulkUpdateWaypoints(updates: { id: number; data: Partial<Waypoint> }[]): void;
+    bulkDeleteWaypoints(ids: number[]): void;
     isDeletable: (id: number) => boolean;
 
     setWaypoints: (wps: Waypoint[]) => void;
-
-    setNewWaypointName: (name: string) => void;
-    setNewWaypointType: (typeId: number) => void;
-    setNewWaypointGroup: (groupId?: number) => void;
 }
 
 export const useWaypointStore = create<WaypointState>()(
@@ -58,32 +57,31 @@ export const useWaypointStore = create<WaypointState>()(
             newWaypointGroup: undefined,
 
             setCurrentPosition: (pos) => set({ currentPosition: pos }),
-            setAddMode: (value) => set({ addMode: value }),
 
             addWaypoint: (lat, lng, baseId, name, typeId, groupId) => {
                 const state = get();
                 const id = state.waypoints.length > 0 ? Math.max(...state.waypoints.map((w) => w.id)) + 1 : 1;
+                const { newWaypointConfig } = useInteractionsStore.getState();
+
                 const newWaypoint: Waypoint = {
                     id,
                     lat,
                     lng,
                     baseId,
-                    typeId: typeId ?? state.newWaypointType,
-                    groupId: groupId ?? state.newWaypointGroup,
-                    name: name ?? state.newWaypointName,
+                    typeId: typeId ?? newWaypointConfig.typeId,
+                    groupId: groupId ?? newWaypointConfig.groupId,
+                    name: name ?? newWaypointConfig.name,
                 };
                 set({ waypoints: [...state.waypoints, newWaypoint] });
+                return id;
             },
 
             addRelativeWaypoint: (baseId, distance, bearing, name, typeId) => {
                 const base = get().waypoints.find((w) => w.id === baseId);
-                if (!base) return;
+                if (!base) throw new Error(`Base waypoint with id ${baseId} not found`);
                 const { lat, lng } = calculateRelativeWaypoint(base.lat, base.lng, distance, bearing);
-                get().addWaypoint(lat, lng, baseId, name, typeId);
+                return get().addWaypoint(lat, lng, baseId, name, typeId);
             },
-
-            selectWaypoint: (id) => set({ selectedId: id }),
-            deselectWaypoint: () => set({ selectedId: null }),
 
             deleteWaypoint: (id) => {
                 if (!get().isDeletable(id)) {
@@ -93,8 +91,9 @@ export const useWaypointStore = create<WaypointState>()(
                 const { waypoints } = get();
                 set({
                     waypoints: waypoints.filter((wp) => wp.id !== id),
-                    selectedId: null,
                 });
+
+                useInteractionsStore.getState().deselect("waypoint", id);
             },
 
             getWaypointById: (id) => get().waypoints.find((wp) => wp.id === id),
@@ -103,6 +102,24 @@ export const useWaypointStore = create<WaypointState>()(
                 set((state) => ({
                     waypoints: state.waypoints.map((wp) => (wp.id === id ? { ...wp, ...updated } : wp)),
                 })),
+
+            bulkUpdateWaypoints: (updates) =>
+                set((state) => ({
+                    waypoints: state.waypoints.map((wp) => {
+                        const update = updates.find((u) => u.id === wp.id);
+                        return update ? { ...wp, ...update.data } : wp;
+                    }),
+                })),
+
+            bulkDeleteWaypoints: (ids) => {
+                set((state) => ({
+                    waypoints: state.waypoints.filter((wp) => !ids.includes(wp.id)),
+                }));
+
+                for (const id of ids) {
+                    useInteractionsStore.getState().deselect("waypoint", id);
+                }
+            },
 
             isDeletable: (id) => {
                 const { waypoints } = get();
@@ -114,7 +131,7 @@ export const useWaypointStore = create<WaypointState>()(
                     return false;
                 }
                 const usedInSegments = paths.some((path) =>
-                    path.segments.some((s) => s.from.waypointId === id || s.to.waypointId === id)
+                    path.segments.some((s) => s.from.waypointId === id || s.to.waypointId === id),
                 );
                 const usedInShapes = shapes.some((s) => s.nodes.some((n) => n.waypointId === id));
                 const usedAsBase = waypoints.some((wp) => wp.baseId === id);
@@ -122,17 +139,12 @@ export const useWaypointStore = create<WaypointState>()(
             },
 
             setWaypoints: (wps) => set({ waypoints: wps }),
-
-            setNewWaypointName: (name) => set({ newWaypointName: name }),
-            setNewWaypointType: (typeId) => set({ newWaypointType: typeId }),
-            setNewWaypointGroup: (groupId) => set({ newWaypointGroup: groupId }),
         }),
         {
             name: getLocalStorageKey("waypoints"),
             partialize: (state) => ({
                 waypoints: state.waypoints,
-                addMode: state.addMode,
             }),
-        }
-    )
+        },
+    ),
 );

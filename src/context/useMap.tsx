@@ -3,6 +3,7 @@ import { Waypoint } from "../stores/useWaypoints";
 
 interface MapContextType {
     map: L.Map;
+    // Only for the standalone map, not for the editor...
     selectedWaypoint: Waypoint | null;
     setSelectedWaypoint: (waypoint: Waypoint | null) => void;
 }

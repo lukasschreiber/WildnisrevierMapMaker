@@ -9,11 +9,12 @@ import { Select } from "../controls/Select";
 import { useState, useRef } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
+import { useInteractionsStore } from "../../stores/useInteractions";
 
 export function WaypointsPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
     const types = useWaypointTypeStore((state) => state.types);
-    const selectedId = useWaypointStore((state) => state.selectedId);
+    const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
     const groups = useWaypointGroupStore((state) => state.waypointGroups);
     const navigate = useNavigate();
 
@@ -66,7 +67,7 @@ export function WaypointsPanel() {
     const renderWaypoint = (waypoint: (typeof waypoints)[0]) => (
         <div
             key={waypoint.id}
-            className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer transition-colors ${selectedId === waypoint.id ? "bg-gray-200" : ""}`}
+            className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer transition-colors ${selectedWaypointIds.includes(waypoint.id) ? "bg-gray-200" : ""}`}
             onClick={() => {
                 navigate(`/waypoints/${waypoint.id}`);
             }}

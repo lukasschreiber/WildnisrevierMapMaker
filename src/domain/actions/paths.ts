@@ -2,9 +2,20 @@ import { executeHistoryAction } from "../history/executeHistoryAction";
 import { Path, PathNode, usePathStore } from "../../stores/usePaths";
 
 export const pathActions = {
-    addPath: (name: string, color: string) => {
-        executeHistoryAction("Add path", ["paths"], () => {
-            usePathStore.getState().addPath(name, color);
+    addPath: (name: string, color: string): number => {
+        return executeHistoryAction("Add path", ["paths"], () => {
+            return usePathStore.getState().addPath(name, color);
+        });
+    },
+
+    createPathWithSegment: (name: string, color: string, from: PathNode, to: PathNode): number => {
+        return executeHistoryAction("Create path", ["paths"], () => {
+            const pathStore = usePathStore.getState();
+            const pathId = pathStore.addPath(name, color);
+
+            usePathStore.getState().addSegment(pathId, from, to);
+
+            return pathId;
         });
     },
 

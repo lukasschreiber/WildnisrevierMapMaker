@@ -16,7 +16,7 @@ export interface LayoutGroup {
 export interface Setting<T> {
     type: SettingLayoutTypes;
     default: T;
-    helpText?: string | ReactNode;
+    helpText?: ReactNode;
     label: string;
     hidden?: boolean | ((settings: Settings) => boolean);
 }

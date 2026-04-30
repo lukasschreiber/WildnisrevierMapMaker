@@ -1,60 +1,108 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useWaypointStore } from "../stores/useWaypoints";
-import { usePathStore } from "../stores/usePaths";
 import { useLocation, useNavigate } from "react-router";
-import { useInteractionModeStore } from "../stores/useInteractionMode";
+import { useInteractionsStore } from "../stores/useInteractions";
 import { waypointActions } from "../domain/actions/waypoints";
 import { useHistoryStore } from "../stores/useHistory";
 import { useMap } from "../context/useMap";
 
 function isTextInputTarget(target: EventTarget | null): boolean {
-    if (!(target instanceof HTMLElement)) {
-        return false;
-    }
-
-    if (target.isContentEditable) {
-        return true;
-    }
+    if (!(target instanceof HTMLElement)) return false;
+    if (target.isContentEditable) return true;
 
     const tagName = target.tagName.toLowerCase();
     return tagName === "input" || tagName === "textarea" || tagName === "select";
 }
 
+type SyncedSelection = {
+    type: "waypoint" | "path" | null;
+    id: number | null;
+};
+
+function isSameSyncedSelection(selection: SyncedSelection, type: SyncedSelection["type"], id: number | null) {
+    return selection.type === type && selection.id === id;
+}
+
+function isSelectionSyncRoute(pathname: string) {
+    return pathname === "/" || pathname.startsWith("/waypoints/") || pathname.startsWith("/paths/");
+}
+
 export function MapEventManager() {
     const map = useMap();
-    const mode = useInteractionModeStore((state) => state.mode);
-    const addPathMode = usePathStore((state) => state.addMode);
-    const selectedId = useWaypointStore((state) => state.selectedId);
+
+    const mode = useInteractionsStore((state) => state.mode);
+    const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
+    const selectedPathIds = useInteractionsStore((state) => state.selectedPathIds);
+
+    const selectOnly = useInteractionsStore((state) => state.selectOnly);
+    const deselect = useInteractionsStore((state) => state.deselect);
+    const clearSelection = useInteractionsStore((state) => state.clearSelection);
+    const cancelPathConnection = useInteractionsStore((state) => state.cancelPathConnection);
+
+    const selectedWaypointId = useMemo(
+        () => (selectedWaypointIds.length > 0 ? selectedWaypointIds[selectedWaypointIds.length - 1] : null),
+        [selectedWaypointIds],
+    );
+
+    const selectedPathId = useMemo(
+        () => (selectedPathIds.length > 0 ? selectedPathIds[selectedPathIds.length - 1] : null),
+        [selectedPathIds],
+    );
+
+    const syncedSelection = useMemo<SyncedSelection>(() => {
+        if (selectedWaypointId !== null) {
+            return {
+                type: "waypoint",
+                id: selectedWaypointId,
+            };
+        }
+
+        if (selectedPathId !== null) {
+            return {
+                type: "path",
+                id: selectedPathId,
+            };
+        }
+
+        return {
+            type: null,
+            id: null,
+        };
+    }, [selectedWaypointId, selectedPathId]);
+
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const waypoints = useWaypointStore((state) => state.waypoints);
-    const cancelSegmentConnection = usePathStore((state) => state.cancelSegmentConnection);
-    const deselectWaypoint = useWaypointStore((state) => state.deselectWaypoint);
-    const selectWaypoint = useWaypointStore((state) => state.selectWaypoint);
+
     const undo = useHistoryStore((state) => state.undo);
     const redo = useHistoryStore((state) => state.redo);
+
     const navigate = useNavigate();
     const location = useLocation();
-    const lastSyncedId = useRef<number | null>(null);
-    const addMode = mode === "waypoint-add";
+
+    const lastSyncedSelection = useRef<SyncedSelection>({
+        type: null,
+        id: null,
+    });
 
     const onMapClick = useCallback(
         (e: L.LeafletMouseEvent) => {
-            if ((e.originalEvent.target as HTMLElement)?.closest("#menu")) return; // Ignore clicks on the menu
-            if (addMode && selectedId === null) {
-                waypointActions.addWaypoint(e.latlng.lat, e.latlng.lng);
-            } else if (addPathMode) {
-                cancelSegmentConnection();
-            } else {
-                deselectWaypoint();
+            if (mode === "waypoint-add") {
+                const newId = waypointActions.addWaypoint(e.latlng.lat, e.latlng.lng);
+                selectOnly("waypoint", newId);
+                return;
             }
+
+            cancelPathConnection();
+            clearSelection();
         },
-        [selectedId, addMode, addPathMode, cancelSegmentConnection, deselectWaypoint]
+        [mode, cancelPathConnection, clearSelection, selectOnly],
     );
 
     const onKeyDown = useCallback(
         (e: KeyboardEvent) => {
             const hasModifier = e.ctrlKey || e.metaKey;
             const key = e.key.toLowerCase();
+
             if (hasModifier && !isTextInputTarget(e.target)) {
                 if (key === "z" && !e.shiftKey) {
                     e.preventDefault();
@@ -69,15 +117,21 @@ export function MapEventManager() {
                 }
             }
 
-            if (selectedId === null) return;
+            if (selectedWaypointIds.length === 0) return;
 
-            const step = 0.000001;
+            const step = hasModifier ? 0.000001 : e.shiftKey ? 0.0001 : 0.00001;
 
-            // Update waypoint position with arrow keys
-            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                for (const wp of waypoints) {
-                    if (wp.id !== selectedId) continue;
-                    let { lat, lng } = wp;
+            if (
+                !isTextInputTarget(e.target) &&
+                (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight")
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const selectedWaypoints = waypoints.filter((wp) => selectedWaypointIds.includes(wp.id));
+
+                const updatedWaypoints = selectedWaypoints.map((waypoint) => {
+                    let { lat, lng } = waypoint;
 
                     switch (e.key) {
                         case "ArrowUp":
@@ -92,76 +146,132 @@ export function MapEventManager() {
                         case "ArrowRight":
                             lng += step;
                             break;
-                        default:
-                            return wp;
                     }
 
-                    waypointActions.updateWaypoint(wp.id, { lat, lng });
-                    break; // Exit the loop after updating the selected waypoint
-                }
+                    return {
+                        id: waypoint.id,
+                        data: { lat, lng },
+                    };
+                });
+
+                waypointActions.updateWaypoints(updatedWaypoints);
             }
 
-            // Delete selected waypoint on "Delete" key press
-            if (e.key === "Delete" && selectedId !== null) {
-                if (!isDeletable(selectedId)) return;
-                const confirmed = window.confirm("Are you sure you want to delete this waypoint?");
-                if (!confirmed) return;
-                waypointActions.deleteWaypointWithDependencies(selectedId);
-                deselectWaypoint();
+            if (e.key === "Delete") {
+                for (const id of selectedWaypointIds) {
+                    if (!isDeletable(id)) continue;
+
+                    waypointActions.deleteWaypointWithDependencies(id);
+                    deselect("waypoint", id);
+                }
             }
         },
-        [isDeletable, selectedId, waypoints, deselectWaypoint, redo, undo]
+        [selectedWaypointIds, undo, redo, waypoints, isDeletable, deselect],
     );
 
     useEffect(() => {
-        window.addEventListener("keydown", onKeyDown);
+        window.addEventListener("keydown", onKeyDown, true);
+
         return () => {
-            window.removeEventListener("keydown", onKeyDown);
+            window.removeEventListener("keydown", onKeyDown, true);
         };
     }, [onKeyDown]);
 
     useEffect(() => {
         map.on("click", onMapClick);
+
         return () => {
             map.off("click", onMapClick);
         };
     }, [map, onMapClick]);
 
     useEffect(() => {
-        // if the URL has the route /waypoints/:id, extract the id and select the waypoint
-        if (!location.pathname.startsWith("/waypoints/")) {
-            deselectWaypoint();
-            return;
-        }
-        const param = location.pathname.split("/").pop();
-        const id = param ? parseInt(param, 10) : null;
+        if (location.pathname.startsWith("/waypoints/")) {
+            const param = location.pathname.split("/").pop();
+            const id = param ? parseInt(param, 10) : null;
 
-        if (id !== lastSyncedId.current) {
-            if (id !== null && !isNaN(id)) {
-                selectWaypoint(id);
+            if (id !== null && !Number.isNaN(id)) {
+                if (isSameSyncedSelection(lastSyncedSelection.current, "waypoint", id)) return;
+
+                clearSelection();
+                selectOnly("waypoint", id);
+
                 const waypoint = waypoints.find((wp) => wp.id === id);
-                if (!waypoint) return;
-                map.flyTo([waypoint.lat, waypoint.lng], 20);
-            } else {
-                deselectWaypoint();
+                if (waypoint) {
+                    map.flyTo([waypoint.lat, waypoint.lng], 20);
+                }
+
+                lastSyncedSelection.current = {
+                    type: "waypoint",
+                    id,
+                };
+
+                return;
             }
-            lastSyncedId.current = id;
         }
-    }, [deselectWaypoint, location.pathname, map, selectWaypoint, waypoints]);
+
+        if (location.pathname.startsWith("/paths/")) {
+            const param = location.pathname.split("/").pop();
+            const id = param ? parseInt(param, 10) : null;
+
+            if (id !== null && !Number.isNaN(id)) {
+                if (isSameSyncedSelection(lastSyncedSelection.current, "path", id)) return;
+
+                clearSelection();
+                selectOnly("path", id);
+
+                lastSyncedSelection.current = {
+                    type: "path",
+                    id,
+                };
+
+                return;
+            }
+        }
+
+        if (!isSameSyncedSelection(lastSyncedSelection.current, null, null)) {
+            clearSelection();
+
+            lastSyncedSelection.current = {
+                type: null,
+                id: null,
+            };
+        }
+    }, [location.pathname, map, waypoints, clearSelection, selectOnly]);
 
     useEffect(() => {
-        if (selectedId !== lastSyncedId.current) {
-            if (selectedId === null) {
-                // Only navigate to "/" if we're currently viewing a waypoint detail
-                if (location.pathname.startsWith("/waypoints/")) {
-                    navigate("/");
-                }
-            } else {
-                navigate(`/waypoints/${selectedId}`);
+        if (!isSelectionSyncRoute(location.pathname)) return;
+
+        if (isSameSyncedSelection(lastSyncedSelection.current, syncedSelection.type, syncedSelection.id)) return;
+
+        if (syncedSelection.type === "waypoint" && syncedSelection.id !== null) {
+            const pathname = `/waypoints/${syncedSelection.id}`;
+
+            if (location.pathname !== pathname) {
+                navigate(pathname);
             }
-            lastSyncedId.current = selectedId;
+
+            lastSyncedSelection.current = syncedSelection;
+            return;
         }
-    }, [selectedId, location.pathname, navigate]);
+
+        if (syncedSelection.type === "path" && syncedSelection.id !== null) {
+            const pathname = `/paths/${syncedSelection.id}`;
+
+            if (location.pathname !== pathname) {
+                navigate(pathname);
+            }
+
+            lastSyncedSelection.current = syncedSelection;
+            return;
+        }
+
+        if (location.pathname.startsWith("/waypoints/") || location.pathname.startsWith("/paths/")) {
+            navigate("/");
+        }
+
+        lastSyncedSelection.current = syncedSelection;
+    }, [syncedSelection, location.pathname, navigate]);
 
     return null;
 }
