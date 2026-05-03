@@ -9,7 +9,6 @@ export type CommonMarkerOptions = {
     rotation: number;
     stroke: string;
     strokeWidth: number;
-    isIcon: boolean;
     isHidden: boolean;
     visualizeHiddenItems: boolean;
     fillColor: string;
@@ -24,7 +23,6 @@ export function applyMarkerCommonAttrs({
     rotation,
     stroke,
     strokeWidth,
-    isIcon,
     isHidden,
     visualizeHiddenItems,
     fillColor,
@@ -43,6 +41,6 @@ export function applyMarkerCommonAttrs({
     return shapeG
         .attr("transform", rotation ? `rotate(${rotation})` : null)
         .style("stroke", stroke)
-        .style("stroke-width", isIcon ? strokeWidth * 0.5 : strokeWidth)
+        .style("stroke-width", strokeWidth)
         .style("cursor", "pointer");
 }

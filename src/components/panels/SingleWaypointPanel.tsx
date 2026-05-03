@@ -62,7 +62,7 @@ export function SingleWaypointPanel({ id }: SingleWaypointPanelProps) {
                     onClick={() => {
                         setActive({
                             type: "waypoint-type",
-                            id: waypoint.id,
+                            id: type.id,
                         });
                     }}
                     color="blue"

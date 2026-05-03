@@ -5,20 +5,29 @@ import { useWaypointGroupStore } from "../../stores/useGroups";
 import { Panel } from "../Panel";
 import { TextInput } from "../controls/TextInput";
 import { Select } from "../controls/Select";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
-import { ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
+import { CircleCheckSolid, ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
 import { useInteractionsStore } from "../../stores/useInteractions";
 import { useSelectionActions } from "../../hooks/useSelectionActions";
 import { useMap } from "../../context/useMap";
 
 export function WaypointsPanel() {
-    const waypoints = useWaypointStore((state) => state.waypoints);
+    const storeWaypoints = useWaypointStore((state) => state.waypoints);
     const types = useWaypointTypeStore((state) => state.types);
     const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
     const groups = useWaypointGroupStore((state) => state.waypointGroups);
+    const deselect = useInteractionsStore((state) => state.deselect);
     const map = useMap();
     const { selectEntity } = useSelectionActions();
+
+    const waypoints = useMemo(
+        () =>
+            selectedWaypointIds.length > 0
+                ? storeWaypoints.filter((wp) => selectedWaypointIds.includes(wp.id))
+                : storeWaypoints,
+        [storeWaypoints, selectedWaypointIds],
+    );
 
     const [searchValue, setSearchValue] = useState("");
     const [filterOpen, setFilterOpen] = useState(false);
@@ -69,16 +78,30 @@ export function WaypointsPanel() {
     const renderWaypoint = (waypoint: (typeof waypoints)[0]) => (
         <div
             key={waypoint.id}
-            className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer transition-colors ${selectedWaypointIds.includes(waypoint.id) ? "bg-gray-200" : ""}`}
+            className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer transition-colors justify-between`}
             onClick={() => {
                 selectEntity("waypoint", waypoint.id, {
                     focus: () => map.flyTo([waypoint.lat, waypoint.lng], 20),
                 });
             }}
         >
-            <LegendWaypointMarker type={types[waypoint.typeId]} radius={8} borderWidth={1} borderColor="black" />
-            <span>{waypoint.id}</span>
-            {waypoint.name ? ` (${waypoint.name})` : ""} {waypoint.additionalText ? `- ${waypoint.additionalText}` : ""}
+            <div className="flex items-center gap-2">
+                <LegendWaypointMarker type={types[waypoint.typeId]} radius={8} borderWidth={1} borderColor="black" />
+                <span>{waypoint.id}</span>
+                {waypoint.name ? ` (${waypoint.name})` : ""}{" "}
+                {waypoint.additionalText ? `- ${waypoint.additionalText}` : ""}
+            </div>
+            {selectedWaypointIds.includes(waypoint.id) && (
+                <CircleCheckSolid
+                    className="w-5 h-5 text-blue-500 cursor-pointer"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        deselect("waypoint", waypoint.id);
+                    }}
+                />
+            )}
         </div>
     );
 

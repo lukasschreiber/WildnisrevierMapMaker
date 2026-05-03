@@ -22,6 +22,7 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
         const gMap = gMapRef.current;
 
         const svg = d3.select(map.getPanes().overlayPane).select<SVGSVGElement>("svg");
+
         svg.attr("pointer-events", "auto");
         svgRef.current = svg;
         setSvgReady(true);
@@ -77,7 +78,7 @@ export function LayerProvider({ children }: React.PropsWithChildren) {
 
         return () => {
             map.off("move", handleMove);
-        }
+        };
     }, [isSvgReady, map]);
 
     return <LayerContext.Provider value={{ getLayer }}>{isSvgReady && children}</LayerContext.Provider>;

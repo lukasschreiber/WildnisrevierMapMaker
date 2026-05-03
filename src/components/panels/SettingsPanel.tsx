@@ -36,17 +36,25 @@ export function SettingsPanel() {
                                     />
                                 );
                             } else if (setting.type === "select") {
+                                const rawOptions =
+                                    setting.options instanceof Function ? setting.options(settings) : setting.options;
+
                                 return (
                                     <Select
                                         key={key}
                                         id={key}
                                         value={settings[key] as string}
-                                        options={Object.entries(setting.options).map(([value, label]) => ({
-                                            value,
-                                            children: label,
+                                        options={rawOptions.map((option) => ({
+                                            value: option.value,
+                                            children: option.icon ? (
+                                                <>
+                                                    {option.icon} {option.label}
+                                                </>
+                                            ) : (
+                                                option.label
+                                            ),
                                         }))}
                                         onChange={(value) => set(key, value)}
-                                        className="flex flex-col"
                                         label={setting.label}
                                         helpText={setting.helpText}
                                     />

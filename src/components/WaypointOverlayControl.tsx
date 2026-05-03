@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useMap } from "../context/useMap";
 import { useInteractionsStore } from "../stores/useInteractions";
-import { Waypoint } from "../stores/useWaypoints";
+import { useWaypointStore, Waypoint } from "../stores/useWaypoints";
 import { DisablePropagation } from "./common/DisablePropagation";
 import { NumberInput } from "./controls/NumberInput";
 import { IconButton } from "./controls/IconButton";
 import { CheckLinear } from "@lukasschreiber/icons";
+import { useSelectionActions } from "../hooks/useSelectionActions";
 
 export function WaypointOverlayControl({ waypoint }: { waypoint: Waypoint }) {
     const map = useMap();
@@ -14,7 +15,8 @@ export function WaypointOverlayControl({ waypoint }: { waypoint: Waypoint }) {
     const setBearing = useInteractionsStore((s) => s.setRelativeWaypointBearing);
     const setDistance = useInteractionsStore((s) => s.setRelativeWaypointDistance);
     const create = useInteractionsStore((s) => s.createRelativeWaypoint);
-    const selectOnly = useInteractionsStore((s) => s.selectOnly);
+    const getWaypointById = useWaypointStore((s) => s.getWaypointById);
+    const { selectEntity } = useSelectionActions();
 
     const [point, setPoint] = useState(() => map.latLngToContainerPoint([waypoint.lat, waypoint.lng]));
 
@@ -52,12 +54,14 @@ export function WaypointOverlayControl({ waypoint }: { waypoint: Waypoint }) {
                         onChange={(value) => {
                             if (value !== undefined) setBearing(value % 360);
                         }}
+                        step={0.5}
                         className="max-w-16"
                     />
                     <NumberInput
                         label="Distance m"
                         value={relativeWaypoint.distance}
-                        min={0.1}
+                        min={0}
+                        step={0.1}
                         onChange={(value) => {
                             if (value !== undefined) setDistance(value);
                         }}
@@ -66,7 +70,12 @@ export function WaypointOverlayControl({ waypoint }: { waypoint: Waypoint }) {
                     <IconButton
                         onClick={() => {
                             const newId = create();
-                            selectOnly("waypoint", newId);
+                            const wp = getWaypointById(newId);
+                            if (!wp) return;
+
+                            selectEntity("waypoint", wp.id, {
+                                focus: () => map.flyTo([wp.lat, wp.lng], 20),
+                            });
                         }}
                         color="blue"
                         icon={<CheckLinear size={16} />}

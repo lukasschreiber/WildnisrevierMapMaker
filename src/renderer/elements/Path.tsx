@@ -6,6 +6,7 @@ import { useSettingsStore } from "../../stores/useSettings";
 import { useMap } from "../../context/useMap";
 import { renderPath } from "../paths/renderPath";
 import { useInteractionsStore } from "../../stores/useInteractions";
+import { useSelectionActions } from "../../hooks/useSelectionActions";
 
 type PathProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -32,9 +33,9 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
     const getWaypointById = useWaypointStore((state) => state.getWaypointById);
 
     const select = useInteractionsStore((state) => state.select);
-    const selectOnly = useInteractionsStore((state) => state.selectOnly);
     const selectSegment = useInteractionsStore((state) => state.selectSegment);
     const isPathSelected = useInteractionsStore((state) => (path ? state.isSelected("path", path.id) : false));
+    const { selectEntity } = useSelectionActions();
 
     const storeAllWaypoints = useWaypointStore((state) => state.waypoints);
     const allWaypoints = props.waypoints ?? storeAllWaypoints;
@@ -99,10 +100,12 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
         const handlePathClick = (event: MouseEvent) => {
             event.stopPropagation();
 
+            console.log("Path clicked:", path.id);
+
             if (event.shiftKey) {
                 select("path", path.id);
             } else {
-                selectOnly("path", path.id);
+                selectEntity("path", path.id);
             }
         };
 
@@ -120,7 +123,7 @@ export const Path = React.memo(({ g, pathId, order, ...props }: PathProps) => {
         } else {
             g.node()?.appendChild(rendered.node()!);
         }
-    }, [g, path, waypoints, map, getWaypointById, selectSegment, order, hideFancyPaths, hideOriginalPaths, isPathSelected, select, selectOnly]);
+    }, [g, path, order, waypoints, map, hideOriginalPaths, hideFancyPaths, getWaypointById, selectSegment, isPathSelected, select, selectEntity]);
 
     React.useEffect(() => {
         draw();

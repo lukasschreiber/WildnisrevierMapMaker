@@ -23,13 +23,13 @@ export function NumberInput({ label, helpText, id, className, value, onChange, a
                             return;
                         }
 
-                        const parsed = Number(raw);
+                        const parsed = parseFloat(raw);
 
                         if (!isNaN(parsed)) {
                             onChange(parsed);
                         }
                     }}
-                    className={`flex-1 rounded border border-slate-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-0 transition px-3 py-1 text-sm text-gray-800 ${className ?? ""}`}
+                    className={`flex-1 rounded border border-slate-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-0 transition pl-3 py-1 text-sm text-gray-800 ${className ?? ""}`}
                     {...rest}
                 />
 

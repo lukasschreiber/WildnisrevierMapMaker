@@ -19,7 +19,6 @@ export function renderIconMarker({
     radius,
     stroke,
     strokeWidth,
-    isIcon,
     isHidden,
     visualizeHiddenItems,
     fillColor,
@@ -50,6 +49,8 @@ export function renderIconMarker({
         .attr("x", -targetWidth / 2)
         .attr("y", -targetHeight / 2);
 
+    containerSvg.selectAll("*").attr("vector-effect", "non-scaling-stroke");
+
     container.style("pointer-events", "all");
     container.attr("data-icon", iconName);
 
@@ -61,7 +62,6 @@ export function renderIconMarker({
         rotation: type.rotation ?? 0,
         stroke,
         strokeWidth,
-        isIcon,
         isHidden,
         visualizeHiddenItems,
         fillColor,
