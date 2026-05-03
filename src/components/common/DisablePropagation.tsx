@@ -1,7 +1,7 @@
 import { HTMLProps, useEffect, useRef } from "react";
 import L from "leaflet";
 
-export function DisablePropagation(props: HTMLProps<HTMLDivElement>) {
+export function DisablePropagation({ className, ...props }: HTMLProps<HTMLDivElement>) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -11,5 +11,5 @@ export function DisablePropagation(props: HTMLProps<HTMLDivElement>) {
         }
     }, []);
 
-    return <div ref={containerRef} {...props} />;
+    return <div ref={containerRef} className={`${className} cursor-default`} {...props} />;
 }

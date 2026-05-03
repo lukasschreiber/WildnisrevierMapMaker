@@ -12,12 +12,16 @@ import { Select } from "./controls/Select";
 import { Chip } from "./common/Chip";
 import { LocationPlusLinear, MenuLinear, XmarkLinear } from "@lukasschreiber/icons";
 import { useInteractionsStore } from "../stores/useInteractions";
+import { useSelectionActions } from "../hooks/useSelectionActions";
+import { useMap } from "../context/useMap";
 
 export function TopIsle() {
     const toggleMenu = useLayoutStore((state) => state.toggleMenu);
     const showSidebar = useLayoutStore((state) => state.showSidebar);
     const location = useLocation();
     const navigate = useNavigate();
+    const { selectEntity } = useSelectionActions();
+    const map = useMap();
     const [inputFocussed, setInputFocused] = useState(false);
     const [addModeSettingsOpen, setAddModeSettingsOpen] = useState(false);
     const types = useWaypointTypeStore((state) => state.types);
@@ -52,7 +56,9 @@ export function TopIsle() {
     const bubbleItems = waypoints.map((wp) => (
         <Chip
             onClick={() => {
-                navigate(`/waypoints/${wp.id}`);
+                selectEntity("waypoint", wp.id, {
+                    focus: () => map.flyTo([wp.lat, wp.lng], 20),
+                });
                 setInputFocused(false);
             }}
             className="flex items-center gap-2 focus:outline-none"
@@ -64,11 +70,11 @@ export function TopIsle() {
 
     return (
         <DisablePropagation>
-            <div className={`absolute top-0 z-[1003] m-4`}>
+            <div className={`absolute top-0 z-1003 m-4`}>
                 <div className="flex flex-wrap gap-2 w-64 md:w-[calc(100vw-2rem)]">
                     <div className="flex flex-col">
                         <div
-                            className={`bg-white w-64 flex flex-col items-center py-2 justify-between border ${isPanelVisible && !inputFocussed ? "border-gray-200" : "shadow-lg border-white"} ${inputFocussed ? "rounded-t-2xl !border-gray-200 rounded-b-2xl" : "rounded-2xl"} transition-all duration-200 ease-in-out`}
+                            className={`bg-white w-64 flex flex-col items-center py-2 justify-between border ${isPanelVisible && !inputFocussed ? "border-gray-200" : "shadow-lg border-white"} ${inputFocussed ? "rounded-t-2xl border-gray-200! rounded-b-2xl" : "rounded-2xl"} transition-all duration-200 ease-in-out`}
                             ref={containerRef}
                         >
                             <div className="flex items-center justify-between w-full px-4 ">
@@ -120,7 +126,9 @@ export function TopIsle() {
                                                 key={waypoint.id}
                                                 className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-xs cursor-pointer`}
                                                 onClick={() => {
-                                                    navigate(`/waypoints/${waypoint.id}`);
+                                                    selectEntity("waypoint", waypoint.id, {
+                                                        focus: () => map.flyTo([waypoint.lat, waypoint.lng], 20),
+                                                    });
                                                     setInputFocused(false);
                                                 }}
                                             >
@@ -188,10 +196,10 @@ export function TopIsle() {
                             </div>
                         )}
                     </div>
-                    {(bubbleItems.length > 0) && (
+                    {bubbleItems.length > 0 && (
                         <TopChipList
                             items={bubbleItems}
-                            className={`order-2 w-64 mt-0 md:order-none md:flex-1 md:min-w-0 md:w-[calc(100vw-30rem)] md:max-w-[calc(100vw-30rem)] ${isPanelVisible ? "ml-4 hidden md:block" : ""}`}
+                            className={`order-2 w-64 mt-0 md:order-0 md:flex-1 md:min-w-0 md:w-[calc(100vw-30rem)] md:max-w-[calc(100vw-30rem)] ${isPanelVisible ? "ml-4 hidden md:block" : ""}`}
                         />
                     )}
                 </div>

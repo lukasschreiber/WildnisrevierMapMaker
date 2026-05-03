@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useWaypointStore } from "../stores/useWaypoints";
-import { useLocation, useNavigate } from "react-router";
 import { useInteractionsStore } from "../stores/useInteractions";
 import { waypointActions } from "../domain/actions/waypoints";
 import { useHistoryStore } from "../stores/useHistory";
 import { useMap } from "../context/useMap";
+import { useUrlState } from "../hooks/useUrlState";
+import { useSelectionActions } from "../hooks/useSelectionActions";
 
 function isTextInputTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
@@ -14,62 +15,28 @@ function isTextInputTarget(target: EventTarget | null): boolean {
     return tagName === "input" || tagName === "textarea" || tagName === "select";
 }
 
-type SyncedSelection = {
-    type: "waypoint" | "path" | null;
-    id: number | null;
-};
-
-function isSameSyncedSelection(selection: SyncedSelection, type: SyncedSelection["type"], id: number | null) {
-    return selection.type === type && selection.id === id;
-}
-
-function isSelectionSyncRoute(pathname: string) {
-    return pathname === "/" || pathname.startsWith("/waypoints/") || pathname.startsWith("/paths/");
+function areNumberArraysEqual(a: number[], b: number[]) {
+    if (a.length !== b.length) return false;
+    return a.every((value, index) => value === b[index]);
 }
 
 export function MapEventManager() {
     const map = useMap();
 
+    const { selection, setSelection } = useUrlState();
+
     const mode = useInteractionsStore((state) => state.mode);
     const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
     const selectedPathIds = useInteractionsStore((state) => state.selectedPathIds);
+    const selectedShapeIds = useInteractionsStore((state) => state.selectedShapeIds);
 
     const selectOnly = useInteractionsStore((state) => state.selectOnly);
     const deselect = useInteractionsStore((state) => state.deselect);
-    const clearSelection = useInteractionsStore((state) => state.clearSelection);
+    const { clearSelection } = useSelectionActions();
+    const replaceSelection = useInteractionsStore((state) => state.replaceSelection);
+
     const cancelPathConnection = useInteractionsStore((state) => state.cancelPathConnection);
     const cancelRelativeWaypointCreation = useInteractionsStore((state) => state.cancelRelativeWaypointCreation);
-
-    const selectedWaypointId = useMemo(
-        () => (selectedWaypointIds.length > 0 ? selectedWaypointIds[selectedWaypointIds.length - 1] : null),
-        [selectedWaypointIds],
-    );
-
-    const selectedPathId = useMemo(
-        () => (selectedPathIds.length > 0 ? selectedPathIds[selectedPathIds.length - 1] : null),
-        [selectedPathIds],
-    );
-
-    const syncedSelection = useMemo<SyncedSelection>(() => {
-        if (selectedWaypointId !== null) {
-            return {
-                type: "waypoint",
-                id: selectedWaypointId,
-            };
-        }
-
-        if (selectedPathId !== null) {
-            return {
-                type: "path",
-                id: selectedPathId,
-            };
-        }
-
-        return {
-            type: null,
-            id: null,
-        };
-    }, [selectedWaypointId, selectedPathId]);
 
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const waypoints = useWaypointStore((state) => state.waypoints);
@@ -77,27 +44,43 @@ export function MapEventManager() {
     const undo = useHistoryStore((state) => state.undo);
     const redo = useHistoryStore((state) => state.redo);
 
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const lastSyncedSelection = useRef<SyncedSelection>({
-        type: null,
-        id: null,
-    });
+    const isApplyingUrlToStore = useRef(false);
+    const lastFocusedWaypointId = useRef<number | null>(null);
 
     const onMapClick = useCallback(
         (e: L.LeafletMouseEvent) => {
             if (mode === "waypoint-add") {
                 const newId = waypointActions.addWaypoint(e.latlng.lat, e.latlng.lng);
+
                 selectOnly("waypoint", newId);
+
+                setSelection(
+                    { waypoint: [newId] },
+                    {
+                        active: {
+                            type: "waypoint",
+                            id: newId,
+                        },
+                    },
+                );
+
                 return;
             }
 
             cancelPathConnection();
             cancelRelativeWaypointCreation();
             clearSelection();
+
+            lastFocusedWaypointId.current = null;
+
+            setSelection(
+                {},
+                {
+                    active: null,
+                },
+            );
         },
-        [mode, cancelPathConnection, cancelRelativeWaypointCreation, clearSelection, selectOnly],
+        [mode, selectOnly, setSelection, cancelPathConnection, cancelRelativeWaypointCreation, clearSelection],
     );
 
     const onKeyDown = useCallback(
@@ -187,93 +170,61 @@ export function MapEventManager() {
         };
     }, [map, onMapClick]);
 
+    /**
+     * URL -> interaction store
+     */
     useEffect(() => {
-        if (location.pathname.startsWith("/waypoints/")) {
-            const param = location.pathname.split("/").pop();
-            const id = param ? parseInt(param, 10) : null;
+        const urlWaypointIds = selection.waypoint ?? [];
+        const urlPathIds = selection.path ?? [];
+        const urlShapeIds = selection.shape ?? [];
 
-            if (id !== null && !Number.isNaN(id)) {
-                if (isSameSyncedSelection(lastSyncedSelection.current, "waypoint", id)) return;
+        const nextSelection =
+            urlWaypointIds.length > 0
+                ? { waypoint: urlWaypointIds }
+                : urlPathIds.length > 0
+                  ? { path: urlPathIds }
+                  : urlShapeIds.length > 0
+                    ? { shape: urlShapeIds }
+                    : {};
 
-                clearSelection();
-                selectOnly("waypoint", id);
+        const nextWaypointIds = nextSelection.waypoint ?? [];
+        const nextPathIds = nextSelection.path ?? [];
+        const nextShapeIds = nextSelection.shape ?? [];
 
-                const waypoint = waypoints.find((wp) => wp.id === id);
-                if (waypoint) {
-                    map.flyTo([waypoint.lat, waypoint.lng], 20);
-                }
+        const waypointChanged = !areNumberArraysEqual(nextWaypointIds, selectedWaypointIds);
+        const pathChanged = !areNumberArraysEqual(nextPathIds, selectedPathIds);
+        const shapeChanged = !areNumberArraysEqual(nextShapeIds, selectedShapeIds);
 
-                lastSyncedSelection.current = {
-                    type: "waypoint",
-                    id,
-                };
+        if (!waypointChanged && !pathChanged && !shapeChanged) return;
 
-                return;
-            }
-        }
+        isApplyingUrlToStore.current = true;
+        replaceSelection(nextSelection);
 
-        if (location.pathname.startsWith("/paths/")) {
-            const param = location.pathname.split("/").pop();
-            const id = param ? parseInt(param, 10) : null;
+        queueMicrotask(() => {
+            isApplyingUrlToStore.current = false;
+        });
+    }, [selection, selectedWaypointIds, selectedPathIds, selectedShapeIds, replaceSelection]);
 
-            if (id !== null && !Number.isNaN(id)) {
-                if (isSameSyncedSelection(lastSyncedSelection.current, "path", id)) return;
-
-                clearSelection();
-                selectOnly("path", id);
-
-                lastSyncedSelection.current = {
-                    type: "path",
-                    id,
-                };
-
-                return;
-            }
-        }
-
-        if (!isSameSyncedSelection(lastSyncedSelection.current, null, null)) {
-            clearSelection();
-
-            lastSyncedSelection.current = {
-                type: null,
-                id: null,
-            };
-        }
-    }, [location.pathname, map, waypoints, clearSelection, selectOnly]);
-
+    /**
+     * URL -> interaction store
+     * Used for reload, deep links, back/forward.
+     */
     useEffect(() => {
-        if (!isSelectionSyncRoute(location.pathname)) return;
+        const urlWaypointIds = selection.waypoint ?? [];
+        const urlPathIds = selection.path ?? [];
+        const urlShapeIds = selection.shape ?? [];
 
-        if (isSameSyncedSelection(lastSyncedSelection.current, syncedSelection.type, syncedSelection.id)) return;
+        const nextSelection =
+            urlWaypointIds.length > 0
+                ? { waypoint: urlWaypointIds }
+                : urlPathIds.length > 0
+                  ? { path: urlPathIds }
+                  : urlShapeIds.length > 0
+                    ? { shape: urlShapeIds }
+                    : {};
 
-        if (syncedSelection.type === "waypoint" && syncedSelection.id !== null) {
-            const pathname = `/waypoints/${syncedSelection.id}`;
-
-            if (location.pathname !== pathname) {
-                navigate(pathname);
-            }
-
-            lastSyncedSelection.current = syncedSelection;
-            return;
-        }
-
-        if (syncedSelection.type === "path" && syncedSelection.id !== null) {
-            const pathname = `/paths/${syncedSelection.id}`;
-
-            if (location.pathname !== pathname) {
-                navigate(pathname);
-            }
-
-            lastSyncedSelection.current = syncedSelection;
-            return;
-        }
-
-        if (location.pathname.startsWith("/waypoints/") || location.pathname.startsWith("/paths/")) {
-            navigate("/");
-        }
-
-        lastSyncedSelection.current = syncedSelection;
-    }, [syncedSelection, location.pathname, navigate]);
+        replaceSelection(nextSelection);
+    }, [selection, replaceSelection]);
 
     return null;
 }

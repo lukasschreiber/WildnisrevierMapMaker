@@ -98,7 +98,6 @@ export default function Tooltip({ children, text, position = "top" }: TooltipPro
                     {shouldRender && (
                         <motion.div
                             ref={tooltipRef}
-                            // @ts-expect-error - Framer Motion's style typing is incomplete
                             style={style || { visibility: "hidden" }}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}

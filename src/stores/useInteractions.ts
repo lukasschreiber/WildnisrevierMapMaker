@@ -10,6 +10,8 @@ export type InteractionMode = "select" | "waypoint-add" | "path-edit" | "shape-e
 
 export type SelectableEntity = "waypoint" | "path" | "shape";
 
+export type EntitySelection = Partial<Record<SelectableEntity, number[]>>;
+
 type NewWaypointConfig = {
     name: string;
     typeId: number;
@@ -47,20 +49,23 @@ interface InteractionModeState {
     selectedPathIds: number[];
     selectedShapeIds: number[];
 
+    getSelection: () => EntitySelection;
+    getSelectedEntity: () => SelectableEntity | null;
+    getSelectedIds: (entity: SelectableEntity) => number[];
+
+    isSelected: (entity: SelectableEntity, id: number) => boolean;
+    select: (entity: SelectableEntity, id: number) => void;
+    selectOnly: (entity: SelectableEntity, id: number) => void;
+    deselect: (entity: SelectableEntity, id: number) => void;
+    clearSelection: (entity?: SelectableEntity) => void;
+    replaceSelection: (selection: EntitySelection) => void;
+
     relativeWaypoint: RelativeWaypointDraft;
     setRelativeWaypointBearing: (bearing: number) => void;
     setRelativeWaypointDistance: (distance: number) => void;
     startRelativeWaypointCreation: (startWaypointId: number) => void;
     createRelativeWaypoint: () => number;
     cancelRelativeWaypointCreation: () => void;
-
-    isSelected: (entity: SelectableEntity, id: number) => boolean;
-    select: (entity: SelectableEntity, id: number) => void;
-    selectOnly: (entity: "waypoint" | "path" | "shape", id: number) => void;
-    deselect: (entity: SelectableEntity, id: number) => void;
-    clearSelection: (entity?: SelectableEntity) => void;
-
-    getSelectedIds: (entity: SelectableEntity) => number[];
 
     pathEdit: PathEdit;
     startPathConnection: (waypointId: number) => void;
@@ -76,6 +81,38 @@ const defaultNewWaypointConfig: NewWaypointConfig = {
     groupId: undefined,
 };
 
+function normalizeSelection(selection: EntitySelection): Required<Record<SelectableEntity, number[]>> {
+    if (selection.waypoint?.length) {
+        return {
+            waypoint: selection.waypoint,
+            path: [],
+            shape: [],
+        };
+    }
+
+    if (selection.path?.length) {
+        return {
+            waypoint: [],
+            path: selection.path,
+            shape: [],
+        };
+    }
+
+    if (selection.shape?.length) {
+        return {
+            waypoint: [],
+            path: [],
+            shape: selection.shape,
+        };
+    }
+
+    return {
+        waypoint: [],
+        path: [],
+        shape: [],
+    };
+}
+
 export const useInteractionsStore = create<InteractionModeState>()(
     persist(
         (set, get) => ({
@@ -86,6 +123,123 @@ export const useInteractionsStore = create<InteractionModeState>()(
             },
 
             newWaypointConfig: defaultNewWaypointConfig,
+
+            updateNewWaypointConfig: (config) => {
+                set((state) => ({
+                    newWaypointConfig: {
+                        ...state.newWaypointConfig,
+                        ...config,
+                    },
+                }));
+            },
+
+            resetNewWaypointConfig: () => {
+                set({ newWaypointConfig: defaultNewWaypointConfig });
+            },
+
+            selectedWaypointIds: [],
+            selectedPathIds: [],
+            selectedShapeIds: [],
+
+            getSelection: () => {
+                const state = get();
+
+                if (state.selectedWaypointIds.length > 0) {
+                    return { waypoint: state.selectedWaypointIds };
+                }
+
+                if (state.selectedPathIds.length > 0) {
+                    return { path: state.selectedPathIds };
+                }
+
+                if (state.selectedShapeIds.length > 0) {
+                    return { shape: state.selectedShapeIds };
+                }
+
+                return {};
+            },
+
+            getSelectedEntity: () => {
+                const state = get();
+
+                if (state.selectedWaypointIds.length > 0) return "waypoint";
+                if (state.selectedPathIds.length > 0) return "path";
+                if (state.selectedShapeIds.length > 0) return "shape";
+
+                return null;
+            },
+
+            getSelectedIds: (entity) => {
+                return get()[selectionKeyByEntity[entity]];
+            },
+
+            isSelected: (entity, id) => {
+                return get().getSelectedIds(entity).includes(id);
+            },
+
+            select: (entity, id) => {
+                const key = selectionKeyByEntity[entity];
+
+                set((state) => {
+                    const existingIds = state[key];
+
+                    if (existingIds.includes(id)) return state;
+
+                    return {
+                        selectedWaypointIds: entity === "waypoint" ? [...existingIds, id] : [],
+                        selectedPathIds: entity === "path" ? [...existingIds, id] : [],
+                        selectedShapeIds: entity === "shape" ? [...existingIds, id] : [],
+                    };
+                });
+            },
+
+            selectOnly: (entity, id) => {
+                set({
+                    selectedWaypointIds: entity === "waypoint" ? [id] : [],
+                    selectedPathIds: entity === "path" ? [id] : [],
+                    selectedShapeIds: entity === "shape" ? [id] : [],
+                });
+            },
+
+            deselect: (entity, id) => {
+                const key = selectionKeyByEntity[entity];
+
+                set((state) => {
+                    if (!state[key].includes(id)) return state;
+
+                    return {
+                        [key]: state[key].filter((selectedId) => selectedId !== id),
+                    } as Pick<InteractionModeState, SelectionKey>;
+                });
+            },
+
+            clearSelection: (entity) => {
+                if (entity) {
+                    const key = selectionKeyByEntity[entity];
+
+                    set({
+                        [key]: [],
+                    } as unknown as Pick<InteractionModeState, SelectionKey>);
+
+                    return;
+                }
+
+                set({
+                    selectedWaypointIds: [],
+                    selectedPathIds: [],
+                    selectedShapeIds: [],
+                });
+            },
+
+            replaceSelection: (selection) => {
+                const normalized = normalizeSelection(selection);
+
+                set({
+                    selectedWaypointIds: normalized.waypoint,
+                    selectedPathIds: normalized.path,
+                    selectedShapeIds: normalized.shape,
+                });
+            },
 
             relativeWaypoint: {
                 startWaypointId: null,
@@ -123,7 +277,9 @@ export const useInteractionsStore = create<InteractionModeState>()(
             createRelativeWaypoint: () => {
                 const { startWaypointId, bearing, distance } = get().relativeWaypoint;
 
-                if (startWaypointId === null) throw new Error("No start waypoint selected for relative waypoint creation");
+                if (startWaypointId === null) {
+                    throw new Error("No start waypoint selected for relative waypoint creation");
+                }
 
                 const newId = waypointActions.addRelativeWaypoint({
                     startWaypointId,
@@ -150,91 +306,18 @@ export const useInteractionsStore = create<InteractionModeState>()(
                 }));
             },
 
-            updateNewWaypointConfig: (config) => {
-                set((state) => ({
-                    newWaypointConfig: {
-                        ...state.newWaypointConfig,
-                        ...config,
-                    },
-                }));
-            },
-
-            resetNewWaypointConfig: () => {
-                set({ newWaypointConfig: defaultNewWaypointConfig });
-            },
-
-            selectedWaypointIds: [],
-            selectedPathIds: [],
-            selectedShapeIds: [],
-
-            getSelectedIds: (entity) => {
-                return get()[selectionKeyByEntity[entity]];
-            },
-
-            isSelected: (entity, id) => {
-                return get().getSelectedIds(entity).includes(id);
-            },
-
-            select: (entity, id) => {
-                const key = selectionKeyByEntity[entity];
-
-                set((state) => {
-                    if (state[key].includes(id)) return state;
-
-                    return {
-                        selectedWaypointIds: entity === "waypoint" ? [...state.selectedWaypointIds, id] : [],
-                        selectedPathIds: entity === "path" ? [...state.selectedPathIds, id] : [],
-                        selectedShapeIds: entity === "shape" ? [...state.selectedShapeIds, id] : [],
-                    };
-                });
-            },
-
-            deselect: (entity, id) => {
-                const key = selectionKeyByEntity[entity];
-
-                set((state) => {
-                    if (!state[key].includes(id)) return state;
-
-                    return {
-                        [key]: state[key].filter((selectedId) => selectedId !== id),
-                    } as Pick<InteractionModeState, SelectionKey>;
-                });
-            },
-
-            clearSelection: (entity) => {
-                if (entity) {
-                    const key = selectionKeyByEntity[entity];
-                    set({ [key]: [] } as unknown as Pick<InteractionModeState, SelectionKey>);
-                    return;
-                }
-
-                set({
-                    selectedWaypointIds: [],
-                    selectedPathIds: [],
-                    selectedShapeIds: [],
-                });
-            },
-
-            selectOnly: (entity, id) => {
-                set({
-                    selectedWaypointIds: entity === "waypoint" ? [id] : [],
-                    selectedPathIds: entity === "path" ? [id] : [],
-                    selectedShapeIds: entity === "shape" ? [id] : [],
-                });
-            },
-
             pathEdit: {
                 selectedSegmentId: null,
                 connectionStartedWaypointId: null,
             },
 
             startPathConnection: (waypointId) => {
-                set({
+                set((state) => ({
                     pathEdit: {
-                        ...get().pathEdit,
+                        ...state.pathEdit,
                         connectionStartedWaypointId: waypointId,
                     },
-                });
+                }));
             },
 
             endPathConnection: (waypointId) => {
@@ -247,6 +330,7 @@ export const useInteractionsStore = create<InteractionModeState>()(
                             connectionStartedWaypointId: null,
                         },
                     }));
+
                     return;
                 }
 
@@ -305,9 +389,6 @@ export const useInteractionsStore = create<InteractionModeState>()(
             partialize: (state) => ({
                 mode: state.mode,
                 newWaypointConfig: state.newWaypointConfig,
-                selectedWaypointIds: state.selectedWaypointIds,
-                selectedPathIds: state.selectedPathIds,
-                selectedShapeIds: state.selectedShapeIds,
                 pathEdit: state.pathEdit,
                 relativeWaypoint: state.relativeWaypoint,
             }),

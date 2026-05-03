@@ -24,3 +24,11 @@ body {
 .add-mode-active .leaflet-grab {
     cursor: crosshair;
 }
+
+.leaflet-container {
+    font-size: unset;
+}
+
+.leaflet-control-attribution {
+    font-size: 12px
+}

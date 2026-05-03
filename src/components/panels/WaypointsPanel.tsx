@@ -1,22 +1,24 @@
-import { useNavigate } from "react-router";
 import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { useWaypointGroupStore } from "../../stores/useGroups";
-import { Panel } from "../MainPanel";
+import { Panel } from "../Panel";
 import { TextInput } from "../controls/TextInput";
 import { Select } from "../controls/Select";
 import { useState, useRef } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
 import { useInteractionsStore } from "../../stores/useInteractions";
+import { useSelectionActions } from "../../hooks/useSelectionActions";
+import { useMap } from "../../context/useMap";
 
 export function WaypointsPanel() {
     const waypoints = useWaypointStore((state) => state.waypoints);
     const types = useWaypointTypeStore((state) => state.types);
     const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
     const groups = useWaypointGroupStore((state) => state.waypointGroups);
-    const navigate = useNavigate();
+    const map = useMap();
+    const { selectEntity } = useSelectionActions();
 
     const [searchValue, setSearchValue] = useState("");
     const [filterOpen, setFilterOpen] = useState(false);
@@ -69,7 +71,9 @@ export function WaypointsPanel() {
             key={waypoint.id}
             className={`flex px-2 mx-2 hover:bg-gray-100 rounded-md py-2 items-center gap-2 text-sm cursor-pointer transition-colors ${selectedWaypointIds.includes(waypoint.id) ? "bg-gray-200" : ""}`}
             onClick={() => {
-                navigate(`/waypoints/${waypoint.id}`);
+                selectEntity("waypoint", waypoint.id, {
+                    focus: () => map.flyTo([waypoint.lat, waypoint.lng], 20),
+                });
             }}
         >
             <LegendWaypointMarker type={types[waypoint.typeId]} radius={8} borderWidth={1} borderColor="black" />
@@ -92,7 +96,7 @@ export function WaypointsPanel() {
                             <SlidersLinear className="w-5 h-5 text-gray-600" />
                         </button>
                         {filterOpen && (
-                            <div className="absolute right-0 top-full mt-2 font-normal bg-white border border-gray-200 rounded-md shadow-lg p-3 z-[1005] w-56">
+                            <div className="absolute right-0 top-full mt-2 font-normal bg-white border border-gray-200 rounded-md shadow-lg p-3 z-1005 w-56">
                                 <div className="flex flex-col gap-1">
                                     <Select
                                         label="Filter by Type"

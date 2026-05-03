@@ -3,7 +3,7 @@ import { Checkbox } from "../controls/Checkbox";
 import { ColorInput } from "../controls/ColorInput";
 import { FormControl } from "../controls/FormControl";
 import { Select } from "../controls/Select";
-import { Panel } from "../MainPanel";
+import { Panel } from "../Panel";
 
 export function SettingsPanel() {
     const settings = useSettingsStore((state) => state.settings);

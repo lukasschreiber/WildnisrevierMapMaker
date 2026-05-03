@@ -1,13 +1,13 @@
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { usePathStore } from "../../stores/usePaths";
-import { Panel } from "../MainPanel";
+import { Panel } from "../Panel";
 import { memo, useMemo } from "react";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "../controls/Button";
 import { GripDotsVerticalLinear, PlusLinear, TrashLinear } from "@lukasschreiber/icons";
-import { useNavigate } from "react-router";
+import { useSelectionActions } from "../../hooks/useSelectionActions";
 
 export function PathsPanel() {
     const paths = usePathStore((state) => state.paths);
@@ -83,7 +83,7 @@ export function PathsPanel() {
 const SortablePathRow = memo(({ pathId }: { pathId: number }) => {
     const path = usePathStore((state) => state.paths.find((p) => p.id === pathId))!;
     const deletePath = usePathStore((state) => state.deletePath);
-    const navigate = useNavigate();
+    const { selectEntity } = useSelectionActions();
 
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: path.id });
 
@@ -105,7 +105,7 @@ const SortablePathRow = memo(({ pathId }: { pathId: number }) => {
                 <div
                     className="flex items-center justify-between w-full pr-2 group cursor-pointer"
                     onClick={() => {
-                        navigate(`/paths/${path.id}`);
+                        selectEntity("path", path.id);
                     }}
                 >
                     <div className="flex items-center gap-2">

@@ -13,7 +13,7 @@ export function Sidebar() {
     const panels = usePanels();
 
     return (
-        <DisablePropagation className="h-full w-12 bg-white text-gray-800 flex flex-col gap-1 z-[10005]">
+        <DisablePropagation className="h-full w-12 bg-white text-gray-800 flex flex-col gap-1 z-10005">
             <div className="flex flex-col items-center justify-center py-4 cursor-pointer" onClick={() => toggleMenu()}>
                 <MenuLinear className="w-6 h-6" />
             </div>

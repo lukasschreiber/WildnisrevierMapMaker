@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from "react-router";
-import { Panel } from "../MainPanel";
+import { useNavigate } from "react-router";
+import { Panel } from "../Panel";
 import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { TextInput } from "../controls/TextInput";
@@ -11,24 +11,18 @@ import { Checkbox } from "../controls/Checkbox";
 import { ColorInput } from "../controls/ColorInput";
 import { IconButton } from "../controls/IconButton";
 import { useWaypointStore } from "../../stores/useWaypoints";
+import { useUrlState } from "../../hooks/useUrlState";
 
 export interface SingleWaypointTypePanelProps {
-    waypointTypeId: number;
+    id: number;
 }
 
-export function SingleWaypointTypePanelWrapper() {
-    const params = useParams();
-    if (!params.id) {
-        return <div>Error: No waypoint type ID provided</div>;
-    }
-    return <SingleWaypointTypePanel waypointTypeId={parseInt(params.id)} />;
-}
-
-export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePanelProps) {
-    const type = useWaypointTypeStore((state) => state.types[waypointTypeId]);
+export function SingleWaypointTypePanel({ id }: SingleWaypointTypePanelProps) {
+    const type = useWaypointTypeStore((state) => state.types[id]);
     const navigate = useNavigate();
+    const { setActive } = useUrlState();
     const numberOfWaypointsUsingThisType = useWaypointStore(
-        (state) => state.waypoints.filter((wp) => wp.typeId == waypointTypeId).length,
+        (state) => state.waypoints.filter((wp) => wp.typeId == id).length,
     );
     const removeType = useWaypointTypeStore((state) => state.removeType);
     const isDeletable = useWaypointTypeStore((state) => state.isDeletable);
@@ -104,7 +98,10 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
 
                         addType(clone);
                         alert("Type duplicated.");
-                        navigate(`/types/${id}`);
+                        setActive({
+                            type: "waypoint-type",
+                            id,
+                        });
                     }}
                     label="Duplicate"
                 />
@@ -124,7 +121,7 @@ export function SingleWaypointTypePanel({ waypointTypeId }: SingleWaypointTypePa
                 <TextInput
                     label="Type Name"
                     value={type.name || ""}
-                    onChange={(value) => updateType(waypointTypeId, { name: value })}
+                    onChange={(value) => updateType(id, { name: value })}
                 />
                 <Select
                     label="Icon Shape"

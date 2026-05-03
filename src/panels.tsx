@@ -1,17 +1,26 @@
-import { WaypointsPanel } from "./components/panels/WaypointsPanel";
-import { Panel } from "./components/MainPanel";
+import { Panel } from "./components/Panel";
 import { SVGProps } from "react";
 import { GitIntegrationPanel } from "./components/panels/GitIntegrationPanel";
-import { WaypointTypesPanel } from "./components/panels/WaypointTypesPanel";
 import { useWaypointTypeStore } from "./stores/useWaypointTypes";
 import { useWaypointStore } from "./stores/useWaypoints";
 import { usePathStore } from "./stores/usePaths";
 import { useWaypointGroupStore } from "./stores/useGroups";
 import { useShapeStore } from "./stores/useShapes";
-import { PathsPanel } from "./components/panels/PathsPanel";
-import { CodeBranchLinear, DrawSquareLinear, FolderLinear, LocationPinLinear, RefreshCcwClockLinear, ScribbleLinear, ShapesLinear, SlidersLinear } from "@lukasschreiber/icons";
+import {
+    CodeBranchLinear,
+    DrawSquareLinear,
+    FolderLinear,
+    LocationPinLinear,
+    RefreshCcwClockLinear,
+    ScribbleLinear,
+    ShapesLinear,
+    SlidersLinear,
+} from "@lukasschreiber/icons";
 import { HistoryPanel } from "./components/panels/HistoryPanel";
 import { SettingsPanel } from "./components/panels/SettingsPanel";
+import { WaypointsPanelRoute } from "./routes/WaypointsPanelRoute";
+import { WaypointTypesPanelRoute } from "./routes/WaypointTypesPanelRoute";
+import { PathsPanelRoute } from "./routes/PathsPanelRoute";
 
 export function usePanels(): PanelGroupConfig[] {
     const waypointTypesCount = useWaypointTypeStore((state) => Object.values(state.types).length);
@@ -27,57 +36,67 @@ export function usePanels(): PanelGroupConfig[] {
                 {
                     title: "Waypoints",
                     icon: LocationPinLinear,
-                    component: WaypointsPanel,
-                    path: "/waypoints",
+                    component: WaypointsPanelRoute,
+                    path: "waypoints",
+                    entityType: "waypoint",
+                    mapSelectable: true,
                     pinnable: true,
                     count: waypointsCount,
                 },
                 {
                     title: "Waypoint Types",
                     icon: ShapesLinear,
-                    component: WaypointTypesPanel,
-                    path: "/types",
+                    component: WaypointTypesPanelRoute,
+                    path: "types",
+                    entityType: "waypoint-type",
+                    mapSelectable: false,
                     pinnable: true,
                     count: waypointTypesCount,
                 },
                 {
                     title: "Paths",
                     icon: ScribbleLinear,
-                    component: PathsPanel,
-                    path: "/paths",
+                    component: PathsPanelRoute,
+                    path: "paths",
+                    entityType: "path",
+                    mapSelectable: true,
                     pinnable: true,
                     count: pathsCount,
                 },
                 {
                     title: "Shapes",
                     icon: DrawSquareLinear,
-                    component: () => <Panel title="Shapes Panel"></Panel>, // Placeholder for ShapesPanel
-                    path: "/shapes",
+                    component: () => <Panel title="Shapes Panel" />,
+                    path: "shapes",
+                    entityType: "shape",
+                    mapSelectable: true,
                     pinnable: true,
                     count: shapesCount,
                 },
                 {
                     title: "Groups",
                     icon: FolderLinear,
-                    component: () => <Panel title="Groups Panel"></Panel>, // Placeholder for ShapesPanel
-                    path: "/groups",
+                    component: () => <Panel title="Groups Panel" />,
+                    path: "groups",
+                    entityType: "group",
+                    mapSelectable: false,
                     pinnable: true,
                     count: groupsCount,
                 },
                 {
                     title: "Layout",
                     icon: SlidersLinear,
-                    component: () => <Panel title="Layout Panel"></Panel>, // Placeholder for ShapesPanel
-                    path: "/layout",
+                    component: () => <Panel title="Layout Panel" />,
+                    path: "layout",
                     pinnable: true,
                 },
                 {
                     title: "History",
                     icon: RefreshCcwClockLinear,
                     component: HistoryPanel,
-                    path: "/history",
+                    path: "history",
                     pinnable: true,
-                }
+                },
             ],
         },
         {
@@ -92,7 +111,7 @@ export function usePanels(): PanelGroupConfig[] {
                 },
                 {
                     title: "Settings",
-                    icon: SlidersLinear, // Cog
+                    icon: SlidersLinear,
                     component: SettingsPanel,
                     path: "settings",
                     pinnable: true,
@@ -102,11 +121,20 @@ export function usePanels(): PanelGroupConfig[] {
     ];
 }
 
+export type PanelEntityType =
+    | "waypoint"
+    | "waypoint-type"
+    | "path"
+    | "shape"
+    | "group";
+
 interface PanelConfig {
     title: string;
     icon: React.ComponentType<SVGProps<SVGSVGElement>>;
     component: React.ComponentType;
     path: string;
+    entityType?: PanelEntityType;
+    mapSelectable?: boolean;
     pinnable?: boolean;
     count?: number;
 }

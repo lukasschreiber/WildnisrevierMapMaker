@@ -16,9 +16,9 @@ import { Tooltray } from "./components/Tooltray";
 import { useInteractionsStore } from "./stores/useInteractions";
 import { TopIsle } from "./components/TopIsle";
 import { ZoomOverlay } from "./components/ZoomOverlay";
+import { DisablePropagation } from "./components/common/DisablePropagation";
 
 export default function App() {
-    // const [activeTab, setActiveTab] = useLocalStorage("activeTab", "waypoints");
     const showSidebar = useLayoutStore((state) => state.showSidebar);
     const mode = useInteractionsStore((state) => state.mode);
 
@@ -28,11 +28,11 @@ export default function App() {
                 {showSidebar && <Sidebar />}
                 <MenuDrawer />
                 <FileLaunchHandler />
-                <div className="relative">
-                    <Outlet />
-                </div>
-                <TopIsle />
                 <Map>
+                    <DisablePropagation>
+                        <Outlet />
+                    </DisablePropagation>
+                    <TopIsle />
                     <LayerProvider>
                         <ShapeLayer debugging />
                         <PathLayer debugging />

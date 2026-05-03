@@ -1,5 +1,5 @@
 import { useHistoryStore } from "../../stores/useHistory";
-import { Panel } from "../MainPanel";
+import { Panel } from "../Panel";
 
 function formatTime(timestamp: number) {
     return new Date(timestamp).toLocaleTimeString("de-DE", {

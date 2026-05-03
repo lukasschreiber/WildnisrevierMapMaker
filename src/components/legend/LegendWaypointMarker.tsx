@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { WaypointType } from "../../stores/useWaypointTypes";
 import * as d3 from "d3";
-import { renderMarker } from "../../renderer";
+import { renderMarker } from "../../renderer/markers/renderMarker";
 
 export function LegendWaypointMarker(props: {
     type: WaypointType;

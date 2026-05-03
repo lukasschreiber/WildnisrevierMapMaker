@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from "react-router";
-import { Panel } from "../MainPanel";
+import { useNavigate } from "react-router";
+import { Panel } from "../Panel";
 import {
     CloneLinear,
     EyeLinear,
@@ -19,16 +19,7 @@ import { Checkbox } from "../controls/Checkbox";
 import { pathActions } from "../../domain/actions/paths";
 
 export interface SinglePathPanelProps {
-    pathId: number;
-}
-
-export function SinglePathPanelWrapper() {
-    const params = useParams();
-    if (!params.id) {
-        return <div>Error: No path ID provided</div>;
-    }
-
-    return <SinglePathPanel pathId={Number(params.id)} />;
+    id: number;
 }
 
 function LineCapPreview({ cap }: { cap: "round" | "butt" | "square" }) {
@@ -39,8 +30,8 @@ function LineCapPreview({ cap }: { cap: "round" | "butt" | "square" }) {
     );
 }
 
-export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
-    const path = usePathStore((state) => state.paths.find((p) => p.id === pathId)!);
+export function SinglePathPanel({ id }: SinglePathPanelProps) {
+    const path = usePathStore((state) => state.paths.find((p) => p.id === id)!);
     const navigate = useNavigate();
 
     return (
@@ -86,7 +77,7 @@ export function SinglePathPanel({ pathId }: SinglePathPanelProps) {
                 <TextInput
                     label="Path Name"
                     value={path.name || ""}
-                    onChange={(value) => pathActions.updatePath(pathId, { name: value })}
+                    onChange={(value) => pathActions.updatePath(id, { name: value })}
                 />
                 <Select
                     label="Path Style"

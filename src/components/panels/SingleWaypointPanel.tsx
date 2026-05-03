@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from "react-router";
-import { Panel } from "../MainPanel";
+import { useNavigate } from "react-router";
+import { Panel } from "../Panel";
 import { useWaypointStore } from "../../stores/useWaypoints";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
@@ -18,26 +18,20 @@ import {
 } from "@lukasschreiber/icons";
 import { waypointActions } from "../../domain/actions/waypoints";
 import { useInteractionsStore } from "../../stores/useInteractions";
+import { useUrlState } from "../../hooks/useUrlState";
 
 export interface SingleWaypointPanelProps {
-    waypointId: string;
+    id: number;
 }
 
-export function SingleWaypointPanelWrapper() {
-    const params = useParams();
-    if (!params.id) {
-        return <div>Error: No waypoint ID provided</div>;
-    }
-    return <SingleWaypointPanel waypointId={params.id} />;
-}
-
-export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
-    const waypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id.toString() === waypointId));
+export function SingleWaypointPanel({ id }: SingleWaypointPanelProps) {
+    const waypoint = useWaypointStore((state) => state.waypoints.find((wp) => wp.id === id));
     const types = useWaypointTypeStore((state) => state.types);
     const waypointGroups = useWaypointGroupStore((state) => state.waypointGroups);
     const deselect = useInteractionsStore((state) => state.deselect);
     const isDeletable = useWaypointStore((state) => state.isDeletable);
     const navigate = useNavigate();
+    const { setActive } = useUrlState();
 
     if (!waypoint) {
         return <div>Error: Waypoint not found</div>;
@@ -66,7 +60,10 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton
                     icon={<ShapesLinear className="w-5 h-5" />}
                     onClick={() => {
-                        navigate(`/types/${type.id}`);
+                        setActive({
+                            type: "waypoint-type",
+                            id: waypoint.id,
+                        });
                     }}
                     color="blue"
                     label="Edit Type"
@@ -87,7 +84,7 @@ export function SingleWaypointPanel({ waypointId }: SingleWaypointPanelProps) {
                 <IconButton icon={<CloneLinear className="w-5 h-5" />} onClick={() => {}} label="Duplicate" />
                 <IconButton
                     icon={<TrashLinear className="w-5 h-5" />}
-                    disabled={!isDeletable(Number(waypointId))}
+                    disabled={!isDeletable(id)}
                     onClick={() => {
                         if (!isDeletable(waypoint.id)) {
                             return;

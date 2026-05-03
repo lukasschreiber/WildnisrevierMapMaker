@@ -1,4 +1,4 @@
-import { getPaths } from "../renderer";
+import { getPaths } from "../renderer/paths/pathGraph";
 import { WaypointGroup } from "../stores/useGroups";
 import { PathSegment, Path } from "../stores/usePaths";
 import { Shape } from "../stores/useShapes";

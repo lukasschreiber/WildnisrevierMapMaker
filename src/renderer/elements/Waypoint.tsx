@@ -11,6 +11,7 @@ import { useMapContext } from "../../context/useMap";
 import { renderMarker } from "../markers/renderMarker";
 import { renderBearingDistanceVisual } from "../markers/renderBearingDistanceVisual";
 import { WaypointOverlayControl } from "../../components/WaypointOverlayControl";
+import { useSelectionActions } from "../../hooks/useSelectionActions";
 
 type WaypointProps = {
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
@@ -32,10 +33,10 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
     const waypoint = props.waypoint ?? storeWaypoint;
 
     const { selectedWaypoint, setSelectedWaypoint, map } = useMapContext();
+    const { selectEntity, selectEntities } = useSelectionActions();
 
     const mode = useInteractionsStore((state) => state.mode);
-    const select = useInteractionsStore((state) => state.select);
-    const selectOnly = useInteractionsStore((state) => state.selectOnly);
+    const selectedWaypointIds = useInteractionsStore((state) => state.selectedWaypointIds);
     const isWaypointSelected = useInteractionsStore((state) =>
         waypoint ? state.isSelected("waypoint", waypoint.id) : false,
     );
@@ -107,7 +108,6 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
 
         const updateSelectionVisual = (selected: boolean) => {
             renderedMarker.select(".waypoint-selection-ring").style("display", () => (selected ? null : "none"));
-
             renderedMarker.select(".waypoint-label").raise();
         };
 
@@ -154,16 +154,23 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
                     }
 
                     startPathConnection(waypoint.id);
+                    return;
                 }
 
                 if (mode === "select") {
-                    if (event.shiftKey) {
-                        select("waypoint", waypoint.id);
-                    } else {
-                        selectOnly("waypoint", waypoint.id);
-                    }
+                    const nextWaypointIds = event.shiftKey
+                        ? selectedWaypointIds.includes(waypoint.id)
+                            ? selectedWaypointIds
+                            : [...selectedWaypointIds, waypoint.id]
+                        : [waypoint.id];
 
-                    map.setView([waypoint.lat, waypoint.lng], map.getZoom());
+                    if (nextWaypointIds.length === 1) {
+                        selectEntity("waypoint", waypoint.id, {
+                            focus: () => map.flyTo([waypoint.lat, waypoint.lng], 20),
+                        });
+                    } else {
+                        selectEntities("waypoint", nextWaypointIds);
+                    }
                 }
             });
         }
@@ -179,7 +186,7 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         group,
         map,
         mode,
-        select,
+        selectedWaypointIds,
         isWaypointSelected,
         isRelativeWaypointStart,
         waypointRadius,
@@ -193,11 +200,12 @@ export const Waypoint = React.memo(({ g, waypointId, ...props }: WaypointProps) 
         props.disableSelection,
         props.visualizeHiddenItems,
         props.highlightType,
-        selectOnly,
         endPathConnection,
         startPathConnection,
         relativeWaypoint.bearing,
         relativeWaypoint.distance,
+        selectEntity,
+        selectEntities,
     ]);
 
     const updatePosition = useCallback(() => {

@@ -1,16 +1,16 @@
 import { Button } from "../controls/Button";
-import { Panel } from "../MainPanel";
+import { Panel } from "../Panel";
 import { useWaypointTypeStore } from "../../stores/useWaypointTypes";
 import { LegendWaypointMarker } from "../legend/LegendWaypointMarker";
-import { useNavigate } from "react-router";
 import { PlusLinear, TrashLinear } from "@lukasschreiber/icons";
+import { useUrlState } from "../../hooks/useUrlState";
 
 export function WaypointTypesPanel() {
     const types = useWaypointTypeStore((state) => state.types);
     const addType = useWaypointTypeStore((state) => state.addType);
     const removeType = useWaypointTypeStore((state) => state.removeType);
     const isDeletable = useWaypointTypeStore((state) => state.isDeletable);
-    const navigate = useNavigate();
+    const { setActive } = useUrlState();
     return (
         <Panel
             title={
@@ -28,7 +28,10 @@ export function WaypointTypesPanel() {
                                 hidden: false,
                                 hasTwoColors: false,
                             });
-                            navigate(`/types/${id}`);
+                            setActive({
+                                type: "waypoint-type",
+                                id,
+                            });
                         }}
                         className="mb-2 text-xs font-normal"
                         color="blue"
@@ -43,7 +46,12 @@ export function WaypointTypesPanel() {
                     {Object.values(types).map((type) => (
                         <div
                             key={type.id}
-                            onClick={() => navigate(`/types/${type.id}`)}
+                            onClick={() => {
+                                setActive({
+                                    type: "waypoint-type",
+                                    id: type.id,
+                                });
+                            }}
                             className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 group cursor-pointer"
                         >
                             <div className="flex items-center gap-2">

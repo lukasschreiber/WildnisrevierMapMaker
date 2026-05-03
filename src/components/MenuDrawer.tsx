@@ -24,7 +24,7 @@ function MenuDrawer() {
             {menuOpen && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/50 z-[10010]"
+                        className="fixed inset-0 bg-black/50 z-10010"
                         onClick={() => setShowMenu(false)}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -32,7 +32,7 @@ function MenuDrawer() {
                         transition={{ duration: 0.3 }}
                     />
                     <motion.div
-                        className="fixed top-0 left-0 h-full w-64 bg-white shadow-xl p-4 z-[10011] text-gray-800"
+                        className="fixed top-0 left-0 h-full w-64 bg-white shadow-xl p-4 z-10011 text-gray-800"
                         initial={{ x: "-100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "-100%" }}

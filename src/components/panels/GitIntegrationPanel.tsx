@@ -1,6 +1,6 @@
 import { useRepoStore } from "../../stores/useRepos";
 import { Checkbox } from "../controls/Checkbox";
-import { Panel } from "../MainPanel";
+import { Panel } from "../Panel";
 
 export function GitIntegrationPanel() {
     const { encryptKeys, toggleEncryption } = useRepoStore();
